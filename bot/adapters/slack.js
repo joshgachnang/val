@@ -420,22 +420,18 @@ class SlackAdapter {
   
   send(envelope, strings) {
     for (let string of strings) {
-      this.slackBot.postMessageToChannel(envelope.room, string, {});
+      this.slackBot.postMessageToChannel(envelope.room.name, string, {link_names: 1});
     }
   }
   
   
   reply(envelope, user, strings) {
     console.log("REPLYING", envelope.room, user, strings);
-    this.slackBot.getUser(user).then((userObject) => {
-      console.log("USER REPLYING TO", userObject)
-      for (let string of strings) {
-    
-        let text = `@${user}: ${string}`;
-        console.log("slackbot post message to channel", envelope.room.name, user, text)
-        this.slackBot.postMessageToChannel(envelope.room.name, text, {link_names: 1});
-      }
-    });
+    for (let string of strings) {
+      let text = `@${user}: ${string}`;
+      console.log("slackbot post message to channel", envelope.room.name, user, text)
+      this.slackBot.postMessageToChannel(envelope.room.name, text, {link_names: 1});
+    }
   }
   
   run() {
