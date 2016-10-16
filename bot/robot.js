@@ -1,5 +1,6 @@
 'use strict';
 
+const config = require('../config/config');
 const Response = require('./response');
 const winston = require('winston');
 const TextListener = require('./listener').TextListener;
@@ -56,7 +57,7 @@ class Robot {
     return {
       name: 'BB8',
       // Add a bot https://my.slack.com/services/new/bot and put the token
-      slackToken: 'xoxb-37956096647-tY4l03N6GktIPKkghJas3ljm',
+      slackToken: config.SLACK_TOKEN,
       id: undefined
     }
   }

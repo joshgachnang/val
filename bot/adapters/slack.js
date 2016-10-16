@@ -56,7 +56,6 @@ util.inherits(SlackBot, EventEmitter);
  */
 SlackBot.prototype.login = function() {
   this._api('rtm.start').then(function(data) {
-    console.log("LOGIN")
     this.wsUrl = data.url;
     this.self = data.self;
     this.team = data.team;
