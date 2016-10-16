@@ -1,0 +1,9 @@
+<div class="cta" ng-repeat="trainRoute in arrivals">
+  <span class="route-name">{{trainRoute[0].route}}, {{trainRoute[0].terminalDestinationName}}</span>
+  <span class="pull-right">
+    <span ng-repeat="arrival in trainRoute">{{arrival.arrivalTime | minutesUntil}}
+      <span ng-if="$last">mins</span>
+      <span ng-if="!$last">, </span>
+    </span>
+  </span>
+</div>

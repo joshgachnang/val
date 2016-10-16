@@ -1,0 +1,53 @@
+md-card.add-recipe.form-card(flex-gt-md="50", flex-offset-gt-md="25")
+  md-card-title
+    md-card-title-text
+      span.md-headline Add Recipe
+  form(ng-submit="recipeSubmit()", flex="100")
+    div(flex="100")
+      md-input-container(flex="100")
+        label Name
+        input(type="text", ng-model="recipe.name", required="true", flex="100")
+      md-input-container(flex="100")
+        label Description
+        input(type="text", ng-model="recipe.description", required="true", flex="100")
+      div(flex="100")
+        md-input-container.md-block(flex="100")
+          label Instructions
+          textarea(ng-model="recipe.instructions", md-select-on-focus, rows="5")
+      div(flex="100", layout="row")
+        md-input-container.md-block(flex="100")
+          label Servings
+          input(type="number", ng-model="recipe.servings", require="true", flex="33")
+        md-input-container.md-block(flex="100")
+          label Prep Time (mins)
+          input(type="number", ng-model="recipe.prepTime", require="true", flex="33")
+        md-input-container.md-block(flex="100")
+          label Cook Time (mins)
+          input(type="number", ng-model="recipe.cookTime", require="true", flex="33")
+        md-input-container.md-block(flex="100")
+          label Ready Time (mins)
+          input(type="number", ng-model="recipe.readyTime", require="true", flex="33")
+      div(flex="100")
+        h3 Ingredients
+        md-card.result(flex="100", layout="row", ng-repeat="ingredient in recipe.ingredients")
+          span.name(flex="50") {{ ingredient.amount }} {{ ingredient.unit }} of {{ ingredient.food.name }}
+          span.cost(flex="25") {{ ingredient.food.calories * ingredient.amount | number: 0 }} cals | ${{ ingredient.food.cost * ingredient.amount | number: 2 }}
+          span.add(flex="25")
+            md-button.md-mini.md-primary.md-raised(ng-click="deleteIngredient($index)") Remove
+      div(flex="100")
+        md-input-container.add-ingredient(flex="100")
+          label Add Ingredient
+          input(type="text", placeholder="e.g. 1 cup of milk", ng-model="food.input", flex="100", ng-model-onblur ng-change="findFood(food)", ng-model-options="{ debounce: { 'default': 500, 'blur': 0 } }")
+      div(flex="100", layout="column")
+        h4(ng-hide="!food || food.searchResults.length == 0") Select an ingredient:
+        md-card.result(flex="100", layout="row", ng-repeat="result in food.searchResults", ng-click="selectIngredient(result, food)")
+          span.name(flex="50") {{ result.name }}
+          span.cost(flex="25") {{ result.calories }} cals | ${{ result.cost }}
+          span.add(flex="25")
+            md-button.md-mini.md-primary.md-raised Add
+      div(flex="100")
+        h4 Images
+        //input(type='file',ng-model='recipe.image',accept="'image/*'",ng-file-select="fileSelected($files)")
+        input(type="file",nv-file-select="",uploader="uploader",multiple,ng-model="recipe.images",name="image")
+      md-button.md-primary.md-raised(type="submit",ng-if="edit == true") Edit Recipe
+      md-button.md-primary.md-raised(type="submit",ng-if="edit == false") Add Recipe

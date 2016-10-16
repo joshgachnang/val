@@ -1,0 +1,39 @@
+{
+  "name": "life-api",
+  "description": "An API for finding gifs related to a keyword. All submissions are curated.",
+  "main": "server.js",
+  "authors": [
+    "Josh Gachnang <josh@servercobra.com>"
+  ],
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "resolutions": {
+    "angular": "~1.x",
+    "angular-resource": "~1.5.3",
+    "angular-animate": "^1.4.8"
+  },
+  "dependencies": {
+    "angular": "~1.5.4",
+    "angular-material": "~1.0.7",
+    "angular-resource": "~1.5.3",
+    "ng-tags-input": "3.0.0",
+    "angular-cached-resource": "^1.4.2",
+    "angular-xeditable": "^0.1.12",
+    "angular-ui-router": "^0.3.1",
+    "foundation-sites": "~6.1.1",
+    "lodash": "~4.3.0",
+    "moment": "~2.11.2",
+    "weather-icons": "~2.0.10",
+    "angular-busy": "^4.1.3",
+    "angular-base64-upload": "^0.1.19",
+    "angular-file-upload": "^2.3.4"
+  }
+}

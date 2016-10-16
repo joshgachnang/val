@@ -1,0 +1,14 @@
+md-card(flex="50")
+  md-card-title
+    md-card-title-text
+      span.md-headline Login
+  md-card-content
+    form(ng-submit="login()")
+      md-input-group
+        label Email
+        input(type="text", name="email", ng-model="form.email")
+      md-input-group
+        label Password
+        input(type="password", name="password", ng-model="form.password")
+      p.error {{ error }}
+      button.md-button.md-raised.md-primary(type="submit") Login

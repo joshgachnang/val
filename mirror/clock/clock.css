@@ -1,0 +1,11 @@
+.clock h2, .clock h3 {
+    margin: 0;
+}
+
+.clock h2 {
+    font-size: 300%;
+}
+
+.clock {
+    padding-left: 20px;
+}

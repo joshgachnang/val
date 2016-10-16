@@ -1,0 +1,14 @@
+<div class="forecast">
+  <span class="row today">
+    <weather-icon class="icon" icon="weather.currently.icon"></weather-icon>
+    {{ weather.currently.temperature | toInt }}&deg;
+  </span>
+
+  <div ng-repeat="forecast in forecasts | limitTo:4">
+    <div class="row future">
+      <span class="date">{{ forecast.time | unixToDOW }}</span>
+      <span class="temperature"><span class="high">{{ forecast.temperatureMax | toInt }}</span> / <span class="low">{{ forecast.temperatureMin | toInt }}</span></span>
+      <weather-icon class="icon" icon="forecast.icon"></weather-icon>
+    </div>
+  </div>
+</div>
