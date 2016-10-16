@@ -1,0 +1,11 @@
+bower_components/
+node_modules/
+*.swp
+npm-debug.log
+.idea/
+build/
+public/css/
+public/js/
+uploads/
+npm-debug.log*
+config/config.js
