@@ -16,7 +16,7 @@ class Response {
 
   send(strings) {
     console.log("Sending", strings);
-    this.bot.send(this.room.name, strings)
+    this.bot.send(this.envelope, strings)
   }
 
   emote(strings) {

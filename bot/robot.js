@@ -107,16 +107,13 @@ class Robot {
   }
   
   send(envelope, messages) {
-    this.logger.debug(`Sending in ${envelop.room}: ${messages}`);
+    this.logger.debug(`Sending in ${envelope.room}: ${messages}`);
     
     if (!Array.isArray(messages)) {
       messages = [messages];
     }
     
-    for (let message of messages) {
-      this.adapters['./adapters/slack'].send(envelope, user, message.text);
-      //message.adapter.send(message, message);
-    }
+    this.adapters['./adapters/slack'].send(envelope, messages);
   }
   
   emote(channel, emotes) {
