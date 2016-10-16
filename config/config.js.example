@@ -68,5 +68,7 @@ module.exports = {
   IMGUR_CLIENT_ID: "",
   IMGUR_CLIENT_SECRET: "",
   IMGUR_PASSWORD: "",
-  IMGUR_EMAIL: ""
+  IMGUR_EMAIL: "",
+  // API Token from Slack custom bot integration
+  SLACK_TOKEN: ""
 };
