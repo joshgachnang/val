@@ -64,7 +64,15 @@
     "xml2js-promise": "0.0.2",
     "xmldom": "^0.1.22",
     "xmlserializer": "^0.4.0",
-    "xpath": "0.0.23"
+    "xpath": "0.0.23",
+    "better-require": "0.0.3",
+    "coffee-script": "^1.10.0",
+    "hubot-scripts": "^2.16.2",
+    "slackbots": "^0.5.1",
+    "winston": "^2.2.0",
+    "extend": "^2.0.1",
+    "request": "^2.56.0",
+    "ws": "^1.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.14.0",
