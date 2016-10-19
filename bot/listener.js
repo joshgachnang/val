@@ -21,7 +21,6 @@ class Listener {
     if (!callback || typeof callback != 'function') {
       throw new Error("missing a callback for Listener");
     }
-    console.log("MAKING LISTENER", callback)
 
     this.robot = robot;
     this.matcher = matcher;
@@ -31,7 +30,7 @@ class Listener {
 
   call(message, adapter, callback) {
     let match = this.matcher(message);
-    console.log("Listener match", this.matcher, match);
+    //console.log("Listener match", this.matcher, match);
     if (match) {
 
       if (this.regex) {
@@ -46,7 +45,7 @@ class Listener {
       try {
         this.callback(response);
       } catch (err) {
-        console.log("Listener callback error", err, err.stack)
+        console.log("Listener callback error", err, err.stack);
         this.robot.emit('error', err);
       }
       return true;

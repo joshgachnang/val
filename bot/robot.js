@@ -27,6 +27,7 @@ class Robot {
     
     // Default variables
     this.listeners = [];
+    this.errorHandlers = [];
     this.logger = new (winston.Logger)({
       transports: [
         new (winston.transports.Console)({level: 'debug'}),
@@ -87,8 +88,9 @@ class Robot {
     if (this.alias) {
       name = this.alias;
     }
+    let pattern = re.join('/');
     
-    return new RegExp("^\\s*[@]" + name, modifiers);
+    return new RegExp("^\\s*[@](" + name + ")[:,]?\\s*(" + pattern + ")", modifiers);
   }
   
   reply(envelope, user, messages) {
@@ -117,11 +119,36 @@ class Robot {
   }
   
   emote(channel, emotes) {
-    
+    this.logger.warn("Unsupported action: emote", channel, emotes);
   }
   
   emit(event, args) {
-    console.log("Emit", event, args);
+    this.logger.warn("Emit", event, args);
+  }
+
+  enter(options, callback) {
+    this.logger.warn("Unsupported action: enter", options);
+  }
+
+  leave(options, callback) {
+    this.logger.warn("Unsupported action: leave", options);
+  }
+
+  topic(options, callback) {
+    this.logger.warn("Unsupported action: topic", options);
+  }
+
+  error(callback) {
+    this.errorHandlers.push(callback);
+  }
+
+  catchAll(options, callback) {
+    if (!callback) {
+      callback = options;
+      options = {};
+    }
+
+    this.logger.warn("Unsupported action: catchAll", options);
   }
   
   receive(message, adapter, callback) {
