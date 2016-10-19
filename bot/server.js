@@ -2,6 +2,7 @@
 
 require('better-require')();
 require('coffee-script/register');
+const config = require('../config/config');
 
 var Robot = require('./robot');
 
@@ -12,12 +13,16 @@ let adapters = [
 
 let plugins = [
   './plugins/log',
-  './plugins/echo',
-  './node_modules/hubot-scripts/src/scripts/ackbar.coffee'
+  //'./plugins/echo',
+  '../node_modules/hubot-scripts/src/scripts/ackbar.coffee',
+  '../node_modules/hubot-scripts/src/scripts/coin.coffee',
+  '../node_modules/hubot-scripts/src/scripts/dealwithit.coffee',
+  '../node_modules/hubot-scripts/src/scripts/go-for-it.coffee',
+  '../node_modules/hubot-scripts/src/scripts/xkcd.coffee',
 ];
 
 // create a bot
-var robot = new Robot("BB8", adapters, plugins);
+var robot = new Robot(config.BOT_NAME, adapters, plugins);
 
 process.on('uncaughtException', (err) => {
   console.log(`uncaught exception: ${err}: ${err.stack}`);

@@ -55,7 +55,7 @@ class Robot {
   loadConfig() {
     // TODO load from env/config files
     return {
-      name: 'BB8',
+      name: config.BOT_NAME,
       // Add a bot https://my.slack.com/services/new/bot and put the token
       slackToken: config.SLACK_TOKEN,
       id: undefined
