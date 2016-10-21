@@ -104,8 +104,6 @@ class Robot {
       messages = [messages];
     }
 
-    console.log("reply messages", messages);
-
     // holy hack batman
     this.adapters['./adapters/slack'].reply(envelope, user, messages);
     //message.adapter.reply(message, user, message.text);
@@ -155,7 +153,6 @@ class Robot {
   }
 
   http(url, options) {
-    console.log("Creating http client for", url, options);
     return HttpClient.create(url, options).header('User-Agent', "R2-D2/1.0")
   }
 

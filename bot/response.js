@@ -19,7 +19,6 @@ class Response {
     // Coffeescript sends a list of arguments, and magically converts them to an array of
     // args. Why? No clue.
     let strings = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
-    console.log("Sending", strings);
     this.bot.send(this.envelope, strings)
   }
 
@@ -44,7 +43,6 @@ class Response {
   // Actually takes a list of 1 to n arguments
   play() {
     let strings = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
-
   }
 
   // Actually takes a list of 1 to n arguments
@@ -53,7 +51,6 @@ class Response {
   }
 
   random(items) {
-    console.log("Randoming", items);
     return items[Math.floor(Math.random() * items.length)]
   }
 
@@ -63,7 +60,6 @@ class Response {
 
   http(url, options) {
     let ret = this.bot.http(url, options);
-    console.log("BOT HTTP", ret);
     return ret;
   }
 }
