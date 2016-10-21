@@ -14,6 +14,7 @@ let adapters = [
 let plugins = [
   './plugins/log',
   //'./plugins/echo',
+  './plugins/deploy',
   '../node_modules/hubot-scripts/src/scripts/ackbar.coffee',
   '../node_modules/hubot-scripts/src/scripts/coin.coffee',
   '../node_modules/hubot-scripts/src/scripts/dealwithit.coffee',

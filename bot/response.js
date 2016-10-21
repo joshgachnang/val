@@ -2,42 +2,54 @@
 
 class Response {
   constructor(bot, message, match, adapter) {
-    //console.log("building response for ", message)
     this.bot = bot;
+    this.message = message;
+    this.match = match;
+    console.log("response match", match)
     this.envelope = {
       room: message.room,
       user: message.user,
       message: message,
       adapter: adapter
     };
-    // bot.logger.info("Building response, room: ", this.room, " user: ",
-    //     this.user, " message: ", this.message);
   }
 
-  send(strings) {
+  // Actually takes a list of 1 to n arguments
+  send() {
+    // Coffeescript sends a list of arguments, and magically converts them to an array of
+    // args. Why? No clue.
+    let strings = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
     console.log("Sending", strings);
     this.bot.send(this.envelope, strings)
   }
 
-  emote(strings) {
+  // Actually takes a list of 1 to n arguments
+  emote() {
+    let strings = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
     this.bot.emote()
   }
 
-  reply(strings) {
+  // Actually takes a list of 1 to n arguments
+  reply() {
     //console.log("Response Replying", this.envelope, this.envelope.user.name, strings);
+    let strings = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
     this.bot.reply(this.envelope, this.envelope.user.name, strings)
   }
 
-  topic(strings) {
+  // Actually takes a list of 1 to n arguments
+  topic() {
+    let strings = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
+  }
+
+  // Actually takes a list of 1 to n arguments
+  play() {
+    let strings = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
 
   }
 
-  play(strings) {
-
-  }
-
-  locked(strings) {
-
+  // Actually takes a list of 1 to n arguments
+  locked() {
+    let strings = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
   }
 
   random(items) {
@@ -49,8 +61,10 @@ class Response {
 
   }
 
-  http() {
-
+  http(url, options) {
+    let ret = this.bot.http(url, options);
+    console.log("BOT HTTP", ret);
+    return ret;
   }
 }
 
