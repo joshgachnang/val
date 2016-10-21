@@ -70,5 +70,11 @@ module.exports = {
   IMGUR_PASSWORD: "",
   IMGUR_EMAIL: "",
   // API Token from Slack custom bot integration
-  SLACK_TOKEN: ""
+  SLACK_TOKEN: "",
+  BOT_NAME: "R2-D2",
+  PLUGINS: {
+      DEPLOY: {
+        DEPLOY_COMMAND: "cd /var/deploy && make deploy"
+      }
+    }
 };
