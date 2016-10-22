@@ -250,7 +250,7 @@ SlackBot.prototype.postMessageToUser = function(name, text, params, cb) {
  * @returns {Promise}
  */
 SlackBot.prototype.postMessageToChannel = function(name, text, params, cb) {
-  console.log("post message to channel", name, "text", text, "params", params, cb)
+  //console.log("post message to channel", name, "text", text, "params", params, cb)
   return this._post('channel', name, text, params, cb);
 };
 
@@ -277,7 +277,7 @@ SlackBot.prototype.postMessageToGroup = function(name, text, params, cb) {
  * @private
  */
 SlackBot.prototype._post = function(type, name, text, params, cb) {
-  console.log("_post", type, name, text, params, cb);
+  //console.log("_post", type, name, text, params, cb);
   var method = ({
     'group': 'getGroupId',
     'channel': 'getChannelId',
@@ -293,7 +293,7 @@ SlackBot.prototype._post = function(type, name, text, params, cb) {
     return this.postMessage(itemId, text, params);
   }.bind(this))
       .catch((err) => {
-        console.log("POST ERROR", err, err.stack)
+        //console.log("POST ERROR", err, err.stack)
       })
       .then(function(data) {
         if (cb) {
@@ -426,10 +426,10 @@ class SlackAdapter {
   
   
   reply(envelope, user, strings) {
-    console.log("REPLYING", envelope.room, user, strings);
+    //console.log("REPLYING", envelope.room, user, strings);
     for (let string of strings) {
       let text = `@${user}: ${string}`;
-      console.log("slackbot post message to channel", envelope.room.name, user, text)
+      //console.log("slackbot post message to channel", envelope.room.name, user, text)
       this.slackBot.postMessageToChannel(envelope.room.name, text, {link_names: 1});
     }
   }
@@ -456,7 +456,6 @@ class SlackAdapter {
         this.logger.debug('SlackAdatper: finished getting list of channels');
       });
       
-      console.log("HI")
       
       this.slackBot.getUsers().then((data) => {
         // this.logger.debug("SlackAdapter: list of users: ", data);
@@ -502,7 +501,7 @@ class SlackAdapter {
       
       if (['message'].indexOf(data.type) > -1) {
         data = this.formatMessage(data);
-        console.log("received message", data);
+        //console.log("received message", data);
         //console.log("ROOMS", this.rooms, this.users)
         let room = this.rooms[data.channel];
         let user = this.users[data.user];
@@ -519,6 +518,13 @@ class SlackAdapter {
   }
   
   receive(message) {
+    // Filter out messages sent by us
+    console.log("MESSAGE RECEIVED", this.me, message.rawData);
+    if (message.rawData.username && this.me.name.toLowerCase() === message.rawData.username.toLowerCase()) {
+      console.log("Message from us, ignoring");
+      return;
+    }
+
     this.robot.receive(message, this);
   }
   
@@ -538,7 +544,7 @@ class SlackAdapter {
     let idRegex = new RegExp("<@(\\w+)>", "ig");
     let matches = data.text.match(idRegex);
     
-    console.log("Formatting message matches: ", matches);
+    //console.log("Formatting message matches: ", matches);
     
     if (matches === null) {
       return data;

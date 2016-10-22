@@ -5,7 +5,7 @@ class Response {
     this.bot = bot;
     this.message = message;
     this.match = match;
-    console.log("response match", match)
+    //console.log("response match", match)
     this.envelope = {
       room: message.room,
       user: message.user,
@@ -59,8 +59,7 @@ class Response {
   }
 
   http(url, options) {
-    let ret = this.bot.http(url, options);
-    return ret;
+    return this.bot.http(url, options);
   }
 }
 
