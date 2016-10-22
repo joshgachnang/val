@@ -59,7 +59,7 @@ class TextListener extends Listener {
   constructor(robot, regex, options, callback) {
     let matcher = function(message) {
       if (message instanceof TextMessage) {
-        console.log("Matching", regex, message.match(regex))
+        //console.log("Matching", regex, message.match(regex))
         return message.match(regex);
       } else {
         console.log("Not a text message")

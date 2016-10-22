@@ -21,7 +21,6 @@ class Message {
 class TextMessage extends Message {
   constructor(user, text, room, id, adapter, rawData) {
     super(user, adapter);
-    console.log("CREATING TEXT MESSAGE", user, text, room, id, adapter.name);
     this.text = text;
     this.room = room;
     this.id = id;

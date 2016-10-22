@@ -4,9 +4,7 @@ module.exports = function (robot) {
   function echoMessage(res) {
     // Remove the bot's name
     let replaceRegex = new RegExp(`^@${robot.config.name}`, 'i');
-    console.log("REPLACE REGEX", replaceRegex, res.envelope.message.text);
     let messageText = res.envelope.message.text.replace(replaceRegex, "");
-    console.log("REPLACE REGEX RESULT", messageText)
     res.reply(messageText);
   }
 

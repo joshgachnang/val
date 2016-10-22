@@ -15,11 +15,12 @@ let plugins = [
   './plugins/log',
   //'./plugins/echo',
   './plugins/deploy',
-  '../node_modules/hubot-scripts/src/scripts/ackbar.coffee',
-  '../node_modules/hubot-scripts/src/scripts/coin.coffee',
+  './plugins/help',
+  //'../node_modules/hubot-scripts/src/scripts/ackbar.coffee',
+  //'../node_modules/hubot-scripts/src/scripts/coin.coffee',
   '../node_modules/hubot-scripts/src/scripts/dealwithit.coffee',
-  '../node_modules/hubot-scripts/src/scripts/go-for-it.coffee',
-  '../node_modules/hubot-scripts/src/scripts/xkcd.coffee',
+  //'../node_modules/hubot-scripts/src/scripts/go-for-it.coffee',
+  //'../node_modules/hubot-scripts/src/scripts/xkcd.coffee',
 ];
 
 // create a bot

@@ -3,10 +3,24 @@
 const EventEmitter = require('events').EventEmitter;
 const HttpClient = require('scoped-http-client');
 const winston = require('winston');
+const fs = require('fs');
 
 const config = require('../config/config');
 const Response = require('./response');
 const TextListener = require('./listener').TextListener;
+
+let HUBOT_DOCUMENTATION_SECTIONS = [
+  'description',
+  'dependencies',
+  'configuration',
+  'commands',
+  'notes',
+  'author',
+  'authors',
+  'examples',
+  'tags',
+  'urls',
+];
 
 class Robot {
   constructor(name, adapters, plugins, alias) {
@@ -29,6 +43,7 @@ class Robot {
 
     // Default variables
     this.listeners = [];
+    this.commands = [];
     this.errorHandlers = [];
     this.logger = new (winston.Logger)({
       transports: [
@@ -50,7 +65,10 @@ class Robot {
     }
 
     for (let plugin of plugins) {
-      this.plugins[plugin] = require(plugin)(this);
+      let module = require(plugin)(this);
+      this.plugins[plugin] = module;
+      let filename = require.resolve(plugin);
+      this.parseHelp(filename)
     }
     this.logger.debug('Finished loading plugins')
   }
@@ -94,6 +112,66 @@ class Robot {
     let pattern = re.join('/');
 
     return new RegExp("^\\s*[@]" + name + "[:,]?\\s*(?:" + pattern + ")", modifiers);
+  }
+
+  parseHelp(path) {
+    var body, cleanedLine, currentSection, i, j, len, len1, line, nextSection, ref, ref1, scriptDocumentation, scriptName,
+      indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+    this.logger.debug("Parsing help for " + path);
+
+    //scriptName = Path.basename(path).replace(/\.(coffee|js)$/, '');
+
+    scriptDocumentation = {};
+
+    body = fs.readFileSync(path, 'utf-8');
+
+    currentSection = null;
+
+    ref = body.split("\n");
+    for (i = 0, len = ref.length; i < len; i++) {
+      line = ref[i];
+      if (!(line[0] === '#' || line.substr(0, 2) === '//')) {
+        break;
+      }
+      cleanedLine = line.replace(/^(#|\/\/)\s?/, "").trim();
+      if (cleanedLine.length === 0) {
+        continue;
+      }
+      if (cleanedLine.toLowerCase() === 'none') {
+        continue;
+      }
+      nextSection = cleanedLine.toLowerCase().replace(':', '');
+      if (indexOf.call(HUBOT_DOCUMENTATION_SECTIONS, nextSection) >= 0) {
+        currentSection = nextSection;
+        scriptDocumentation[currentSection] = [];
+      } else {
+        if (currentSection) {
+          scriptDocumentation[currentSection].push(cleanedLine.trim());
+          if (currentSection === 'commands') {
+            this.commands.push(cleanedLine.trim());
+          }
+        }
+      }
+    }
+
+    if (currentSection === null) {
+      this.logger.info(path + " is using deprecated documentation syntax");
+      scriptDocumentation.commands = [];
+      ref1 = body.split("\n");
+      for (j = 0, len1 = ref1.length; j < len1; j++) {
+        line = ref1[j];
+        if (!(line[0] === '#' || line.substr(0, 2) === '//')) {
+          break;
+        }
+        if (!line.match('-')) {
+          continue;
+        }
+        cleanedLine = line.slice(2, +line.length + 1 || 9e9).replace(/^hubot/i, this.name).trim();
+        scriptDocumentation.commands.push(cleanedLine);
+        this.commands.push(cleanedLine);
+      }
+    }
   }
 
   reply(envelope, user, messages) {
@@ -157,7 +235,7 @@ class Robot {
   }
 
   receive(message, adapter, callback) {
-    // this.logger.info('received message', message, this.listeners);
+     //this.logger.info('received message', message.text, this.listeners);
     // let response = new Response(this, data, match);
 
     // Check each hear callback for a match
