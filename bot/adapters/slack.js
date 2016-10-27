@@ -445,12 +445,10 @@ class SlackAdapter {
             this.rooms[channel.id] = channel;
           }
         }
-        this.logger.debug('SlackAdatper: finished getting list of channels');
       });
       
       
       this.slackBot.getUsers().then((data) => {
-         this.logger.debug("SlackAdapter: list of users: ", data);
         if (data.members) {
           for (let member of data.members) {
             if (member.name && member.name.toLowerCase() == config.name.toLowerCase()) {
@@ -460,20 +458,7 @@ class SlackAdapter {
             this.users[member.id] = member;
           }
         }
-        this.logger.debug('SlackAdatper: finished getting list of users');
       });
-      
-      // more information about additional params https://api.slack.com/methods/chat.postMessage
-      // var params = {};
-      
-      // define channel, where bot exist. You can adjust it there https://my.slack.com/services
-      // bot.postMessageToChannel('bot', ':partyparrot:', params);
-      
-      // define existing username instead of 'user_name'
-      // bot.postMessageToUser('user_name', 'meow!', params);
-      
-      // define private group instead of 'private_group', where bot exist
-      // bot.postMessageToGroup('private_group', 'meow!', params);
     });
   
     // all incoming events https://api.slack.com/rtm

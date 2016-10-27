@@ -119,9 +119,7 @@ class Robot {
       indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
     this.logger.debug("Parsing help for " + path);
-
-    //scriptName = Path.basename(path).replace(/\.(coffee|js)$/, '');
-
+    
     scriptDocumentation = {};
 
     body = fs.readFileSync(path, 'utf-8');
@@ -141,6 +139,8 @@ class Robot {
       if (cleanedLine.toLowerCase() === 'none') {
         continue;
       }
+      cleanedLine = line.replace(/^\s*hubot/i, this.name).trim();
+  
       nextSection = cleanedLine.toLowerCase().replace(':', '');
       if (indexOf.call(HUBOT_DOCUMENTATION_SECTIONS, nextSection) >= 0) {
         currentSection = nextSection;
