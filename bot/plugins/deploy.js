@@ -3,9 +3,37 @@
 const exec = require('child_process').exec;
 
 module.exports = function (bot) {
+  
+  function deploy(response) {
+    console.log(response);
+    let logger = response.bot.logger;
 
-  function deploy(message) {
-    let deployCommand = bot.config.plugins.DEPLOY.DEPLOY_COMMAND;
+    let DEPLOY = bot.config.plugins.DEPLOY_COMMANDS;
+    console.log("DEPLOY", DEPLOY)
+    let deployCommand;
+    let commandName;
+    let extraArgs = "";
+
+    let process;
+
+    // Parse args
+    let deployArgs = response.match[1];
+    if (deployArgs) {
+      commandName = deployArgs.split(" ")[0];
+      deployCommand = DEPLOY[commandName];
+      extraArgs = deployArgs.split(" ").slice(1).join(" ");
+    } else {
+      commandName = "default";
+      deployCommand = DEPLOY.default;
+    }
+    logger.debug("Deploy command args:", deployCommand, extraArgs);
+
+    if (!deployCommand) {
+      logger.error("Could not find a deploy command ${commandName}");
+      bot.send(response.envelope, "Could not find a deploy command ${commandName}");
+      return;
+    }
+
     let commandOptions = {
       encoding: 'utf8',
       shell: '/bin/bash',

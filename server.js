@@ -241,20 +241,28 @@ app = foodAPI.routes(app);
 // Load Alexa apps
 app = foodAlexa.routes(app);
 
+// IFTTT
+
+app.post('/ifttt/todo', function (req, res) {
+  console.log(req);
+  console.log(req.body);
+  res.send("OK");
+});
+
 // If it matches none of the above routes, check static files
 app.use(express.static('./public'));
 app.use('/bower_components/', express.static('./bower_components/'));
 app.use('/node_modules/', express.static('./node_modules/'));
 // Temporary hack to get mirror up
 app.use('/mirror/', express.static('./mirror/'));
-
-https.createServer({
-  key: fs.readFileSync('./ssl/private-key.pem'),
-  cert: fs.readFileSync('./ssl/certificate.pem'),
-  requestCert: true,
-  rejectUnauthorized: false
-}, app).listen(port, function() {
-  console.log("Secure Express server listening on port 8443");
-});
+app.listen(8080);
+//https.createServer({
+//  key: fs.readFileSync('./ssl/private-key.pem'),
+//  cert: fs.readFileSync('./ssl/certificate.pem'),
+//  requestCert: true,
+//  rejectUnauthorized: false
+//}, app).listen(port, function() {
+//  console.log("Secure Express server listening on port 8443");
+//});
 
 

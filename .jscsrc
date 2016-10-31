@@ -1,0 +1,28 @@
+{
+  "disallowImplicitTypeConversion": [
+    "numeric",
+    "boolean",
+    "binary",
+    "string"
+  ],
+  "maxErrors": Infinity,
+  "disallowMultipleSpaces": true,
+  "disallowTrailingWhitespace": "ignoreEmptyLines",
+  "disallowMixedSpacesAndTabs": true,
+  "disallowTabs": true,
+  "maximumLineLength": {
+    "value": 100,
+    "allExcept": ["require"]
+  },
+  "requireCurlyBraces": [
+    "if",
+    "else",
+    "for",
+    "while",
+    "do",
+    "try",
+    "catch",
+  ],
+  "requireCamelCaseOrUpperCaseIdentifiers": "ignoreProperties",
+  "requireCapitalizedConstructors": false
+}
