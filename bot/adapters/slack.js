@@ -450,7 +450,7 @@ class SlackAdapter {
       
       
       this.slackBot.getUsers().then((data) => {
-         this.logger.debug("SlackAdapter: list of users: ", data);
+        // this.logger.debug("SlackAdapter: list of users: ", data);
         if (data.members) {
           for (let member of data.members) {
             if (member.name && member.name.toLowerCase() == config.name.toLowerCase()) {

@@ -16,6 +16,7 @@ let plugins = [
   //'./plugins/echo',
   './plugins/deploy',
   './plugins/help',
+  './plugins/frontendQuote/index.js',
   //'../node_modules/hubot-scripts/src/scripts/ackbar.coffee',
   //'../node_modules/hubot-scripts/src/scripts/coin.coffee',
   '../node_modules/hubot-scripts/src/scripts/dealwithit.coffee',
