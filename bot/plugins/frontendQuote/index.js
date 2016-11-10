@@ -6,9 +6,11 @@ module.exports = function(robot) {
   if (!Array.isArray(quotes) || quotes == 0) {
     throw new Error(`QUOTES must be an array of quotes`);
   }
-  
+ 
   robot.frontend.addScript(__dirname + "/quote.js", "quote/quote.js");
   robot.frontend.addTemplate(__dirname + "/quote.html", "quote/quote.html");
   
-  robot.frontend.addConfigKeys({quotes: robot.config.QUOTES});
+  robot.router.get('/quotes', (req, res) => {
+    res.json(quotes);
+  });
 };

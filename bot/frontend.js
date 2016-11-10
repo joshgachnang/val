@@ -1,3 +1,4 @@
+const browserify = require('browserify');
 const express = require('express');
 const fs = require('fs');
 
@@ -15,24 +16,37 @@ class Frontend {
     this.router.get('/', (req, res) => {
       res.render('frontend.jade', {
         config: this.config,
-        scripts: this.scripts,
-        stylesheets: this.stylesheets
+        scripts: Object.keys(this.scripts),
+        stylesheets: Object.keys(this.stylesheets)
       });
     });
     
     // Expose configuration variables
-    this.router.get('/config.js', function(req, res) {
+    this.router.get('/config.js', (req, res) => {
       let base = 'angular.module("config", [])';
-      this.configKeys.forEach(function(key) {
+      for (let key in this.configKeys) {
         let val = this.configKeys[key];
-        console.log(key, val);
+        if (!val || !key) {
+            this.robot.logger.warn(`not adding key/val ${key} : ${val}`);
+            continue;
+        }
         base = base.concat(`.constant("${key}", "${val}")`);
-      });
+      }
       res.header('Content-Type', 'application/javascript');
       res.write(base);
       res.end();
     });
     
+    this.router.use('/bundle.js', (req, res) => {
+      res.setHeader('content-type', 'application/javascript');
+      browserify('./js/frontend.js', {
+        debug: true
+      })
+      .add('./plugins/frontendQuote/quote.js')
+      .bundle()
+      .pipe(res);
+    });
+
     // Expose templates
     this.router.get('/templates/:partial', function(req, res) {
       if (this.templates[req.params.partial] === undefined) {
@@ -41,6 +55,7 @@ class Frontend {
       res.render(this.templates[req.params.partial], {});
     });
     
+    this.router.use('/bower_components', express.static(__dirname + '/../bower_components/')); 
     this.robot.router.use('/frontend', this.router)
   }
   
@@ -87,18 +102,30 @@ class Frontend {
   
   // Call after all plugins have registered their frontend components
   setup() {
+    // Add the base frontend components
+    console.log("SETTING UP FRONTEND", __dirname + 'js/frontend.js');
+    this.addScript(__dirname + '/js/frontend.js', 'frontend/js/frontend.js');
+    this.addStylesheet(__dirname + '/css/frontend.css', 'frontend/css/frontend.css');
+
+    console.log("SCRIPTS", this.scripts);
+
     for (let script in this.scripts) {
       let path = this.scripts[script];
-      this.robot.addStaticFile(script, path);
+      this.robot.logger.debug(`Adding script. Path: ${path}; script: ${script}`);
+      this.robot.addStaticFile(path, script);
     }
   
     for (let stylesheet in this.stylesheets) {
       let path = this.stylesheets[stylesheet];
-      this.robot.addStaticFile(stylesheet, path);
+      this.robot.logger.debug(`Adding stylesheet. Path: ${path}; script: ${stylesheet}`);
+      this.robot.addStaticFile(path, stylesheet);
     }
-  }
-  
-  
+    for (let template in this.templates) {
+      let path = this.templates[template];
+      this.robot.logger.debug(`Adding template. Path: ${path}; script: ${template}`);
+      this.robot.addStaticFile(path, template);
+    }
+   }  
 }
 
 module.exports = Frontend;

@@ -82,6 +82,7 @@ class Robot {
     this.logger.debug('Finished loading plugins');
     
     this.frontend.setup();
+    this.listen();
   }
 
   loadConfig() {
@@ -91,7 +92,8 @@ class Robot {
       // Add a bot https://my.slack.com/services/new/bot and put the token
       slackToken: config.SLACK_TOKEN,
       id: undefined,
-      plugins: config.PLUGINS
+      plugins: config.PLUGINS,
+      layout: config.LAYOUT,
     }
   }
 
@@ -252,9 +254,6 @@ class Robot {
   }
   
   setupExpress() {
-    let port = process.env.EXPRESS_PORT || 8080;
-    let address = process.env.EXPRESS_BIND_ADDRESS || '0.0.0.0';
-    
     let app = express();
     
     app.use((req, res, next) => {
@@ -267,22 +266,36 @@ class Robot {
     app.use(bodyParser.json());
     app.use(multipart({maxFileSize: 100 * 1024 * 1024}));
     app.use('/static', express.static('static'));
-    
+    app.use('/bower_components', express.static('bower_components'));
+    this.router = app;
+  }
+  listen() {
+    let port = process.env.EXPRESS_BIND_PORT || 8080;
+    let address = process.env.EXPRESS_BIND_ADDRESS || '0.0.0.0';
+    this.logger.debug('All routes');
+    this.logger.debug(this.router.stack);
+    this.router._router.stack.forEach(function(r){
+          if (r.route && r.route.path){
+                  console.log(r.route.path)
+                    }
+    });
     try {
-      
-      this.router = app;
-      console.log("STARTING UP")
-      this.server = app.listen(port, address);
+      this.server = this.router.listen(port, address);
     } catch (err) {
       this.logger.error(`Error trying to start HTTP server: ${err}\n${err.stack}`);
       process.exit(1);
     }
-  }
   
+  }
   // filesystemPath: Relative path to the file
   // url: the URL to expose the file at. Will be served as `/static/${url}`
   addStaticFile(filesystemPath, url) {
-    this.router.use('static/' + url, (req, res) => {
+    this.logger.debug(`Adding static file: static/${url}:${filesystemPath}`);
+    if (!fs.existsSync(filesystemPath)) {
+      throw new Error(`Script does not exist: ${filesystemPath}`);
+    }
+    this.router.use('/static/' + url, (req, res) => {
+      this.logger.debug(`Serving ${req.path}: ${filesystemPath}`);
       res.sendFile(filesystemPath);
     });
   }
