@@ -8,11 +8,12 @@ const express = require('express');
 const multipart = require('connect-multiparty');
 const bodyParser = require('body-parser')
 
-
 const config = require('../config/config');
 const Response = require('./response');
 const TextListener = require('./listener').TextListener;
 const Frontend = require('./frontend');
+const Brain = require('./brain');
+const Message = require('./message');
 
 let HUBOT_DOCUMENTATION_SECTIONS = [
   'description',
@@ -27,8 +28,9 @@ let HUBOT_DOCUMENTATION_SECTIONS = [
   'urls',
 ];
 
-class Robot {
+class Robot extends EventEmitter {
   constructor(name, adapters, plugins, alias) {
+    super()
     if (!name) {
       winston.error('`name` is required to start robot');
       throw new Error('`name` is required to start robot');
@@ -50,6 +52,7 @@ class Robot {
     this.listeners = [];
     this.commands = [];
     this.errorHandlers = [];
+    this.TextMessage = Message.TextMessage;
     this.router = undefined;
     this.logger = new (winston.Logger)({
       transports: [
@@ -57,6 +60,7 @@ class Robot {
         new (winston.transports.File)({filename: 'bot.log', level: 'debug'})
       ]
     });
+    this.brain = new Brain(this);
     this.setupExpress();
     
     this.frontend = new Frontend(this);
@@ -68,9 +72,9 @@ class Robot {
     for (let adapter of adapters) {
       this.logger.info('loading', adapter);
       let adapterModule = require(adapter);
-      this.logger.info('loaded', adapterModule);
-      this.adapters[adapter] = new adapterModule(this);
-      this.adapters[adapter].run();
+      let adapterClass = new adapterModule(this);
+      this.adapters[adapterClass.adapterName] = adapterClass;
+      adapterClass.run();
     }
 
     for (let plugin of plugins) {
@@ -87,14 +91,11 @@ class Robot {
 
   loadConfig() {
     // TODO load from env/config files
-    return {
-      name: config.BOT_NAME,
-      // Add a bot https://my.slack.com/services/new/bot and put the token
-      slackToken: config.SLACK_TOKEN,
-      id: undefined,
-      plugins: config.PLUGINS,
-      layout: config.LAYOUT,
-    }
+    let conf = config;
+    conf.id = undefined
+    // TODO: deprecate
+    conf.name = config.BOT_NAME;
+    return config;
   }
 
   hear(regex, options, callback) {
@@ -193,9 +194,7 @@ class Robot {
       messages = [messages];
     }
 
-    // holy hack batman
-    this.adapters['./adapters/slack'].reply(envelope, user, messages);
-    //message.adapter.reply(message, user, message.text);
+    this.adapters[envelope.adapter].reply(envelope, user, messages);
   }
 
   send(envelope, messages) {
@@ -204,8 +203,12 @@ class Robot {
     if (!Array.isArray(messages)) {
       messages = [messages];
     }
-
-    this.adapters['./adapters/slack'].send(envelope, messages);
+    console.log("SENDING", Object.keys(this.adapters), envelope.adapterName)
+    let adapter = this.adapters[envelope.adapterName];
+    if (!adapter) {
+      throw new Error(`Invalid adapter name: ${envelope.adapterName}`);
+    }
+    adapter.send(envelope, messages);
   }
   
   emote(envelope, emotes) {
@@ -246,7 +249,7 @@ class Robot {
   }
 
   receive(message, adapter, callback) {
-    this.logger.info('received message', message.text, this.listeners);
+    this.logger.info('received message', message.text);
 
     for (let listener of this.listeners) {
       listener.call(message, adapter, callback)

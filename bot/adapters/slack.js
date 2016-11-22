@@ -2,14 +2,14 @@
 
 // Forked from Slackbots to throw out vow, use ES6 where possible
 
-var Message = require('../message').TextMessage;
-var winston = require('winston');
-var request = require('request');
-var extend = require('extend');
-var WebSocket = require('ws');
-var util = require('util');
-var EventEmitter = require('events').EventEmitter;
-
+const Message = require('../message').TextMessage;
+const winston = require('winston');
+const request = require('request');
+const extend = require('extend');
+const WebSocket = require('ws');
+const util = require('util');
+const EventEmitter = require('events');
+const Adapter = require('../adapter');
 
 function find(arr, params) {
   var result = {};
@@ -402,17 +402,24 @@ function isReply(data) {
   return (data.text !== undefined && data.text.match(reg) != null);
 }
 
-class SlackAdapter {
+class SlackAdapter extends Adapter {
   constructor(robot) {
+    super(robot);
     this.robot = robot;
     this.logger = robot.logger;
     this.rooms = [];
     this.users = [];
     this.me = {};
-    this.name = "SlackAdapter";
+    this.adapterName = "Slack";
   }
   
   send(envelope, strings) {
+    if (envelope.room === undefined) {
+      for (let string of strings) {
+        this.slackBot.postMessageToUser(envelope.user.name, string, {link_names: 1});
+      }
+      return;
+    }
     for (let string of strings) {
       this.slackBot.postMessageToChannel(envelope.room.name, string, {link_names: 1});
     }
@@ -431,7 +438,7 @@ class SlackAdapter {
     var config = this.robot.config;
     
     this.slackBot = new SlackBot({
-      token: config.slackToken,
+      token: config.SLACK_TOKEN,
       name: config.name
     });
     
@@ -482,15 +489,19 @@ class SlackAdapter {
       if (['reconnect_url', 'user_typing', 'hello'].indexOf(data.type) > -1) {
         return
       }
-      
+
       this.logger.debug(`SlackAdapter: received ${data.type} message`);
       
       if (['presence_change'].indexOf(data.type) > -1) {
         this.updateUser(data);
-        return
+        return;
       }
       
       if (['message'].indexOf(data.type) > -1) {
+        if (['message_changed', 'bot_message'].indexOf(data.subtype) > -1) {
+          this.logger.debug(`SlackAdapter: skipping processing of ${data.subtype}`);
+          return;
+        }
         data = this.formatMessage(data);
         let room = this.rooms[data.channel];
         let user = this.users[data.user];

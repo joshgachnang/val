@@ -30,7 +30,6 @@ class Listener {
 
   call(message, adapter, callback) {
     let match = this.matcher(message);
-    //console.log("Listener match", this.matcher, match);
     if (match) {
 
       if (this.regex) {
@@ -38,10 +37,9 @@ class Listener {
             `listener.options = ${this.options}`);
       }
 
-      let response = new Response(this.robot, message, match);
+      let response = new Response(this.robot, message, match, adapter);
       this.robot.logger.debug(
           `Executing listener callback for Message ${message}`, callback);
-      //console.log("CALLBACKS", this.callback, this.robot.name)
       try {
         this.callback(response);
       } catch (err) {

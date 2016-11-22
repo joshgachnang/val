@@ -8,7 +8,8 @@ var Robot = require('./robot');
 
 
 let adapters = [
-  './adapters/slack'
+  './adapters/slack',
+  './adapters/twilio',
 ];
 
 let plugins = [
@@ -17,6 +18,7 @@ let plugins = [
   './plugins/deploy',
   './plugins/help',
   './plugins/frontendQuote/index.js',
+  './plugins/goodmorning',
   //'../node_modules/hubot-scripts/src/scripts/ackbar.coffee',
   //'../node_modules/hubot-scripts/src/scripts/coin.coffee',
   '../node_modules/hubot-scripts/src/scripts/dealwithit.coffee',

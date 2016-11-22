@@ -1,24 +1,32 @@
 "use strict";
 
+class Envelope {
+    constructor(room, user, message, adapterName) {
+        if (!room || !user || !message || !adapterName) {
+            throw new Error(`Envelope requires all fields: room: ${room}  
+                user: ${user} message: ${message} adapterName: ${adapterName}`);
+        }
+        this.room = room;
+        this.user = user;
+        this.message = message;
+        this.adapterName = adapterName;
+    }
+}
+
 class Response {
   constructor(bot, message, match, adapter) {
     this.bot = bot;
     this.message = message;
     this.match = match;
     //console.log("response match", match)
-    this.envelope = {
-      room: message.room,
-      user: message.user,
-      message: message,
-      adapter: adapter
-    };
+    this.envelope = new Envelope(message.room, message.user, message, adapter.adapterName);
   }
 
   // Actually takes a list of 1 to n arguments
-  send() {
+  send(...strings) {
     // Coffeescript sends a list of arguments, and magically converts them to an array of
     // args. Why? No clue.
-    let strings = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
+    console.log("RESPONSE SENDING", this.envelope, strings);
     this.bot.send(this.envelope, strings)
   }
 

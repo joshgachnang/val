@@ -3,8 +3,6 @@
 class Message {
   constructor(user, adapter, done) {
     this.robot = adapter.robot;
-    // console.log("Message", message.room, this.robot.channels);
-
     this.adapter = adapter;
     this.user = user;
     if (!done) {
@@ -20,6 +18,10 @@ class Message {
 
 class TextMessage extends Message {
   constructor(user, text, room, id, adapter, rawData) {
+    if (!user || !text) {
+      throw new Error(`Cannot create text message without user or text. user: 
+        ${user} text: ${text}`);
+    }
     super(user, adapter);
     this.text = text;
     this.room = room;
