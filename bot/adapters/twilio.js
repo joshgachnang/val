@@ -39,6 +39,7 @@ class Twilio extends Adapter {
 
   run() {
     return this.robot.router.post("/twilio/sms/reply", (request, response) => {
+      console.log("POST")
       this.robot.logger.debug(`Twilio SMS Post: ${request.url}`);
       console.log(request.body);
       let payload = request.body;
@@ -65,7 +66,7 @@ class Twilio extends Adapter {
 	// TODO Assign self.robot.name here instead of Nurph
     if (body.match(/^Nurph\b/i) === null) {
       this.robot.logger.debug(`I'm adding ${this.robot.name} as a prefix.`);
-      body = `${this.robot.name}:${body}`;
+      body = `${this.robot.name}: ${body}`;
     }
 
     return this.robot.receive(new this.robot.TextMessage(user, body, user + "-sms", undefined, this), this);

@@ -194,7 +194,7 @@ class Robot extends EventEmitter {
       messages = [messages];
     }
 
-    this.adapters[envelope.adapter].reply(envelope, user, messages);
+    this.adapters[envelope.adapterName].reply(envelope, user, messages);
   }
 
   send(envelope, messages) {
