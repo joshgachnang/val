@@ -8,7 +8,7 @@ const express = require('express');
 const multipart = require('connect-multiparty');
 const bodyParser = require('body-parser')
 
-const config = require('../config/config');
+const config = require('./config/config');
 const Response = require('./response');
 const TextListener = require('./listener').TextListener;
 const Frontend = require('./frontend');
@@ -94,7 +94,7 @@ class Robot extends EventEmitter {
     let conf = config;
     conf.id = undefined
     // TODO: deprecate
-    conf.name = config.BOT_NAME;
+    conf.name = process.env.BOT_NAME || config.BOT_NAME;
     return config;
   }
 
@@ -233,6 +233,15 @@ class Robot extends EventEmitter {
 
   error(callback) {
     this.errorHandlers.push(callback);
+  }
+  
+  // Get a key from the environment, or throw an error if it's not defined
+  envKey(key) {
+    let value = process.env[key];
+    if (!value) {
+      throw new Error(`${key} environment variable not defined`);
+    }
+    return value;
   }
 
   catchAll(options, callback) {

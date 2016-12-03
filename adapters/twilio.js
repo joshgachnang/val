@@ -7,10 +7,9 @@ const Adapter = require('../adapter');
 class Twilio extends Adapter {
   constructor(robot) {
     super(robot);
-    this.sid   = robot.config.TWILIO_SID;
-    this.token = robot.config.TWILIO_TOKEN;
-    this.from  = robot.config.TWILIO_NUMBER;
-    console.log("Twilio startup: ", this.sid, this.token, this.from);
+    this.sid   = robot.envKey("TWILIO_SID");
+    this.token = robot.envKey("TWILIO_TOKEN");
+    this.from  = robot.envKey("TWILIO_NUMBER");
     this.robot = robot;
     this.adapterName = "Twilio"
   }

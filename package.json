@@ -21,7 +21,7 @@
     "build:scss": "node-sass --include-path scss --source-map true food/scss/ -o public/css/",
     "start": "node server.js",
     "dev": "npm run watch",
-    "bot": "cd bot && nodemon server.js"
+    "bot": "nodemon server.js"
   },
   "author": "Josh Gachnang",
   "license": "GPL-3.0",

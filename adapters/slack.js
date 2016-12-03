@@ -436,9 +436,9 @@ class SlackAdapter extends Adapter {
   run() {
     this.logger.info('Running Slack adapter');
     var config = this.robot.config;
-    
+   
     this.slackBot = new SlackBot({
-      token: config.SLACK_TOKEN,
+      token: this.robot.envKey("SLACK_TOKEN"),
       name: config.name
     });
     
@@ -468,7 +468,7 @@ class SlackAdapter extends Adapter {
           }
         }
         this.logger.debug('SlackAdatper: finished getting list of users');
-      });
+      })
       
       // more information about additional params https://api.slack.com/methods/chat.postMessage
       // var params = {};
@@ -564,6 +564,10 @@ class SlackAdapter extends Adapter {
   
   updateUser(data) {
     let user = this.users[data.user];
+    if (!user) {
+      this.logger.warn(`Could not find user ${data.user}`);
+      return;
+    }
     user.status = data.presence;
     this.logger.info(`Updated user ${user.name} to ${user.status}`);
   }

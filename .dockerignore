@@ -1,4 +1,4 @@
 bower_components/
 node_modules/
 uploads/
-config/config.js
+envfile

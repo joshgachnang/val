@@ -2,7 +2,7 @@ module.exports = function(robot) {
   "use strict";
   
   console.log(robot.config)
-  let quotes = robot.config.PLUGINS.QUOTES;
+  let quotes = robot.config.QUOTES;
   if (!Array.isArray(quotes) || quotes == 0) {
     throw new Error(`QUOTES must be an array of quotes`);
   }

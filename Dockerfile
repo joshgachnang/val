@@ -1,5 +1,6 @@
-FROM node:argon
+FROM node:boron
 
+RUN apt-get -y update && apt-get install nano && apt-get install 
 # Create app directory
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
@@ -15,9 +16,6 @@ RUN bower install --allow-root
 # Install app
 COPY . /usr/src/app
 
-EXPOSE 8443
-
-VOLUME [ "/usr/src/app/config" ]
-VOLUME [ "/usr/src/app/uploads" ]
+EXPOSE 8080
 
 CMD [ "npm", "start" ]

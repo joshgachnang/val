@@ -29,7 +29,7 @@ function weatherInZip(response) {
     return;
   }
 
-  let key = robot.config.FORECASTIO_KEY;
+  let key = robot.envKey("FORECASTIO_KEY");
   let client = robot.http(`https://api.darksky.net/forecast/${key}/${latlng[0]},${latlng[1]}`)
   client.get()((err, resp, body) => {
     let res = JSON.parse(body);

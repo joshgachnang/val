@@ -38,9 +38,9 @@ module.exports = function (bot) {
   }
 
   function fetchWeather(callback) {
-    let key = bot.config.FORECASTIO_KEY;
-    let lat = bot.config.LATITUDE;
-    let lng = bot.config.LONGITUDE;
+    let key = bot.envKey('FORECASTIO_KEY');
+    let lat = bot.envKey('LATITUDE');
+    let lng = bot.envKey('LONGITUDE');
     let client = bot.http(`https://api.darksky.net/forecast/${key}/${lat},${lng}`)
     client.get()((err, resp, body) => {
       callback(JSON.parse(body));
@@ -48,7 +48,7 @@ module.exports = function (bot) {
   }
 
   function sendAllGoodMornings() {
-    for (let user of bot.config.PLUGINS.GOOD_MORNING.SMS_USERS) {
+    for (let user of bot.envKey("GOOD_MORNING_SMS_USERS").split(",")) {
       sendGoodMorning(user);
     }
   }
