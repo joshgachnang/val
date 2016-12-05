@@ -10,3 +10,4 @@ uploads/
 npm-debug.log*
 config/config.js
 config/config.prd
+envfile
