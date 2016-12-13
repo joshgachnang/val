@@ -28,7 +28,7 @@ module.exports = class Brain extends EventEmitter {
         pair[key] = value;
       }
 
-      extend(this.data._private, pair);
+      Object.assign(this.data._private, pair);
       this.emit('loaded', this.data);
       return this;
     }
@@ -41,8 +41,15 @@ module.exports = class Brain extends EventEmitter {
       if (this.data._private[key] != null) { return delete this.data._private[key]; }
     }
 
+    mergeData(data) {
+      if (data) {
+        Object.assign(this.data, data);
+      }
+      this.emit('loaded', this.data);
+    }
+
     save() {
-      emit('save', this.data);
+      this.emit('save', this.data);
     }
 
     close() {
@@ -55,7 +62,7 @@ module.exports = class Brain extends EventEmitter {
       this.autoSave = enabled;
     }
 
-    setSaveInterval(seconds) {
+    resetSaveInterval(seconds) {
       if (this.saveInterval) { clearInterval(this.saveInterval); }
       return this.saveInterval = setInterval(() => {
         if (this.autoSave) { return this.save(); }

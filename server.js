@@ -1,11 +1,12 @@
 "use strict";
 
+require('dotenv').config({path: './envfile'});
+
 require('better-require')();
 require('coffee-script/register');
 const config = require('./config/config');
 
 var Robot = require('./robot');
-
 
 let adapters = [
   './adapters/slack',
@@ -13,7 +14,9 @@ let adapters = [
 ];
 
 let plugins = [
-  './plugins/log',
+  './plugins/mongo-brain',
+//  './plugins/log',
+  './plugins/remember',
   //'./plugins/echo',
   './plugins/deploy',
   './plugins/help',

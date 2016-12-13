@@ -105,6 +105,7 @@ class Robot extends EventEmitter {
   }
 
   respond(regex, options, callback) {
+    console.log("RESPONSE PATTERN", this.respondPattern(regex));
     this.hear(this.respondPattern(regex), options, callback);
   }
 
@@ -112,6 +113,13 @@ class Robot extends EventEmitter {
     let re = regex.toString().split('/');
     re.shift();
     let modifiers = re.pop();
+	console.log("REGEX MODS", modifiers);
+
+	// Default to case insensitive if not otherwise declared, or bot name gets messed up
+	// NOTE: change from upstream
+	if (!modifiers) {
+      modifiers = 'i';
+    }
 
     if (re[0] && re[0][0] === '^') {
       this.logger.warn('Anchors don\'t work well with respond, perhaps you ' +
@@ -125,7 +133,7 @@ class Robot extends EventEmitter {
     }
     let pattern = re.join('/');
 
-    return new RegExp('^\\s*[@]' + name + '[:,]?\\s*(?:' + pattern + ')', modifiers);
+    return new RegExp('^\\s*[@]*' + name.toLowerCase() + '[:,]?\\s*(?:' + pattern + ')', modifiers);
   }
 
   parseHelp(path) {
