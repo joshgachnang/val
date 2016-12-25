@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "sourceMap":  true,
+        "outDir": "./built",
+        "allowJs": true,
+        "target": "es6",
+		"module": "es6",
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true
+    },
+    "typeRoots": [ "node_modules/@types" ],
+    "files": [
+        "adapter.ts",
+        "brain.ts",
+        "envelope.ts",
+        "frontend.ts",
+        "listener.ts",
+        "message.ts",
+        "response.ts",
+        "robot.ts",
+        "room.ts",
+        "server.ts",
+        "user.ts"
+    ]
+}

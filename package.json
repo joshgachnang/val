@@ -1,7 +1,7 @@
 {
-  "name": "life-api",
-  "version": "0.0.1",
-  "description": "API for your life",
+  "name": "veronica",
+  "version": "0.1.0",
+  "description": "A chat bot based on Hubot to automate your life",
   "main": "server.js",
   "scripts": {
     "test": "mocha",
@@ -11,8 +11,8 @@
     "watch:food": "watchify food/js/*.js -o public/js/food.js -t [ babelify --presets [ es2015 ] ]",
     "watch:mirror": "watchify mirror/mirror.js -o public/js/mirror.js -t [ babelify --presets [ es2015 ] ]",
     "postinstall": "./extras/postinstall.sh",
-    "clean": "rimraf *",
     "precompile": "npm run clean",
+    "compile": "tsc && mkdir -p built/config/ && cp config/config.js built/config && cp envfile built/envfile",
     "prebuild": "npm run build:clean",
     "build": "npm build:clean & npm build:food & build:mirror & build:scss",
     "build:clean": "rimraf public/css/*, public/js/*",
@@ -21,11 +21,17 @@
     "build:scss": "node-sass --include-path scss --source-map true food/scss/ -o public/css/",
     "start": "node server.js",
     "dev": "npm run watch",
-    "bot": "nodemon server.js"
+    "bot": "nodemon ./server.js",
+    "tsc": "tsc -w"
   },
   "author": "Josh Gachnang",
   "license": "GPL-3.0",
   "dependencies": {
+    "@types/body-parser": "0.0.33",
+    "@types/browserify": "^12.0.30",
+    "@types/express": "^4.0.34",
+    "@types/node": "^6.0.53",
+    "@types/winston": "0.0.32",
     "alexa-app": "^2.3.4",
     "alexa-app-server": "^2.2.4",
     "angular": "^1.4.9",
