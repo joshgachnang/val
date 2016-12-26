@@ -1,15 +1,13 @@
-Life API
+Veronica
 ----
 
-An API for running my life. Hosts the backend for a magic mirror, a chat bot,
-a recipe app currently. More to come soon :)
+An chatbot for running my life. Based on Hubot, but with multiple simultaneous
+adapters. Currently Alexa, Twilio, and Slack are supported.
+
+Hosts the backend for a magic mirror and a recipe app currently. More to come soon :)
 
 Dev
 ----
-
-Note: This app is a bunch of prototypes all jammed together. It makes deploying them
-and doing things like users/OAuth easier across small apps. Anything I want to automate
-in my life goes in this repo for now. 
 
     npm install -g watchify browserify
     

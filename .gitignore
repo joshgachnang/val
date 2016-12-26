@@ -12,3 +12,4 @@ config/config.js
 config/config.prd
 envfile
 built/
+*.js
