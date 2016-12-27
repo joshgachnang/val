@@ -8,7 +8,7 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import {exit, env} from 'process';
 
-let config = require('./config/config');
+import Config from './config';
 import Response from './response';
 import {TextListener, Listener} from './listener';
 import Frontend from './frontend';
@@ -31,7 +31,7 @@ let HUBOT_DOCUMENTATION_SECTIONS = [
 export default class Robot extends EventEmitter {
     name: string;
     alias: string;
-    config: any;
+    config: Config;
     pluginListeners: Array<Listener> = [];
     commands: any;
     errorHandlers: any;
@@ -77,18 +77,19 @@ export default class Robot extends EventEmitter {
     this.brain = new Brain(this);
     this.setupExpress();
     
-    this.frontend = new Frontend(this);
+    //this.frontend = new Frontend(this);
   
     this.logger.debug('Starting Robot');
 
     this.adapters = {};
     this.plugins = {};
     for (let adapter of adapters) {
-//      this.logger.info('loading', adapter);
-//      let adapterModule = import(adapter);
-//      let adapterClass = new adapterModule(this);
-//      this.adapters[adapterClass.adapterName] = adapterClass;
-//      adapterClass.run();
+      this.logger.info('loading', adapter);
+      let adapterModule = require(adapter);
+
+      let adapterClass = new adapterModule(this);
+      this.adapters[adapterClass.adapterName] = adapterClass;
+      adapterClass.run();
     }
 
     for (let plugin of plugins) {
@@ -99,17 +100,17 @@ export default class Robot extends EventEmitter {
     }
     this.logger.debug('Finished loading plugins');
     
-    this.frontend.setup();
+    //this.frontend.setup();
     this.listen();
   }
 
   loadConfig() {
     // TODO load from env/config files
-    let conf = config;
+    let conf = new Config();
     conf.id = undefined
     // TODO: deprecate
-    conf.name = process.env.BOT_NAME || config.BOT_NAME;
-    return config;
+    conf.name = process.env.BOT_NAME || conf.BOT_NAME;
+    return conf;
   }
 
   hear(regex, options, callback) {
@@ -301,14 +302,16 @@ export default class Robot extends EventEmitter {
     let port = process.env.EXPRESS_BIND_PORT || 8080;
     let address = process.env.EXPRESS_BIND_ADDRESS || '0.0.0.0';
     this.logger.debug('All routes');
-    this.logger.debug(this.router.stack);
+//    this.logger.debug(this.router.stack);
     this.router._router.stack.forEach(function(r){
           if (r.route && r.route.path){
                   console.log(r.route.path)
                     }
     });
+		console.log("HI");
     try {
       this.server = this.router.listen(port, address);
+      console.log("LISTENING");
     } catch (err) {
       this.logger.error(`Error trying to start HTTP server: ${err}\n${err.stack}`);
       process.exit(1);

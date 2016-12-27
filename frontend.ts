@@ -2,6 +2,7 @@ import * as browserify from 'browserify';
 import * as express from 'express';
 import {existsSync} from 'fs';
 import Robot from './robot';
+import * as _ from 'lodash';
 
 export default class Frontend {
   robot: Robot;
@@ -106,7 +107,7 @@ export default class Frontend {
         throw new Error(`Duplicated config key ${key}`);
       }
     }
-    Object.assign(this.configKeys, config);
+    _.extend(this.configKeys, config);
   }
   
   // Call after all plugins have registered their frontend components

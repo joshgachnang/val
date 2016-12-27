@@ -3,15 +3,15 @@
 import {EventEmitter} from 'events';
 import User from "./user";
 import Robot from "./robot";
+import * as _ from "lodash";
 
 export default class Brain extends EventEmitter {
   robot: Robot;
   data: any;
   saveInterval: number;
   autoSave: boolean;
-     
+
   constructor(robot) {
-    console.log("BRAIN CONSTRUCT", robot);
     super();
     this.robot = robot;
     this.data = {
@@ -33,7 +33,7 @@ export default class Brain extends EventEmitter {
         pair[key] = value;
       }
 
-      Object.assign(this.data._private, pair);
+      _.extend(this.data._private, pair);
       this.emit('loaded', this.data);
       return this;
     }
@@ -41,7 +41,7 @@ export default class Brain extends EventEmitter {
     get(key) {
       return this.data._private[key] != null ? this.data._private[key] : null;
     }
-    
+
     remove(key) {
       if (this.data._private[key] != null) { return delete this.data._private[key]; } else {
         return null;
@@ -50,7 +50,7 @@ export default class Brain extends EventEmitter {
 
     mergeData(data) {
       if (data) {
-        Object.assign(this.data, data);
+        _.extend(this.data, data);
       }
       this.emit('loaded', this.data);
     }
@@ -77,10 +77,10 @@ export default class Brain extends EventEmitter {
     }
 
     userForId(id, options) {
-	  let user = this.data.users[id];
+    let user = this.data.users[id];
 	  if (!user) {
-		user = new User(id, options);
-		this.data.users[id] = user;
+			user = new User(id, options);
+			this.data.users[id] = user;
 	  }
 
 	  if (options && options.room && (!user.room || user.room !== options.room)) {
@@ -89,5 +89,5 @@ export default class Brain extends EventEmitter {
       }
 
 	  return user;
-	} 
+  }
 }

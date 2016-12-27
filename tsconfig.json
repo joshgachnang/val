@@ -3,8 +3,8 @@
         "sourceMap":  true,
         "outDir": "./built",
         "allowJs": true,
-        "target": "es6",
-		"module": "es6",
+        "target": "es5",
+        "moduleResolution": "node",
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true
     },
@@ -12,6 +12,7 @@
     "files": [
         "adapter.ts",
         "brain.ts",
+        "config.ts",
         "envelope.ts",
         "frontend.ts",
         "listener.ts",
