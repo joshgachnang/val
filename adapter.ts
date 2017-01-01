@@ -5,6 +5,7 @@ import Robot from "./robot";
 
 export default class Adapter extends EventEmitter {
     robot: Robot;
+    adapterName: string;
 
     constructor(robot) {
         super();

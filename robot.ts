@@ -77,7 +77,7 @@ export default class Robot extends EventEmitter {
     this.brain = new Brain(this);
     this.setupExpress();
     
-    //this.frontend = new Frontend(this);
+    this.frontend = new Frontend(this);
   
     this.logger.debug('Starting Robot');
 
@@ -86,8 +86,8 @@ export default class Robot extends EventEmitter {
     for (let adapter of adapters) {
       this.logger.info('loading', adapter);
       let adapterModule = require(adapter);
-
-      let adapterClass = new adapterModule(this);
+			// Use default here to get the default exported class
+      let adapterClass = new adapterModule.default(this);
       this.adapters[adapterClass.adapterName] = adapterClass;
       adapterClass.run();
     }
@@ -226,7 +226,6 @@ export default class Robot extends EventEmitter {
     if (!Array.isArray(messages)) {
       messages = [messages];
     }
-    console.log("SENDING", Object.keys(this.adapters), envelope.adapterName)
     let adapter = this.adapters[envelope.adapterName];
     if (!adapter) {
       throw new Error(`Invalid adapter name: ${envelope.adapterName}`);
@@ -272,7 +271,7 @@ export default class Robot extends EventEmitter {
     this.logger.warn('Unsupported action: catchAll', options);
   }
 
-  http(url, options) {
+  http(url: string, options: any = {}) {
     return HttpClient.create(url, options).header('User-Agent', `${this.name}/1.0`)
   }
 
@@ -308,10 +307,9 @@ export default class Robot extends EventEmitter {
                   console.log(r.route.path)
                     }
     });
-		console.log("HI");
     try {
       this.server = this.router.listen(port, address);
-      console.log("LISTENING");
+      this.logger.info(`Listening at ${address}:${port}`);
     } catch (err) {
       this.logger.error(`Error trying to start HTTP server: ${err}\n${err.stack}`);
       process.exit(1);

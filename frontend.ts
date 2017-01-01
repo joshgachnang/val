@@ -137,5 +137,3 @@ export default class Frontend {
     }
    }  
 }
-
-module.exports = Frontend;

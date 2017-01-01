@@ -1,20 +1,20 @@
-# Description:
-#   hubot-mongodb-brain
-#   support MongoLab and MongoHQ on heroku.
-#
-# Dependencies:
-#   "mongodb": "*"
-#   "lodash" : "*"
-#
-# Configuration:
-#   MONGODB_URL or 'mongodb://localhost/hubot-brain'
-#
-# Author:
-#   Sho Hashimoto <hashimoto@shokai.org>
-#   Josh Gachnang <josh@servercobra.com>
+// Description:
+//   hubot-mongodb-brain
+//   support MongoLab and MongoHQ on heroku.
+//
+// Dependencies:
+//   "mongodb": "*"
+//   "lodash" : "*"
+//
+// Configuration:
+//   MONGODB_URL or 'mongodb://localhost/hubot-brain'
+//
+// Author:
+//   Sho Hashimoto <hashimoto@shokai.org>
+//   Josh Gachnang <josh@servercobra.com>
 'use strict';
 
-import _ from 'lodash';
+import * as _ from 'lodash';
 import { MongoClient } from 'mongodb';
 
 let deepClone = obj => JSON.parse(JSON.stringify(obj));

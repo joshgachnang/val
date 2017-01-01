@@ -66,5 +66,3 @@ export default class Response {
     return this.bot.http(url, options);
   }
 }
-
-module.exports = Response;

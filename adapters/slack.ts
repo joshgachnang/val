@@ -1,15 +1,15 @@
 'use strict';
 
-// Forked from Slackbots to throw out vow, use ES6 where possible
+// Forked from Slackbots to throw out vow, use TS
+import {EventEmitter} from 'events';
 
-const Message = require('../message').TextMessage;
-const winston = require('winston');
-const request = require('request');
-const extend = require('extend');
-const WebSocket = require('ws');
-const util = require('util');
-const EventEmitter = require('events');
-const Adapter = require('../adapter');
+import {TextMessage} from '../message';
+import Robot from '../robot';
+import * as winston from 'winston';
+import * as request from 'request';
+import * as _ from 'lodash';
+import * as WebSocket from 'ws';
+import Adapter from '../adapter';
 
 function find(arr, params) {
   var result = {};
@@ -31,378 +31,389 @@ function assert(condition, error) {
   }
 }
 
-module.exports = {
-  find: find,
-  assert: assert
-};
-
-
 /**
  * @param {object} params
  * @constructor
  */
-function SlackBot(params) {
-  // TODO: Add logger instance here
-  this.token = params.token;
-  this.name = params.name;
-  
-  assert(params.token, 'token must be defined');
-  this.login();
-}
+class SlackBot extends EventEmitter {
+  token: string;
+  name: string;
+  team: any;
+  room: any;
+  users: any;
+  ims: any;
+  groups: any;
+  logger: any;
+  me: any;
+  ws: any;
+  wsUrl: any;
 
-util.inherits(SlackBot, EventEmitter);
-
-/**
- * Starts a Real Time Messaging API session
- */
-SlackBot.prototype.login = function() {
-  this._api('rtm.start').then(function(data) {
-    this.wsUrl = data.url;
-    this.self = data.self;
-    this.team = data.team;
-    this.rooms = data.channels;
-    this.users = data.users;
-    this.ims = data.ims;
-    this.groups = data.groups;
+  constructor(params) {
+    super();
+    // TODO: Add logger instance here
+    this.token = params.token;
+    this.name = params.name;
     
-    this.emit('start');
-    
-    this.connect();
-  }.bind(this)).catch(function(data) {
-    console.error("SlackBot login error: ", data)
-    assert(false, data.error);
-  });
-};
-
-/**
- * Establish a WebSocket connection
- */
-SlackBot.prototype.connect = function() {
-  this.ws = new WebSocket(this.wsUrl);
-  
-  this.ws.on('open', function(data) {
-    this.emit('open', data);
-  }.bind(this));
-  
-  this.ws.on('close', function(data) {
-    this.emit('close', data);
-  }.bind(this));
-  
-  this.ws.on('message', function(data) {
-    try {
-      this.emit('message', JSON.parse(data));
-    } catch (e) {
-      console.log("SlackBot message error", e, e.stack);
-    }
-  }.bind(this));
-};
-
-/**
- * Get channels
- * @returns {Promise}
- */
-SlackBot.prototype.getChannels = function() {
-  return this._api('channels.list');
-};
-
-/**
- * Get users
- * @returns {Promise}
- */
-SlackBot.prototype.getUsers = function() {
-  if (this.users.length > 0) {
-    return Promise.resolve({members: this.users});
+    assert(params.token, 'token must be defined');
+    this.login();
   }
-  
-  return this._api('users.list');
-};
 
-/**
- * Get groups
- * @returns {Promise}
- */
-SlackBot.prototype.getGroups = function() {
-  if (this.groups) {
-    return Promise.resolve({groups: this.groups});
-  }
-  
-  return this._api('groups.list');
-};
-
-/**
- * Get user by name
- * @param {string} name
- * @returns {object}
- */
-SlackBot.prototype.getUser = function(name) {
-  return this.getUsers().then(function(data) {
-    return find(data.members, {name: name});
-  });
-};
-
-/**
- * Get channel by name
- * @param {string} name
- * @returns {object}
- */
-SlackBot.prototype.getChannel = function(name) {
-  return this.getChannels().then(function(data) {
-    return find(data.channels, {name: name});
-  });
-};
-
-/**
- * Get group by name
- * @param {string} name
- * @returns {object}
- */
-SlackBot.prototype.getGroup = function(name) {
-  return this.getGroups().then(function(data) {
-    return find(data.groups, {name: name});
-  });
-};
-
-/**
- * Get channel ID
- * @param {string} name
- * @returns {string}
- */
-SlackBot.prototype.getChannelId = function(name) {
-  return this.getChannel(name).then(function(channel) {
-    return channel.id;
-  });
-};
-
-/**
- * Get group ID
- * @param {string} name
- * @returns {string}
- */
-SlackBot.prototype.getGroupId = function(name) {
-  return this.getGroup(name).then(function(group) {
-    return group.id;
-  });
-};
-
-/**
- * Get "direct message" channel ID
- * @param {string} name
- * @returns {Promise}
- */
-SlackBot.prototype.getChatId = function(name) {
-  return this.getUser(name).then(function(data) {
-    
-    var chatId = find(this.ims, {user: data.id}).id;
-    
-    return chatId || this.openIm(data.id);
-  }.bind(this)).then(function(data) {
-    return typeof data === 'string' ? data : data.room.id;
-  });
-};
-
-/**
- * Opens a "direct message" channel with another member of your Slack team
- * @param {string} userId
- * @returns {Promise}
- */
-SlackBot.prototype.openIm = function(userId) {
-  return this._api('im.open', {user: userId});
-};
-
-/**
- * Posts a message to a channel by ID
- * @param {string} id - channel ID
- * @param {string} text
- * @param {object} params
- * @returns {Promise}
- */
-SlackBot.prototype.postMessage = function(id, text, params) {
-  params = extend({
-    text: text,
-    channel: id,
-    username: this.name
-  }, params || {});
-  
-  return this._api('chat.postMessage', params);
-};
-
-/**
- * Posts a message to user by name
- * @param {string} name
- * @param {string} text
- * @param {object} params
- * @param {function} cb
- * @returns {Promise}
- */
-SlackBot.prototype.postMessageToUser = function(name, text, params, cb) {
-  return this._post('user', name, text, params, cb);
-};
-
-/**
- * Posts a message to channel by name
- * @param {string} name
- * @param {string} text
- * @param {object} params
- * @param {function} cb
- * @returns {Promise}
- */
-SlackBot.prototype.postMessageToChannel = function(name, text, params, cb) {
-  return this._post('channel', name, text, params, cb);
-};
-
-/**
- * Posts a message to group by name
- * @param {string} name
- * @param {string} text
- * @param {object} params
- * @param {function} cb
- * @returns {Promise}
- */
-SlackBot.prototype.postMessageToGroup = function(name, text, params, cb) {
-  return this._post('group', name, text, params, cb);
-};
-
-/**
- * Common method for posting messages
- * @param {string} type
- * @param {string} name
- * @param {string} text
- * @param {object} params
- * @param {function} cb
- * @returns {Promise}
- * @private
- */
-SlackBot.prototype._post = function(type, name, text, params, cb) {
-  var method = ({
-    'group': 'getGroupId',
-    'channel': 'getChannelId',
-    'user': 'getChatId'
-  })[type];
-  
-  if (typeof params === 'function') {
-    cb = params;
-    params = null;
-  }
-  
-  return this[method](name).then(function(itemId) {
-    return this.postMessage(itemId, text, params);
-  }.bind(this))
-      .catch((err) => {
-        console.error("POST ERROR", err, err.stack);
-      })
-      .then(function(data) {
-        if (cb) {
-          cb(data._value);
-        }
-      });
-};
-
-/**
- * Posts a message to group | channel | user
- * @param {string} name
- * @param {string} text
- * @param {object} params
- * @param {function} cb
- * @returns {Promise}
- */
-SlackBot.prototype.postTo = function(name, text, params, cb) {
-  return Promise.all([this.getChannels(), this.getUsers(), this.getGroups()]).then(function(data) {
-    
-    var all = [].concat(data[0].rooms, data[1].members, data[2].groups);
-    var result = find(all, {name: name});
-    
-    assert(Object.keys(result).length, 'wrong name');
-    
-    if (result['is_channel']) {
-      return this.postMessageToChannel(name, text, params, cb);
-    } else if (result['is_group']) {
-      return this.postMessageToGroup(name, text, params, cb);
-    } else {
-      return this.postMessageToUser(name, text, params, cb);
-    }
-  }.bind(this));
-};
-
-/**
- * Preprocessing of params
- * @param params
- * @returns {object}
- * @private
- */
-SlackBot.prototype._preprocessParams = function(params) {
-  params = extend(params || {}, {token: this.token});
-  
-  Object.keys(params).forEach(function(name) {
-    var param = params[name];
-    
-    if (param && typeof param === 'object') {
-      params[name] = JSON.stringify(param);
-    }
-  });
-  
-  return params;
-};
-
-/**
- * Send request to API method
- * @param {string} methodName
- * @param {object} params
- * @returns {Promise}
- * @private
- */
-SlackBot.prototype._api = function(methodName, params) {
-  
-  var data = {
-    url: 'https://slack.com/api/' + methodName,
-    form: this._preprocessParams(params)
-  };
-  
-  return new Promise(function(resolve, reject) {
-    
-    request.post(data, function(err, request, body) {
-      if (err) {
-        reject(err);
-        
-        return false;
-      }
+  /**
+   * Starts a Real Time Messaging API session
+   */
+  login() {
+    this._api('rtm.start', {}).then(function(data) {
+      this.wsUrl = data.url;
+      this.self = data.self;
+      this.team = data.team;
+      this.rooms = data.channels;
+      this.users = data.users;
+      this.ims = data.ims;
+      this.groups = data.groups;
       
+      this.emit('start');
+      
+      this.connect();
+    }.bind(this)).catch(function(data) {
+      console.error("SlackBot login error: ", data)
+      assert(false, data.error);
+    });
+  };
+
+  /**
+   * Establish a WebSocket connection
+   */
+  connect() {
+    this.ws = new WebSocket(this.wsUrl);
+    
+    this.ws.on('open', function(data) {
+      this.emit('open', data);
+    }.bind(this));
+    
+    this.ws.on('close', function(data) {
+      this.emit('close', data);
+    }.bind(this));
+    
+    this.ws.on('message', function(data) {
       try {
-        body = JSON.parse(body);
-        
-        // Response always contain a top-level boolean property ok,
-        // indicating success or failure
-        if (body.ok) {
-          resolve(body);
-        } else {
-          reject(body);
-        }
-        
+        this.emit('message', JSON.parse(data));
       } catch (e) {
-        console.error("SlackBot API error: ", e);
-        reject(e);
+        console.log("SlackBot message error", e, e.stack);
+      }
+    }.bind(this));
+  };
+
+  /**
+   * Get channels
+   * @returns {Promise}
+   */
+  getChannels() {
+    return this._api('channels.list', {});
+  };
+
+  /**
+   * Get users
+   * @returns {Promise}
+   */
+  getUsers() {
+    if (this.users.length > 0) {
+      return Promise.resolve({members: this.users});
+    }
+    
+    return this._api('users.list', {});
+  };
+
+  /**
+   * Get groups
+   * @returns {Promise}
+   */
+  getGroups() {
+    if (this.groups) {
+      return Promise.resolve({groups: this.groups});
+    }
+    
+    return this._api('groups.list', {});
+  };
+
+  /**
+   * Get user by name
+   * @param {string} name
+   * @returns {object}
+   */
+  getUser(name) {
+    return this.getUsers().then(function(data: any) {
+      return find(data.members, {name: name});
+    });
+  };
+
+  /**
+   * Get channel by name
+   * @param {string} name
+   * @returns {object}
+   */
+  getChannel(name) {
+    return this.getChannels().then(function(data: any) {
+      return find(data.channels, {name: name});
+    });
+  };
+
+  /**
+   * Get group by name
+   * @param {string} name
+   * @returns {object}
+   */
+  getGroup(name) {
+    return this.getGroups().then(function(data: any) {
+      return find(data.groups, {name: name});
+    });
+  };
+
+  /**
+   * Get channel ID
+   * @param {string} name
+   * @returns {string}
+   */
+  getChannelId(name) {
+    return this.getChannel(name).then(function(channel: any) {
+      return channel.id;
+    });
+  };
+
+  /**
+   * Get group ID
+   * @param {string} name
+   * @returns {string}
+   */
+  getGroupId(name) {
+    return this.getGroup(name).then(function(group: any) {
+      return group.id;
+    });
+  };
+
+  /**
+   * Get "direct message" channel ID
+   * @param {string} name
+   * @returns {Promise}
+   */
+  getChatId(name) {
+    return this.getUser(name).then(function(data: any) {
+      
+      let chatUser: any = find(this.ims, {user: data.id});
+      let chatId = chatUser.id;
+      
+      return chatId || this.openIm(data.id);
+    }.bind(this)).then(function(data: any) {
+      return typeof data === 'string' ? data : data.room.id;
+    });
+  };
+
+  /**
+   * Opens a "direct message" channel with another member of your Slack team
+   * @param {string} userId
+   * @returns {Promise}
+   */
+  openIm(userId) {
+    return this._api('im.open', {user: userId});
+  };
+
+  /**
+   * Posts a message to a channel by ID
+   * @param {string} id - channel ID
+   * @param {string} text
+   * @param {object} params
+   * @returns {Promise}
+   */
+  postMessage(id, text, params) {
+    params = _.extend({
+      text: text,
+      channel: id,
+      username: this.name
+    }, params || {});
+    
+    return this._api('chat.postMessage', params);
+  };
+
+  /**
+   * Posts a message to user by name
+   * @param {string} name
+   * @param {string} text
+   * @param {object} params
+   * @param {function} cb
+   * @returns {Promise}
+   */
+  postMessageToUser(name, text, params, cb) {
+    return this._post('user', name, text, params, cb);
+  };
+
+  /**
+   * Posts a message to channel by name
+   * @param {string} name
+   * @param {string} text
+   * @param {object} params
+   * @param {function} cb
+   * @returns {Promise}
+   */
+  postMessageToChannel(name, text, params, cb) {
+    return this._post('channel', name, text, params, cb);
+  };
+
+  /**
+   * Posts a message to group by name
+   * @param {string} name
+   * @param {string} text
+   * @param {object} params
+   * @param {function} cb
+   * @returns {Promise}
+   */
+  postMessageToGroup(name, text, params, cb) {
+    return this._post('group', name, text, params, cb);
+  };
+
+  /**
+   * Common method for posting messages
+   * @param {string} type
+   * @param {string} name
+   * @param {string} text
+   * @param {object} params
+   * @param {function} cb
+   * @returns {Promise}
+   * @private
+   */
+  _post(type, name, text, params, cb) {
+    var method = ({
+      'group': 'getGroupId',
+      'channel': 'getChannelId',
+      'user': 'getChatId'
+    })[type];
+    
+    if (typeof params === 'function') {
+      cb = params;
+      params = null;
+    }
+    
+    return this[method](name).then(function(itemId) {
+      return this.postMessage(itemId, text, params);
+    }.bind(this))
+        .catch((err) => {
+          console.error("POST ERROR", err, err.stack);
+        })
+        .then(function(data) {
+          if (cb) {
+            cb(data._value);
+          }
+        });
+  };
+
+  /**
+   * Posts a message to group | channel | user
+   * @param {string} name
+   * @param {string} text
+   * @param {object} params
+   * @param {function} cb
+   * @returns {Promise}
+   */
+  postTo(name, text, params, cb) {
+    let promise: Promise<any> = Promise.all([this.getChannels(), this.getUsers(), this.getGroups()]).then(function(data) {
+      
+      var all = [].concat(data[0].rooms, data[1].members, data[2].groups);
+      var result = find(all, {name: name});
+      
+      assert(Object.keys(result).length, 'wrong name');
+      
+      if (result['is_channel']) {
+        return this.postMessageToChannel(name, text, params, cb);
+      } else if (result['is_group']) {
+        return this.postMessageToGroup(name, text, params, cb);
+      } else {
+        return this.postMessageToUser(name, text, params, cb);
+      }
+    }.bind(this));
+    return promise;
+  };
+
+  /**
+   * Preprocessing of params
+   * @param params
+   * @returns {object}
+   * @private
+   */
+  _preprocessParams(params) {
+    params = _.extend(params || {}, {token: this.token});
+    
+    Object.keys(params).forEach(function(name) {
+      var param = params[name];
+      
+      if (param && typeof param === 'object') {
+        params[name] = JSON.stringify(param);
       }
     });
-  });
-};
+    
+    return params;
+  };
 
+  /**
+   * Send request to API method
+   * @param {string} methodName
+   * @param {object} params
+   * @returns {Promise}
+   * @private
+   */
+  _api(methodName, params) {
+    
+    var data = {
+      url: 'https://slack.com/api/' + methodName,
+      form: this._preprocessParams(params)
+    };
+    
+    return new Promise(function(resolve, reject) {
+      
+      request.post(data, function(err, request, body) {
+        if (err) {
+          reject(err);
+        }
+        
+        try {
+          body = JSON.parse(body);
+          
+          // Response always contain a top-level boolean property ok,
+          // indicating success or failure
+          if (body.ok) {
+            resolve(body);
+          } else {
+            reject(body);
+          }
+          
+        } catch (e) {
+          console.error("SlackBot API error: ", e);
+          reject(e);
+        }
+      });
+    });
+  }
 
-function isReply(data) {
-  // TODO check if message is a DM
-  if (me === undefined) {
-    return false;
+  isReply(data) {
+    // TODO check if message is a DM
+    if (this.me === undefined) {
+      return false;
+    }
+    
+    var reg = new RegExp("@" + this.me.name, "i");
+    
+    return (data.text !== undefined && data.text.match(reg) != null);
   }
-  
-  var reg = new RegExp("@" + me.name, "i");
-  if (data.text) {
-    logger.debug("is reply? ", reg, data.originalText, data.originalText.match(reg));
-  } else {
-    logger.debug("is reply? ", reg, data.originalText)
-  }
-  
-  return (data.text !== undefined && data.text.match(reg) != null);
 }
 
-class SlackAdapter extends Adapter {
+export default class SlackAdapter extends Adapter {
+  robot: Robot;
+  logger: any;
+  rooms: any;
+  users: any;
+  me: any;
+  adapterName: string;
+  slackBot: SlackBot;
+  channels: any;
+  members: any;
+
   constructor(robot) {
     super(robot);
     this.robot = robot;
@@ -416,12 +427,12 @@ class SlackAdapter extends Adapter {
   send(envelope, strings) {
     if (envelope.room === undefined) {
       for (let string of strings) {
-        this.slackBot.postMessageToUser(envelope.user.name, string, {link_names: 1});
+        this.slackBot.postMessageToUser(envelope.user.name, string, {link_names: 1}, undefined);
       }
       return;
     }
     for (let string of strings) {
-      this.slackBot.postMessageToChannel(envelope.room.name, string, {link_names: 1});
+      this.slackBot.postMessageToChannel(envelope.room.name, string, {link_names: 1}, undefined);
     }
   }
   
@@ -429,7 +440,7 @@ class SlackAdapter extends Adapter {
   reply(envelope, user, strings) {
     for (let string of strings) {
       let text = `@${user}: ${string}`;
-      this.slackBot.postMessageToChannel(envelope.room.name, text, {link_names: 1});
+      this.slackBot.postMessageToChannel(envelope.room.name, text, {link_names: 1}, undefined);
     }
   }
   
@@ -445,7 +456,7 @@ class SlackAdapter extends Adapter {
     this.slackBot.on('start', () => {
       // save the list of users
       this.logger.debug('SlackAdapter: slack started');
-      this.slackBot.getChannels().then((data) => {
+      this.slackBot.getChannels().then((data: any) => {
         //this.logger.debug("SlackAdapter: list  of channels: ", data);
         if (data.channels) {
           for (let channel of data.channels) {
@@ -456,7 +467,7 @@ class SlackAdapter extends Adapter {
       });
       
       
-      this.slackBot.getUsers().then((data) => {
+      this.slackBot.getUsers().then((data: any) => {
         // this.logger.debug("SlackAdapter: list of users: ", data);
         if (data.members) {
           for (let member of data.members) {
@@ -507,7 +518,7 @@ class SlackAdapter extends Adapter {
         let user = this.users[data.user];
         let text = data.text;
         
-        let message = new Message(user, text, room, data.id, this, data);
+        let message = new TextMessage(user, text, room, data.id, this, data);
         this.receive(message);
         return
       }
@@ -523,7 +534,7 @@ class SlackAdapter extends Adapter {
       return;
     }
 
-    this.robot.receive(message, this);
+    this.robot.receive(message, this, undefined);
   }
   
   // util functions
@@ -536,7 +547,7 @@ class SlackAdapter extends Adapter {
     }
     
     // Copy original text by value
-    let copy = Object.assign({}, data);
+    let copy = _.extend({}, data);
     data.originalText = copy.text;
     
     let idRegex = new RegExp("<@(\\w+)>", "ig");
@@ -574,4 +585,3 @@ class SlackAdapter extends Adapter {
   
 }
 
-module.exports = SlackAdapter;
