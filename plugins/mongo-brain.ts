@@ -62,15 +62,11 @@ export default function(robot) {
               collection.update({
                 type: '_private',
                 key:  k
-              }
-              , {
-                $set: {
-                  value: v
-                }
-              }
-              ,
-                {upsert: true}
-              , function(err, res) {
+              }, {
+                $set: {value: v}
+              }, {
+                upsert: true
+              }, function(err, res) {
                 if (err) { return robot.logger.error(err); }
               });
             })(k, v));
