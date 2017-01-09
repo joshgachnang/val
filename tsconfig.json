@@ -24,6 +24,8 @@
         "user.ts",
 				"adapters/slack",
 				"adapters/twilio",
+				"plugins/forecastio",
+				"plugins/inspirationalQuote",
 				"plugins/mongo-brain"
     ]
 }

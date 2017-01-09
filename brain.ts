@@ -8,7 +8,7 @@ import * as _ from "lodash";
 export default class Brain extends EventEmitter {
   robot: Robot;
   data: any;
-  saveInterval: number;
+  saveInterval: any;
   autoSave: boolean;
 
   constructor(robot) {
@@ -71,23 +71,23 @@ export default class Brain extends EventEmitter {
 
     resetSaveInterval(seconds) {
       if (this.saveInterval) { clearInterval(this.saveInterval); }
-      return this.saveInterval = window.setInterval(() => {
+      return this.saveInterval = setInterval(() => {
         if (this.autoSave) { return this.save(); }
       }, seconds * 1000);
     }
 
     userForId(id, options) {
     let user = this.data.users[id];
-	  if (!user) {
-			user = new User(id, options);
-			this.data.users[id] = user;
-	  }
+    if (!user) {
+      user = new User(id, options);
+      this.data.users[id] = user;
+    }
 
-	  if (options && options.room && (!user.room || user.room !== options.room)) {
-		user = new User(id, options);
-		this.data.users[id] = user;
+    if (options && options.room && (!user.room || user.room !== options.room)) {
+    user = new User(id, options);
+    this.data.users[id] = user;
       }
 
-	  return user;
+    return user;
   }
 }

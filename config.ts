@@ -1,8 +1,8 @@
 export default class Config {
- 	id: string;
-	name: string;
-  
-	MODULES = [
+  id: string;
+  name: string;
+
+  MODULES = [
     //"./modules/chicagoCTA",
     "./modules/clock",
     "./modules/forecastio",
@@ -10,26 +10,30 @@ export default class Config {
     "./modules/quote",
     //"./modules/uber"
   ];
- 	adapters = [
+
+  adapters = [
     './adapters/slack',
     './adapters/twilio',
   ];
+
   plugins = [
     './plugins/mongo-brain',
     // './plugins/log',
-    './plugins/remember',
+    './plugins/forecastio',
+		'./plugins/inspirationalQuote'
+    //'./plugins/remember',
     //'./plugins/echo',
-    './plugins/deploy',
-    './plugins/help',
-    './plugins/frontendQuote/index',
-    './plugins/goodmorning',
-    './plugins/weather',
+    //'./plugins/deploy',
+    //'./plugins/help',
+    //'./plugins/frontendQuote/index',
+    //'./plugins/goodmorning',
+    //'./plugins/weather',
     //'../node_modules/hubot-scripts/src/scripts/ackbar.coffee',
     //'../node_modules/hubot-scripts/src/scripts/coin.coffee',
-    './node_modules/hubot-scripts/src/scripts/dealwithit.coffee',
+    //'./node_modules/hubot-scripts/src/scripts/dealwithit.coffee',
     //'../node_modules/hubot-scripts/src/scripts/go-for-it.coffee',
     //'../node_modules/hubot-scripts/src/scripts/xkcd.coffee',
- 	];
+  ];
   UBER_CLIENT_ID = '';
   UBER_CLIENT_SECRET = '';
   UBER_SERVER_TOKEN = '';
@@ -38,7 +42,7 @@ export default class Config {
   LONGITUDE = -87.0000;
   CTA_TRAIN_API_KEY = '';
   CTA_TRAIN_MAP_ID = '41320';
-  FORECASTIO_KEY = "5cb5e4d3b5a03f690fb616639e01bc7b";
+  DARKSKY_KEY = "5cb5e4d3b5a03f690fb616639e01bc7b";
   GOOGLE_CALENDAR_CLIENT_SECRET = {
     "installed": {
       "client_id": "",

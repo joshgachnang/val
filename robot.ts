@@ -7,11 +7,12 @@ import {existsSync, readFileSync} from 'fs';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import {exit, env} from 'process';
+import * as cors from 'cors';
 
 import Config from './config';
 import Response from './response';
 import {TextListener, Listener} from './listener';
-import Frontend from './frontend';
+import frontend from './frontend';
 import Brain from './brain';
 import {TextMessage} from './message';
 
@@ -76,30 +77,32 @@ export default class Robot extends EventEmitter {
     });
     this.brain = new Brain(this);
     this.setupExpress();
-    
-    this.frontend = new Frontend(this);
-  
+
+    this.frontend = new frontend(this);
+
     this.logger.debug('Starting Robot');
 
     this.adapters = {};
     this.plugins = {};
     for (let adapter of adapters) {
-      this.logger.info('loading', adapter);
+      this.logger.info('[Robot] loading adapter:', adapter);
       let adapterModule = require(adapter);
-			// Use default here to get the default exported class
+      // Use default here to get the default exported class
       let adapterClass = new adapterModule.default(this);
       this.adapters[adapterClass.adapterName] = adapterClass;
       adapterClass.run();
     }
 
     for (let plugin of plugins) {
-//      let module = import(plugin)(this);
-//      this.plugins[plugin] = module;
-//      let filename = import.resolve(plugin);
-//      this.parseHelp(filename)
+      this.logger.info('[Robot] loading plugin:', plugin);
+      let pluginModule = require(plugin);
+      // Use default here to get the default exported function
+      pluginModule.default(this);
+      let filename = require.resolve(plugin);
+      this.parseHelp(filename)
     }
     this.logger.debug('Finished loading plugins');
-    
+
     //this.frontend.setup();
     this.listen();
   }
@@ -128,11 +131,11 @@ export default class Robot extends EventEmitter {
     let re = regex.toString().split('/');
     re.shift();
     let modifiers = re.pop();
-	console.log("REGEX MODS", modifiers);
+  console.log("REGEX MODS", modifiers);
 
-	// Default to case insensitive if not otherwise declared, or bot name gets messed up
-	// NOTE: change from upstream
-	if (!modifiers) {
+  // Default to case insensitive if not otherwise declared, or bot name gets messed up
+  // NOTE: change from upstream
+  if (!modifiers) {
       modifiers = 'i';
     }
 
@@ -154,9 +157,9 @@ export default class Robot extends EventEmitter {
   parseHelp(path) {
     var body, cleanedLine, currentSection, i, j, len, len1, line, nextSection, ref, ref1, scriptDocumentation, scriptName,
       indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-    
+
     this.logger.debug('Parsing help for ' + path);
-    
+
     scriptDocumentation = {};
 
     body = readFileSync(path, 'utf-8');
@@ -232,7 +235,7 @@ export default class Robot extends EventEmitter {
     }
     adapter.send(envelope, messages);
   }
-  
+
   emote(envelope, emotes) {
     this.logger.warn('Unsupported action: emote', envelope.channel, emotes);
   }
@@ -252,7 +255,7 @@ export default class Robot extends EventEmitter {
   error(callback) {
     this.errorHandlers.push(callback);
   }
-  
+
   // Get a key from the environment, or throw an error if it's not defined
   envKey(key) {
     let value = process.env[key];
@@ -282,21 +285,24 @@ export default class Robot extends EventEmitter {
       listener.call(message, adapter, callback)
     }
   }
-  
+
   setupExpress() {
     let app = express();
-    
+
+    app.use(cors());
+
     app.use((req, res, next) => {
       res.setHeader('X-Powered-By', `hubot/${this.name}/1.0`);
       next();
     });
-    
+
     app.use(bodyParser.urlencoded({extended: false}));
     app.use(bodyParser.json());
     app.use('/static', express.static('static'));
     app.use('/bower_components', express.static('bower_components'));
     this.router = app;
   }
+
   listen() {
     let port = process.env.EXPRESS_BIND_PORT || 8080;
     let address = process.env.EXPRESS_BIND_ADDRESS || '0.0.0.0';
@@ -314,7 +320,6 @@ export default class Robot extends EventEmitter {
       this.logger.error(`Error trying to start HTTP server: ${err}\n${err.stack}`);
       process.exit(1);
     }
-  
   }
   // filesystemPath: Relative path to the file
   // url: the URL to expose the file at. Will be served as `/static/${url}`

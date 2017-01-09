@@ -27,8 +27,7 @@ export default class Twilio extends Adapter {
     return this.send_sms(message, envelope.user, function(err, body) {
       if (err || (body === null)) {
         console.log(`Error sending reply SMS: ${err} ${body}`);
-      } else {
-        
+      } else {  
         console.log(`Sending reply SMS: ${message} to ${envelope.user}`, body);
       }
     });
