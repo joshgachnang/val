@@ -9,7 +9,7 @@
         "noFallthroughCasesInSwitch": true
     },
     "typeRoots": [ "node_modules/@types" ],
-    "files": [
+    "include": [
         "adapter.ts",
         "brain.ts",
         "config.ts",
@@ -22,10 +22,7 @@
         "room.ts",
         "server.ts",
         "user.ts",
-				"adapters/slack",
-				"adapters/twilio",
-				"plugins/forecastio",
-				"plugins/inspirationalQuote",
-				"plugins/mongo-brain"
+				"adapters/*",
+				"plugins/*"
     ]
 }

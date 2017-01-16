@@ -29,6 +29,10 @@ let HUBOT_DOCUMENTATION_SECTIONS = [
   'urls',
 ];
 
+interface ResponseCallback {
+  (response: Response): void;
+}
+
 export default class Robot extends EventEmitter {
     name: string;
     alias: string;
@@ -116,18 +120,17 @@ export default class Robot extends EventEmitter {
     return conf;
   }
 
-  hear(regex, options, callback) {
+  hear(regex: RegExp, options, callback: ResponseCallback) {
     this.logger.info('creating listener for regex', regex);
     let listener = new TextListener(this, regex, options, callback);
     this.pluginListeners.push(listener);
   }
 
-  respond(regex, options, callback) {
-    console.log("RESPONSE PATTERN", this.respondPattern(regex));
+  respond(regex: RegExp, options, callback: ResponseCallback) {
     this.hear(this.respondPattern(regex), options, callback);
   }
 
-  respondPattern(regex) {
+  respondPattern(regex: RegExp) {
     let re = regex.toString().split('/');
     re.shift();
     let modifiers = re.pop();
@@ -158,7 +161,7 @@ export default class Robot extends EventEmitter {
     var body, cleanedLine, currentSection, i, j, len, len1, line, nextSection, ref, ref1, scriptDocumentation, scriptName,
       indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-    this.logger.debug('Parsing help for ' + path);
+    this.logger.debug('[Robot] Parsing help for ' + path);
 
     scriptDocumentation = {};
 

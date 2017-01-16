@@ -24,59 +24,59 @@ export default class Brain extends EventEmitter {
     });
   }
 
-    set(key, value) {
-      let pair: any
-      if (key === Object(key)) {
-        pair = key;
-      } else {
-        pair = {};
-        pair[key] = value;
-      }
-
-      _.extend(this.data._private, pair);
-      this.emit('loaded', this.data);
-      return this;
+  set(key, value) {
+    let pair: any
+    if (key === Object(key)) {
+      pair = key;
+    } else {
+      pair = {};
+      pair[key] = value;
     }
 
-    get(key) {
-      return this.data._private[key] != null ? this.data._private[key] : null;
-    }
+    _.extend(this.data._private, pair);
+    this.emit('loaded', this.data);
+    return this;
+  }
 
-    remove(key) {
-      if (this.data._private[key] != null) { return delete this.data._private[key]; } else {
-        return null;
-      }
-    }
+  get(key) {
+    return this.data._private[key] != null ? this.data._private[key] : null;
+  }
 
-    mergeData(data) {
-      if (data) {
-        _.extend(this.data, data);
-      }
-      this.emit('loaded', this.data);
+  remove(key) {
+    if (this.data._private[key] != null) { return delete this.data._private[key]; } else {
+      return null;
     }
+  }
 
-    save() {
-      this.emit('save', this.data);
+  mergeData(data) {
+    if (data) {
+      _.extend(this.data, data);
     }
+    this.emit('loaded', this.data);
+  }
 
-    close() {
-      clearInterval(this.saveInterval);
-      this.save();
-      this.emit('close');
-    }
+  save() {
+    this.emit('save', this.data);
+  }
 
-    setAutoSave(enabled) {
-      this.autoSave = enabled;
-    }
+  close() {
+    clearInterval(this.saveInterval);
+    this.save();
+    this.emit('close');
+  }
 
-    resetSaveInterval(seconds) {
-      if (this.saveInterval) { clearInterval(this.saveInterval); }
-      return this.saveInterval = setInterval(() => {
-        if (this.autoSave) { return this.save(); }
-      }, seconds * 1000);
-    }
+  setAutoSave(enabled) {
+    this.autoSave = enabled;
+  }
 
-    userForId(id, options) {
+  resetSaveInterval(seconds) {
+    if (this.saveInterval) { clearInterval(this.saveInterval); }
+    return this.saveInterval = setInterval(() => {
+      if (this.autoSave) { return this.save(); }
+    }, seconds * 1000);
+  }
+
+  userForId(id, options) {
     let user = this.data.users[id];
     if (!user) {
       user = new User(id, options);

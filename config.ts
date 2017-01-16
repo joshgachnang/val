@@ -1,26 +1,27 @@
+import * as process from 'process';
+
 export default class Config {
   id: string;
   name: string;
-
+	baseUrl = process.env.BASE_URL || "http://localhost:8080";
   MODULES = [
-    //"./modules/chicagoCTA",
-    "./modules/clock",
-    "./modules/forecastio",
     //"./modules/googleCalendar",
-    "./modules/quote",
     //"./modules/uber"
   ];
 
   adapters = [
     './adapters/slack',
     './adapters/twilio',
+		'./adapters/alexa',
   ];
 
   plugins = [
     './plugins/mongo-brain',
     // './plugins/log',
     './plugins/forecastio',
-		'./plugins/inspirationalQuote'
+		'./plugins/inspirationalQuote',
+		'./plugins/cta',
+		'./plugins/googleCalendar',
     //'./plugins/remember',
     //'./plugins/echo',
     //'./plugins/deploy',
@@ -38,11 +39,11 @@ export default class Config {
   UBER_CLIENT_SECRET = '';
   UBER_SERVER_TOKEN = '';
   UBER_APP_NAME = 'LIFE';
-  LATITUDE = 41.0000;
-  LONGITUDE = -87.0000;
-  CTA_TRAIN_API_KEY = '';
-  CTA_TRAIN_MAP_ID = '41320';
-  DARKSKY_KEY = "5cb5e4d3b5a03f690fb616639e01bc7b";
+  LATITUDE = process.env.LATITUDE || 41.0000;
+  LONGITUDE = process.env.LONGITUDE || -87.0000;
+  CTA_TRAIN_API_KEY = process.env.CTA_TRAIN_API_KEY;
+  CTA_TRAIN_MAP_ID = process.env.CTA_TRAIN_MAP_ID || '41320';
+  DARKSKY_KEY = process.env.DARKSKY_KEY;
   GOOGLE_CALENDAR_CLIENT_SECRET = {
     "installed": {
       "client_id": "",

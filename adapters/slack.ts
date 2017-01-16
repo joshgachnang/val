@@ -1,5 +1,3 @@
-'use strict';
-
 // Forked from Slackbots to throw out vow, use TS
 import {EventEmitter} from 'events';
 
@@ -13,7 +11,7 @@ import Adapter from '../adapter';
 
 function find(arr, params) {
   var result = {};
-  
+
   arr.forEach(function(item) {
     if (Object.keys(params).every(function(key) {
           return item[key] === params[key];
@@ -21,7 +19,7 @@ function find(arr, params) {
       result = item;
     }
   });
-  
+
   return result;
 }
 
@@ -53,7 +51,7 @@ class SlackBot extends EventEmitter {
     // TODO: Add logger instance here
     this.token = params.token;
     this.name = params.name;
-    
+
     assert(params.token, 'token must be defined');
     this.login();
   }
@@ -70,9 +68,9 @@ class SlackBot extends EventEmitter {
       this.users = data.users;
       this.ims = data.ims;
       this.groups = data.groups;
-      
+
       this.emit('start');
-      
+
       this.connect();
     }.bind(this)).catch(function(data) {
       console.error("SlackBot login error: ", data)
@@ -85,15 +83,15 @@ class SlackBot extends EventEmitter {
    */
   connect() {
     this.ws = new WebSocket(this.wsUrl);
-    
+
     this.ws.on('open', function(data) {
       this.emit('open', data);
     }.bind(this));
-    
+
     this.ws.on('close', function(data) {
       this.emit('close', data);
     }.bind(this));
-    
+
     this.ws.on('message', function(data) {
       try {
         this.emit('message', JSON.parse(data));
@@ -119,7 +117,7 @@ class SlackBot extends EventEmitter {
     if (this.users.length > 0) {
       return Promise.resolve({members: this.users});
     }
-    
+
     return this._api('users.list', {});
   };
 
@@ -131,7 +129,7 @@ class SlackBot extends EventEmitter {
     if (this.groups) {
       return Promise.resolve({groups: this.groups});
     }
-    
+
     return this._api('groups.list', {});
   };
 
@@ -197,10 +195,10 @@ class SlackBot extends EventEmitter {
    */
   getChatId(name) {
     return this.getUser(name).then(function(data: any) {
-      
+
       let chatUser: any = find(this.ims, {user: data.id});
       let chatId = chatUser.id;
-      
+
       return chatId || this.openIm(data.id);
     }.bind(this)).then(function(data: any) {
       return typeof data === 'string' ? data : data.room.id;
@@ -229,7 +227,7 @@ class SlackBot extends EventEmitter {
       channel: id,
       username: this.name
     }, params || {});
-    
+
     return this._api('chat.postMessage', params);
   };
 
@@ -285,12 +283,12 @@ class SlackBot extends EventEmitter {
       'channel': 'getChannelId',
       'user': 'getChatId'
     })[type];
-    
+
     if (typeof params === 'function') {
       cb = params;
       params = null;
     }
-    
+
     return this[method](name).then(function(itemId) {
       return this.postMessage(itemId, text, params);
     }.bind(this))
@@ -314,12 +312,12 @@ class SlackBot extends EventEmitter {
    */
   postTo(name, text, params, cb) {
     let promise: Promise<any> = Promise.all([this.getChannels(), this.getUsers(), this.getGroups()]).then(function(data) {
-      
+
       var all = [].concat(data[0].rooms, data[1].members, data[2].groups);
       var result = find(all, {name: name});
-      
+
       assert(Object.keys(result).length, 'wrong name');
-      
+
       if (result['is_channel']) {
         return this.postMessageToChannel(name, text, params, cb);
       } else if (result['is_group']) {
@@ -339,15 +337,15 @@ class SlackBot extends EventEmitter {
    */
   _preprocessParams(params) {
     params = _.extend(params || {}, {token: this.token});
-    
+
     Object.keys(params).forEach(function(name) {
       var param = params[name];
-      
+
       if (param && typeof param === 'object') {
         params[name] = JSON.stringify(param);
       }
     });
-    
+
     return params;
   };
 
@@ -359,22 +357,22 @@ class SlackBot extends EventEmitter {
    * @private
    */
   _api(methodName, params) {
-    
+
     var data = {
       url: 'https://slack.com/api/' + methodName,
       form: this._preprocessParams(params)
     };
-    
+
     return new Promise(function(resolve, reject) {
-      
+
       request.post(data, function(err, request, body) {
         if (err) {
           reject(err);
         }
-        
+
         try {
           body = JSON.parse(body);
-          
+
           // Response always contain a top-level boolean property ok,
           // indicating success or failure
           if (body.ok) {
@@ -382,7 +380,7 @@ class SlackBot extends EventEmitter {
           } else {
             reject(body);
           }
-          
+
         } catch (e) {
           console.error("SlackBot API error: ", e);
           reject(e);
@@ -396,9 +394,9 @@ class SlackBot extends EventEmitter {
     if (this.me === undefined) {
       return false;
     }
-    
+
     var reg = new RegExp("@" + this.me.name, "i");
-    
+
     return (data.text !== undefined && data.text.match(reg) != null);
   }
 }
@@ -423,7 +421,7 @@ export default class SlackAdapter extends Adapter {
     this.me = {};
     this.adapterName = "Slack";
   }
-  
+
   send(envelope, strings) {
     if (envelope.room === undefined) {
       for (let string of strings) {
@@ -435,24 +433,24 @@ export default class SlackAdapter extends Adapter {
       this.slackBot.postMessageToChannel(envelope.room.name, string, {link_names: 1}, undefined);
     }
   }
-  
-  
+
+
   reply(envelope, user, strings) {
     for (let string of strings) {
       let text = `@${user}: ${string}`;
       this.slackBot.postMessageToChannel(envelope.room.name, text, {link_names: 1}, undefined);
     }
   }
-  
+
   run() {
-    this.logger.info('Running Slack adapter');
+    this.logger.info('[Robot] Running Slack adapter');
     var config = this.robot.config;
-   
+
     this.slackBot = new SlackBot({
       token: this.robot.envKey("SLACK_TOKEN"),
       name: config.name
     });
-    
+
     this.slackBot.on('start', () => {
       // save the list of users
       this.logger.debug('SlackAdapter: slack started');
@@ -465,8 +463,8 @@ export default class SlackAdapter extends Adapter {
         }
         this.logger.debug('SlackAdatper: finished getting list of channels');
       });
-      
-      
+
+
       this.slackBot.getUsers().then((data: any) => {
         // this.logger.debug("SlackAdapter: list of users: ", data);
         if (data.members) {
@@ -480,20 +478,20 @@ export default class SlackAdapter extends Adapter {
         }
         this.logger.debug('SlackAdatper: finished getting list of users');
       })
-      
+
       // more information about additional params https://api.slack.com/methods/chat.postMessage
       // var params = {};
-      
+
       // define channel, where bot exist. You can adjust it there https://my.slack.com/services
       // bot.postMessageToChannel('bot', ':partyparrot:', params);
-      
+
       // define existing username instead of 'user_name'
       // bot.postMessageToUser('user_name', 'meow!', params);
-      
+
       // define private group instead of 'private_group', where bot exist
       // bot.postMessageToGroup('private_group', 'meow!', params);
     });
-  
+
     // all incoming events https://api.slack.com/rtm
     this.slackBot.on('message', (data) => {
       // Throw out unsupported/experimental/not useful messages:
@@ -502,12 +500,12 @@ export default class SlackAdapter extends Adapter {
       }
 
       this.logger.debug(`SlackAdapter: received ${data.type} message`);
-      
+
       if (['presence_change'].indexOf(data.type) > -1) {
         this.updateUser(data);
         return;
       }
-      
+
       if (['message'].indexOf(data.type) > -1) {
         if (['message_changed', 'bot_message'].indexOf(data.subtype) > -1) {
           this.logger.debug(`SlackAdapter: skipping processing of ${data.subtype}`);
@@ -517,17 +515,17 @@ export default class SlackAdapter extends Adapter {
         let room = this.rooms[data.channel];
         let user = this.users[data.user];
         let text = data.text;
-        
+
         let message = new TextMessage(user, text, room, data.id, this, data);
         this.receive(message);
         return
       }
-      
+
       this.logger.warn(`Unhandled message type: ${data.type}`);
     });
-    
+
   }
-  
+
   receive(message) {
     // Filter out messages sent by us
     if (message.rawData.username && this.me.name.toLowerCase() === message.rawData.username.toLowerCase()) {
@@ -536,27 +534,27 @@ export default class SlackAdapter extends Adapter {
 
     this.robot.receive(message, this, undefined);
   }
-  
+
   // util functions
-  
+
   // Take a slack message and replace the <ID>'s with users, save original
   // message
   formatMessage(data) {
     if (data.text === undefined) {
       return data;
     }
-    
+
     // Copy original text by value
     let copy = _.extend({}, data);
     data.originalText = copy.text;
-    
+
     let idRegex = new RegExp("<@(\\w+)>", "ig");
     let matches = data.text.match(idRegex);
-    
+
     if (matches === null) {
       return data;
     }
-    
+
     for (let match of matches) {
       // Match again to get the captured group
       let idMatchRegex = new RegExp(match, "i");
@@ -572,7 +570,7 @@ export default class SlackAdapter extends Adapter {
     }
     return data;
   }
-  
+
   updateUser(data) {
     let user = this.users[data.user];
     if (!user) {
@@ -582,6 +580,6 @@ export default class SlackAdapter extends Adapter {
     user.status = data.presence;
     this.logger.info(`Updated user ${user.name} to ${user.status}`);
   }
-  
+
 }
 

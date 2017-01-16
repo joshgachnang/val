@@ -33,7 +33,7 @@ export default function(robot) {
 
     let cache = {};
 
-    //# restore data from mongodb
+    // restore data from mongodb
     db.createCollection('brain', (err, collection) =>
       collection.find({type: '_private'}).toArray(function(err, docs) {
         if (err) { return robot.logger.error(err); }
@@ -48,7 +48,7 @@ export default function(robot) {
       })
     );
 
-    //# save data into mongodb
+    // save data into mongodb
     return robot.brain.on('save', data =>
       db.collection('brain', (err, collection) =>
         (() => {

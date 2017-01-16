@@ -20,22 +20,17 @@ export default class Response {
 
   // Actually takes a list of 1 to n arguments
   send(...strings) {
-    // Coffeescript sends a list of arguments, and magically converts them to an array of
-    // args. Why? No clue.
-    console.log("RESPONSE SENDING", this.envelope, strings);
     this.bot.send(this.envelope, strings)
   }
 
   // Actually takes a list of 1 to n arguments
-  emote() {
-    let strings = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
+  emote(...strings) {
     this.bot.emote(this.envelope, strings)
   }
 
   // Actually takes a list of 1 to n arguments
-  reply() {
+  reply(...strings) {
     //console.log("Response Replying", this.envelope, this.envelope.user.name, strings);
-    let strings = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
     this.bot.reply(this.envelope, this.envelope.user.name, strings)
   }
 
