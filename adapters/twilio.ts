@@ -37,11 +37,11 @@ export default class Twilio extends Adapter {
     return strings.map((str) => this.send(envelope.user, str));
   }
 
-  respond(regex, callback) {
+  public respond(regex, callback) {
     return this.robot.respond(regex, {}, callback);
   }
 
-  run() {
+  public run() {
     return this.robot.router.post("/twilio/sms/reply", (request, response) => {
       this.robot.logger.debug(`Twilio SMS Post: ${request.url}`);
       console.log(request.body);
@@ -57,7 +57,7 @@ export default class Twilio extends Adapter {
     );
   }
 
-  receive_sms(body, fromNumber) {
+  private receive_sms(body, fromNumber) {
     this.robot.logger.debug(`Receive SMS ${body}, from: ${fromNumber}`);
     if (body.length === 0) {
       this.robot.logger.debug("SMS Body length is 0, returning");
@@ -76,7 +76,7 @@ export default class Twilio extends Adapter {
     return this.robot.receive(message, this, undefined);
   }
 
-  send_sms(message, to, callback) {
+  public send_sms(message, to, callback) {
     console.log("SENDING SMS", this.sid, this.token, this.fromNumber);
     let auth = new Buffer(this.sid + ':' + this.token).toString("base64");
     let data = QS.stringify({From: this.fromNumber, To: to, Body: message});

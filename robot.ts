@@ -8,6 +8,8 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import {exit, env} from 'process';
 import * as cors from 'cors';
+import * as https from 'https';
+import * as fs from 'fs';
 
 import Config from './config';
 import Response from './response';
@@ -84,7 +86,7 @@ export default class Robot extends EventEmitter {
 
     this.frontend = new frontend(this);
 
-    this.logger.debug('Starting Robot');
+    this.logger.debug('[Robot] Starting Robot');
 
     this.adapters = {};
     this.plugins = {};
@@ -96,6 +98,7 @@ export default class Robot extends EventEmitter {
       this.adapters[adapterClass.adapterName] = adapterClass;
       adapterClass.run();
     }
+    this.emit('adapterInitialized');
 
     for (let plugin of plugins) {
       this.logger.info('[Robot] loading plugin:', plugin);
@@ -105,8 +108,14 @@ export default class Robot extends EventEmitter {
       let filename = require.resolve(plugin);
       this.parseHelp(filename)
     }
-    this.logger.debug('Finished loading plugins');
+    this.logger.debug('[Robot] Finished loading plugins');
+    this.emit('pluginsInitialized');
 
+    // TODO: can't register for an on('pluginsInitialized'..) in adapters for some reason.
+    if (this.adapters.AlexaAdapter) {
+      this.logger.debug('initing alexa plugins');
+      this.adapters.AlexaAdapter.postPluginInit();
+    }
     //this.frontend.setup();
     this.listen();
   }
@@ -134,11 +143,11 @@ export default class Robot extends EventEmitter {
     let re = regex.toString().split('/');
     re.shift();
     let modifiers = re.pop();
-  console.log("REGEX MODS", modifiers);
+    console.log("REGEX MODS", modifiers);
 
-  // Default to case insensitive if not otherwise declared, or bot name gets messed up
-  // NOTE: change from upstream
-  if (!modifiers) {
+    // Default to case insensitive if not otherwise declared, or bot name gets messed up
+    // NOTE: change from upstream
+    if (!modifiers) {
       modifiers = 'i';
     }
 
@@ -197,7 +206,7 @@ export default class Robot extends EventEmitter {
     }
 
     if (currentSection === null) {
-      this.logger.info(path + ' is using deprecated documentation syntax');
+      this.logger.info('[Robot] ' + path + ' is using deprecated documentation syntax');
       scriptDocumentation.commands = [];
       ref1 = body.split('\n');
       for (j = 0, len1 = ref1.length; j < len1; j++) {
@@ -285,6 +294,7 @@ export default class Robot extends EventEmitter {
     this.logger.info('received message', message.text);
 
     for (let listener of this.pluginListeners) {
+      console.log(listener.matcher);
       listener.call(message, adapter, callback)
     }
   }
@@ -309,30 +319,37 @@ export default class Robot extends EventEmitter {
   listen() {
     let port = process.env.EXPRESS_BIND_PORT || 8080;
     let address = process.env.EXPRESS_BIND_ADDRESS || '0.0.0.0';
-    this.logger.debug('All routes');
+    this.logger.debug('[Robot] All routes:');
 //    this.logger.debug(this.router.stack);
-    this.router._router.stack.forEach(function(r){
-          if (r.route && r.route.path){
-                  console.log(r.route.path)
-                    }
+    this.router._router.stack.forEach((r) => {
+       if (r.route && r.route.path){
+        this.logger.debug('[Robot] ' + r.route.path);
+      }
     });
+
     try {
-      this.server = this.router.listen(port, address);
-      this.logger.info(`Listening at ${address}:${port}`);
+      this.router.listen(port, address);
+//      this.server = https.createServer({
+//        key: fs.readFileSync('./certs/server/privkey.pem'),
+//        cert: fs.readFileSync('./certs/server/fullchain.pem'),
+//        rejectUnauthorized: false
+//    }, this.router).listen(port, () => {
+      this.logger.info(`[Robot] Listening at ${address}:${port}`);
+//    });
     } catch (err) {
-      this.logger.error(`Error trying to start HTTP server: ${err}\n${err.stack}`);
+      this.logger.error(`[Robot] Error trying to start HTTP server: ${err}\n${err.stack}`);
       process.exit(1);
     }
   }
   // filesystemPath: Relative path to the file
   // url: the URL to expose the file at. Will be served as `/static/${url}`
   addStaticFile(filesystemPath, url) {
-    this.logger.debug(`Adding static file: static/${url}:${filesystemPath}`);
+    this.logger.debug(`[Robot] Adding static file: static/${url}:${filesystemPath}`);
     if (!existsSync(filesystemPath)) {
-      throw new Error(`Script does not exist: ${filesystemPath}`);
+      throw new Error(`[Robot] Script does not exist: ${filesystemPath}`);
     }
     this.router.use('/static/' + url, (req, res) => {
-      this.logger.debug(`Serving ${req.path}: ${filesystemPath}`);
+      this.logger.debug(`[Robot] Serving ${req.path}: ${filesystemPath}`);
       res.sendFile(filesystemPath);
     });
   }

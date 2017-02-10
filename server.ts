@@ -1,6 +1,10 @@
 "use strict";
 
-require('dotenv').config({path: './envfile'});
+import * as fs from 'fs';
+
+if (fs.existsSync('./envfile')) {
+	require('dotenv').config({path: './envfile'});
+}
 
 require('better-require')();
 require('coffee-script/register');

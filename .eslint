@@ -1,0 +1,23 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 2017,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true,
+    },
+  },
+  "parser": "typescript-eslint-parser",
+  "extends": ["eslint:recommended"],
+  "rules": {
+    "indent": ["error", 2],
+    "max-len": ["error", 100, {"ignoreUrls": true}],
+    "no-console": "warn",
+    "no-trailing-spaces": "error",
+    "no-unused-vars": ["error", {"args": "none"}],
+    "quotes": ["error", "single", {"avoidEscape": true}],
+    "semi": "error",
+  },
+  "globals": {
+    "console": false,
+  },
+}

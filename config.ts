@@ -16,12 +16,16 @@ export default class Config {
   ];
 
   plugins = [
+		'./plugins/users',
     './plugins/mongo-brain',
     // './plugins/log',
     './plugins/forecastio',
 		'./plugins/inspirationalQuote',
 		'./plugins/cta',
 		'./plugins/googleCalendar',
+		'./plugins/recipe',
+		'./plugins/meditation',
+		'./plugins/alarm',
     //'./plugins/remember',
     //'./plugins/echo',
     //'./plugins/deploy',
@@ -55,6 +59,7 @@ export default class Config {
       "redirect_uris": ["urn:ietf:wg:oauth:2.0:oob", "http://localhost"]
     }
   };
+	CALENDAR_NAMES = ['LBB', 'Bills', 'pcsforeducation@gmail.com', 'josh.gachnang@triggrhealth.com'];
   QUOTES = [
     "Look at that sexy dude!",
     "Woah, stylin' today",
@@ -65,6 +70,12 @@ export default class Config {
     "Go kick some ass today!",
     "Who's world is that? Josh Gachnang's world."
   ];
+	INSPIRATIONAL_QUOTES = [
+		`"It is not the mountain we conquer, but ourselves." ―Sir Edmund Hillary`,
+		`"Twenty years from now you will be more disappointed by the things you didn't do than by the ones you did do. So throw off the bowlines. Sail away from the safe harbor. Catch the trade winds in your sail. Explore. Dream. Discover." ―Mark Twain`,
+		`"Multitasking is a lie" ―Gary Keller`,	
+	];
+	GUIDED_MEDITATION_URL = process.env.GUIDED_MEDITATION_URL;
   LAYOUT = {
     topLeft: [
       "clock-simple",

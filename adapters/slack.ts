@@ -495,8 +495,8 @@ export default class SlackAdapter extends Adapter {
     // all incoming events https://api.slack.com/rtm
     this.slackBot.on('message', (data) => {
       // Throw out unsupported/experimental/not useful messages:
-      if (['reconnect_url', 'user_typing', 'hello'].indexOf(data.type) > -1) {
-        return
+      if (['reconnect_url', 'user_typing', 'hello', 'desktop_notification'].indexOf(data.type) > -1) {
+        return;
       }
 
       this.logger.debug(`SlackAdapter: received ${data.type} message`);

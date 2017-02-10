@@ -23,6 +23,8 @@ export default function(robot) {
   let mongoUrl = process.env.MONGODB_URL ||
              'mongodb://localhost/hubot-brain';
 
+	robot.logger.debug(`MONGO URL: ${mongoUrl}`);
+
   return MongoClient.connect(mongoUrl, function(err, db) {
     if (err) { throw err; }
 

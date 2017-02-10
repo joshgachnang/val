@@ -11,5 +11,6 @@ npm-debug.log*
 config/config.js
 config/config.prd
 envfile
+prodenvfile
 built/
 *.js

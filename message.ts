@@ -11,6 +11,7 @@ export class Message {
   user: User;
   done: any;
   rawData: any;
+	msgType = "message";
 
   constructor(user, adapter, done) {
     this.robot = adapter.robot;
@@ -32,12 +33,13 @@ export class TextMessage extends Message {
   room: Room;
   id: string;
 
-  constructor(user, text, room, id, adapter, rawData) {
+  constructor(user: User, text: string, room: any, id: string, adapter: Adapter, rawData: any) {
     if (!user || !text) {
       throw new Error(`Cannot create text message without user or text. user: 
         ${user} text: ${text}`);
     }
     super(user, adapter, false);
+		this.msgType = "text";
     this.text = text;
     this.room = room;
     this.id = id;

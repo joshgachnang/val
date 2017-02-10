@@ -7,15 +7,20 @@ WORKDIR /usr/src/app
 
 # Install app dependencies
 COPY package.json /usr/src/app/
-RUN npm install --only=production && npm install -g bower
+COPY node_modules/ /usr/src/app/node_modules/
+RUN npm install -g bower typescript
 
-# Install app dependencies
+# Install frontend dependencies
 COPY bower.json /usr/src/app/
 RUN bower install --allow-root
 
-# Install app
-COPY . /usr/src/app
+# Install and compile app
+COPY ./ /usr/src/app
+
+RUN tsc
 
 EXPOSE 8080
+
+CMD [ "npm", "build" ]
 
 CMD [ "npm", "start" ]
