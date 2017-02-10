@@ -21,7 +21,6 @@ export default function(robot: Robot) {
   }
 
   robot.hear(/add phone number (.+)/i, {}, (response: Response) => {
-    console.log(response);
     let phoneNumber = extractPhoneNumber(response.match[1]);
     if (!phoneNumber) {
       robot.logger.debug(`[Users] Invalid phone number, not configuring: ${response.match[1]}`);

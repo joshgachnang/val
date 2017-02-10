@@ -38,22 +38,19 @@ export class Listener {
   // Response middleware is called after a response is created but before the callback is called
   call(message, adapter, responseMiddleware) {
     let match = this.matcher(message);
-    console.log("MATCH", match);
     if (match) {
-      console.log("REGEX?", this.regex);
+      this.robot.logger.debug(`Listener found match: ${match}`);
       if (this.regex) {
-        this.robot.logger.debug(`Message '${message}' matched regex ${this.regex};` +
+        this.robot.logger.debug(`Message '${message.text}' matched regex ${this.regex};` +
             `listener.options = ${this.options}`);
       }
 
-      console.log('hi');
       let response: Response;
       try {
         response = new Response(this.robot, message, match, adapter);
       } catch (e) {
-        console.log('ERR', e);
+        this.robot.logger.error(`Creating response from listener error: ${e}`);
       }
-      console.log(response)
       this.robot.logger.debug(
           `Executing listener callback for Message ${message}`, this.callback);
 
@@ -62,10 +59,9 @@ export class Listener {
       }
 
       try {
-        console.log(this.callback);
         this.callback(response);
       } catch (err) {
-        console.log("Listener callback error", err, err.stack);
+        this.robot.logger.error(`Listener callback error: ${err} ${err.stack}`);
         this.robot.emit('error', err);
       }
       return true;
@@ -78,12 +74,9 @@ export class Listener {
 export class TextListener extends Listener {
   constructor(robot, regex, options, callback) {
     let matcher = function(message) {
-      console.log(message instanceof TextMessage);
       if (message instanceof TextMessage) {
-        console.log("Matching", regex, message.match(regex))
         return message.match(regex);
       } else {
-        console.log("Not a text message")
         return undefined;
       }
     };

@@ -14,7 +14,6 @@ export default class Response {
     this.bot = bot;
     this.message = message;
     this.match = match;
-    //console.log("response match", match)
     this.envelope = new Envelope(message.room, message.user, message, adapter.adapterName);
   }
 
@@ -30,7 +29,6 @@ export default class Response {
 
   // Actually takes a list of 1 to n arguments
   reply(...strings) {
-    //console.log("Response Replying", this.envelope, this.envelope.user.name, strings);
     this.bot.reply(this.envelope, this.envelope.user.name, strings)
   }
 
