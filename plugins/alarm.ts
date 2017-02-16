@@ -1,19 +1,25 @@
 import * as moment from 'moment-timezone';
+import * as crypto from 'crypto';
 
 import Response from '../response';
 import Robot from '../robot';
 
 type AlarmRepeat =
-  'never' | 'daily' | 'weekly' | 'monthly' | 'everyTwoWeeks' | 'weekdays' | 'weekends' | 'yearly';
+  'never' | 'hour' | 'day' | 'week' | 'month' | 'everyTwoWeeks' | 'weekdays' | 'weekends' | 'year';
 
 export class Alarm {
   public time: string;
+  public created: Date;
+  public id: string;
+
   // acceptable inputs for time:
   // 11:11am
   // 15:00
   constructor(time: string, public repeats: AlarmRepeat) {
     let date = moment(time, ['h:ma', 'H:m']);
     this.time = date.format('H:m');
+    this.created = new Date();
+    this.id = crypto.randomBytes(16).toString('hex');
   }
 
   /* represent the alarm in a way that can be stored in the brain */

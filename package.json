@@ -9,6 +9,7 @@
     "compile": "mkdir -p built/config/ && tsc && cp envfile built/",
     "docker": "npm run compile && docker build -t servercobra/veronica . && docker push servercobra/veronica",
     "dev": "npm run watch",
+    "deploy": "npm run docker && npm run hyper",
     "hyper": "hyper stop veronica; hyper rm veronica; hyper pull servercobra/veronica; hyper run -d --name veronica -p 8080:8080 --env-file prodenvfile servercobra/veronica && hyper fip attach 199.245.57.103 veronica",
     "prebuild": "npm run build:clean",
     "serve": "npm run watch:node",
