@@ -23,14 +23,14 @@ export default function(robot) {
   let mongoUrl = process.env.MONGODB_URL ||
              'mongodb://localhost/hubot-brain';
 
-	robot.logger.debug(`MONGO URL: ${mongoUrl}`);
+  robot.logger.debug(`MONGO URL: ${mongoUrl}`);
 
   return MongoClient.connect(mongoUrl, function(err, db) {
     if (err) { throw err; }
 
     robot.brain.on('close', () => db.close());
 
-    robot.logger.info("MongoDB connected");
+    robot.logger.info('MongoDB connected');
     robot.brain.setAutoSave(false);
 
     let cache = {};
@@ -39,12 +39,12 @@ export default function(robot) {
     db.createCollection('brain', (err, collection) =>
       collection.find({type: '_private'}).toArray(function(err, docs) {
         if (err) { return robot.logger.error(err); }
-        let _private = {};
+        let priv = {};
         for (let doc of docs) {
-          _private[doc.key] = doc.value;
+          priv[doc.key] = doc.value;
         }
-        cache = deepClone(_private);
-        robot.brain.mergeData({_private});
+        cache = deepClone(priv);
+        robot.brain.mergeData({priv});
         robot.brain.resetSaveInterval(10);
         return robot.brain.setAutoSave(true);
       })
@@ -57,7 +57,7 @@ export default function(robot) {
           let result = [];
           for (let k in data._private) {
             let v = data._private[k];
-            result.push((function(k,v) {
+            result.push((function(k, v) {
               if (_.isEqual(cache[k], v)) { return; }  // skip not modified key
               robot.logger.debug(`save \"${k}\" into mongodb-brain`);
               cache[k] = deepClone(v);
@@ -79,4 +79,3 @@ export default function(robot) {
     );
   });
 };
-

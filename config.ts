@@ -5,8 +5,8 @@ export default class Config {
   name = process.env.VERONICA_NAME || 'veronica';
   baseUrl = process.env.BASE_URL || 'http://localhost:8080';
   MODULES = [
-    //'./modules/googleCalendar',
-    //'./modules/uber'
+    // './modules/googleCalendar',
+    // './modules/uber'
   ];
 
   adapters = [
@@ -27,18 +27,18 @@ export default class Config {
     './plugins/meditation',
     './plugins/alarm',
     './plugins/dogecoin',
-    //'./plugins/remember',
-    //'./plugins/echo',
-    //'./plugins/deploy',
-    //'./plugins/help',
-    //'./plugins/frontendQuote/index',
-    //'./plugins/goodmorning',
-    //'./plugins/weather',
-    //'../node_modules/hubot-scripts/src/scripts/ackbar.coffee',
-    //'../node_modules/hubot-scripts/src/scripts/coin.coffee',
-    //'./node_modules/hubot-scripts/src/scripts/dealwithit.coffee',
-    //'../node_modules/hubot-scripts/src/scripts/go-for-it.coffee',
-    //'../node_modules/hubot-scripts/src/scripts/xkcd.coffee',
+    // './plugins/remember',
+    // './plugins/echo',
+    // './plugins/deploy',
+    // './plugins/help',
+    // './plugins/frontendQuote/index',
+    // './plugins/goodmorning',
+    // './plugins/weather',
+    // '../node_modules/hubot-scripts/src/scripts/ackbar.coffee',
+    // '../node_modules/hubot-scripts/src/scripts/coin.coffee',
+    // './node_modules/hubot-scripts/src/scripts/dealwithit.coffee',
+    // '../node_modules/hubot-scripts/src/scripts/go-for-it.coffee',
+    // '../node_modules/hubot-scripts/src/scripts/xkcd.coffee',
   ];
   UBER_CLIENT_ID = '';
   UBER_CLIENT_SECRET = '';
@@ -61,6 +61,7 @@ export default class Config {
     }
   };
   CALENDAR_NAMES = ['LBB', 'Bills', 'pcsforeducation@gmail.com', 'josh.gachnang@triggrhealth.com'];
+  /* tslint:disable */
   QUOTES = [
     'Look at that sexy dude!',
     'Woah, stylin\' today',
@@ -76,6 +77,7 @@ export default class Config {
     `'Twenty years from now you will be more disappointed by the things you didn't do than by the ones you did do. So throw off the bowlines. Sail away from the safe harbor. Catch the trade winds in your sail. Explore. Dream. Discover.' ―Mark Twain`,
     `'Multitasking is a lie' ―Gary Keller`,
   ];
+  /* tslint:enable */
   GUIDED_MEDITATION_URL = process.env.GUIDED_MEDITATION_URL;
   LAYOUT = {
     topLeft: [
@@ -116,5 +118,5 @@ export default class Config {
       DEPLOY: {
         DEPLOY_COMMAND: 'cd /var/deploy && make deploy'
       }
-    }
+    };
 };

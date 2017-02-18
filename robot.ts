@@ -1,23 +1,23 @@
 'use strict';
 
 import {EventEmitter} from 'events';
-let HttpClient = require('scoped-http-client');
-import * as winston from 'winston';
-import {existsSync, readFileSync} from 'fs';
-import * as express from 'express';
+let httpClient = require('scoped-http-client');
 import * as bodyParser from 'body-parser';
-import {exit, env} from 'process';
 import * as cors from 'cors';
-import * as https from 'https';
+import * as express from 'express';
+import {existsSync, readFileSync} from 'fs';
 import * as fs from 'fs';
+import * as https from 'https';
+import {env, exit} from 'process';
+import * as winston from 'winston';
 
+import Brain from './brain';
 import Config from './config';
 import Envelope from './envelope';
-import Response from './response';
-import {TextListener, Listener} from './listener';
 import frontend from './frontend';
-import Brain from './brain';
+import {Listener, TextListener} from './listener';
 import {TextMessage} from './message';
+import Response from './response';
 import User from './user';
 
 let HUBOT_DOCUMENTATION_SECTIONS = [
@@ -43,7 +43,7 @@ export default class Robot extends EventEmitter {
   pluginListeners: Array<Listener> = [];
   commands: any;
   errorHandlers: any;
-  TextMessage: TextMessage;
+  TextMessage: TextMessage;  // tslint:disable-line
   router: any;
   logger: any;
   brain: Brain;
@@ -64,7 +64,7 @@ export default class Robot extends EventEmitter {
     }
 
     if (!config.adapters) {
-      throw new Error('A list of `adapters` is required to start robot.')
+      throw new Error('A list of `adapters` is required to start robot.');
     }
 
     // Default variables
@@ -103,7 +103,7 @@ export default class Robot extends EventEmitter {
       // Use default here to get the default exported function
       pluginModule.default(this);
       let filename = require.resolve(plugin);
-      this.parseHelp(filename)
+      this.parseHelp(filename);
     }
     this.logger.debug('[Robot] Finished loading plugins');
     this.emit('pluginsInitialized');
@@ -113,7 +113,7 @@ export default class Robot extends EventEmitter {
       this.logger.debug('initing alexa plugins');
       this.adapters.AlexaAdapter.postPluginInit();
     }
-    //this.frontend.setup();
+    // this.frontend.setup();
     this.listen();
   }
 
@@ -131,7 +131,6 @@ export default class Robot extends EventEmitter {
     let re = regex.toString().split('/');
     re.shift();
     let modifiers = re.pop();
-    console.log("REGEX MODS", modifiers);
 
     // Default to case insensitive if not otherwise declared, or bot name gets messed up
     // NOTE: change from upstream
@@ -152,8 +151,11 @@ export default class Robot extends EventEmitter {
   }
 
   parseHelp(path) {
-    var body, cleanedLine, currentSection, i, j, len, len1, line, nextSection, ref, ref1, scriptDocumentation, scriptName,
-      indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+    let body, cleanedLine, currentSection, i, j, len, len1, line, nextSection, ref, ref1,
+      scriptDocumentation, scriptName,
+      indexOf = [].indexOf || function(item) { for (let i = 0, l = this.length; i < l; i++) {
+        if (i in this && this[i] === item) return i; } return -1;
+      };
 
     this.logger.debug('[Robot] Parsing help for ' + path);
 
@@ -210,7 +212,7 @@ export default class Robot extends EventEmitter {
   }
 
   reply(envelope: Envelope, user: User, messages) {
-    //console.log('ROBOT REPLY', envelope, user, messages)
+    // robot.logger.debug('ROBOT REPLY', envelope, user, messages)
     this.logger.debug(`Attempting to reply to ${user} in #${envelope.room}, message: ${messages}`);
 
     if (!Array.isArray(messages)) {
@@ -272,15 +274,15 @@ export default class Robot extends EventEmitter {
   }
 
   http(url: string, options: any = {}) {
-    return HttpClient.create(url, options).header('User-Agent', `${this.name}/1.0`)
+    return httpClient.create(url, options).header('User-Agent', `${this.name}/1.0`);
   }
 
   receive(message, adapter, callback) {
     this.logger.info('received message', message.text);
 
     for (let listener of this.pluginListeners) {
-      console.log(listener.matcher);
-      listener.call(message, adapter, callback)
+      this.logger.debug(listener.matcher);
+      listener.call(message, adapter, callback);
     }
   }
 
@@ -307,7 +309,7 @@ export default class Robot extends EventEmitter {
     this.logger.debug('[Robot] All routes:');
 //    this.logger.debug(this.router.stack);
     this.router._router.stack.forEach((r) => {
-       if (r.route && r.route.path){
+      if (r.route && r.route.path) {
         this.logger.debug('[Robot] ' + r.route.path);
       }
     });
@@ -339,4 +341,3 @@ export default class Robot extends EventEmitter {
     });
   }
 }
-

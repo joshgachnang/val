@@ -1,7 +1,6 @@
 import Envelope from '../envelope';
-import Robot from '../robot';
 import Response from '../response';
-
+import Robot from '../robot';
 
 export default function(robot: Robot) {
 
@@ -24,7 +23,7 @@ export default function(robot: Robot) {
     let phoneNumber = extractPhoneNumber(response.match[1]);
     if (!phoneNumber) {
       robot.logger.debug(`[Users] Invalid phone number, not configuring: ${response.match[1]}`);
-      return
+      return;
     };
 
     let twilioAdapter = robot.adapters['TwilioAdapter'];

@@ -21,5 +21,5 @@ describe('Test with hello plugin', () => {
 
   it('should say hello') {
 
-  }
+  });
 }

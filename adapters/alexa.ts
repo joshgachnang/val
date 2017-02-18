@@ -3,16 +3,16 @@ const app = new alexa.app('veronica');
 
 import Adapter from '../adapter';
 import Envelope from '../envelope';
-import Room from '../room';
 import {TextMessage} from '../message';
+import Room from '../room';
 import User from '../user';
 
 interface AlexaCallback {
-  (req: any, res: any): void
+  (req: any, res: any): void;
 }
 
 interface EmitFunction {
-  (slots: any): string
+  (slots: any): string;
 }
 
 
@@ -57,7 +57,7 @@ export class AlexaMessage extends TextMessage {
 
 export default class AlexaAdapter extends Adapter {
   intents: AlexaIntent[] = [];
-  adapterName = "AlexaAdapter";
+  adapterName = 'AlexaAdapter';
 
   constructor(robot) {
     super(robot);
@@ -69,9 +69,9 @@ export default class AlexaAdapter extends Adapter {
   run() {
     this.robot.router.get('/alexa/schema', (req, res) => {
       let schema = app.schema();
-//      console.log('schema', schema);
+//      robot.logger.debug('schema', schema);
       let utterances = app.utterances();
-      console.log("UTTERANCES", utterances);
+      this.robot.logger.debug('UTTERANCES', utterances);
       utterances = utterances.replace(new RegExp('\\n', 'g'), '<br />');
       let template = `<h2>Schema:</h2><p>${schema}</p><h2>Utterances:</h2><p>${utterances}</p>`;
       res.send(template);
@@ -84,8 +84,8 @@ export default class AlexaAdapter extends Adapter {
       res.say('hello, my name is veronica.');
     });
 
-    let utterances = ["say the number {1-2|number}"];
-    let slots = { number: "NUMBER" };
+    let utterances = ['say the number {1-2|number}'];
+    let slots = { number: 'NUMBER' };
     let numberIntent = new AlexaIntent('saynumber', utterances, (slots) => {
       return `you wanted the number ${slots.number}`;
     }, slots);
@@ -112,17 +112,17 @@ export default class AlexaAdapter extends Adapter {
         options.slots = intent.slots;
       }
       app.intent(intent.intent, options, (req, res) => {
-        console.log('intent', req.data);
+        this.robot.logger.debug('intent', req.data);
         this.robot.logger.info('Alexa intent ' + req.name);
         this.receivedIntent(req, res, intent);
         return false;
-      })
+      });
     }
   }
 
   receivedIntent(req, res, intent) {
     let user = new User('josh', 'josh');
-    console.log("SLOTS", req.data.request.slots);
+    this.robot.logger.debug('SLOTS', req.data.request.slots);
     let text = intent.getText(req.slots);
     let message = new AlexaMessage(user, req, res, intent, this);
     this.receive(message);
@@ -145,7 +145,7 @@ export default class AlexaAdapter extends Adapter {
       throw new Error('Message did not contain an Alexa Response object. Cannot send.');
     }
 
-    let res = strings.join(". ");
+    let res = strings.join('. ');
     alexaResponse.say(res).send();
   }
 

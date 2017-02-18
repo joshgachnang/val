@@ -1,13 +1,12 @@
 import * as csv from 'fast-csv';
 
 import AlexaAdapter from '../adapters/alexa';
-import Robot from '../robot';
 import Response from '../response';
+import Robot from '../robot';
 
 enum Unit {
   Each, Cup, Tablespoon, Teaspoon, Ounce, FluidOunce
 }
-
 
 class Food {
   constructor(private name: string, private calories: number, private servingSize: number,
@@ -25,11 +24,11 @@ class Recipe {
 function loadFromCSV(filename: string) {
   let stream = fs.createReadStream(filename);
   let csvStream = csv()
-    .on("data", function(data){
-         console.log(data);
+    .on('data', function(data){
+         robot.logger.debug(data);
     })
-    .on("end", function(){
-         console.log("done");
+    .on('end', function(){
+         robot.logger.debug('done');
     });
 
   stream.pipe(csvStream);

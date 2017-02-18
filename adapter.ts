@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-import {EventEmitter} from "events";
-import Robot from "./robot";
+import {EventEmitter} from 'events';
+import Robot from './robot';
 
 export default class Adapter extends EventEmitter {
     robot: Robot;
@@ -9,11 +9,11 @@ export default class Adapter extends EventEmitter {
 
     constructor(robot: Robot) {
         super();
-        this.robot = robot
+        this.robot = robot;
     }
     send(envelope, ...strings) {}
     emote(envelope, ...strings) {
-        this.send(envelope, strings)
+        this.send(envelope, strings);
     }
     reply(envelope, ...strings) {}
     topic(envelope, ...strings) {}
@@ -24,4 +24,3 @@ export default class Adapter extends EventEmitter {
         this.robot.receive(message, this, null);
     }
 }
-

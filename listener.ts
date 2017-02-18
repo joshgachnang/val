@@ -13,7 +13,7 @@ export class Listener {
 
   constructor(robot, matcher, options, callback) {
     if (!matcher) {
-      throw new Error("Missing a matcher for Listener");
+      throw new Error('Missing a matcher for Listener');
     }
 
     if (!callback) {
@@ -22,11 +22,11 @@ export class Listener {
     }
 
     if (!options.id) {
-      options.id = null
+      options.id = null;
     }
 
-    if (!callback || typeof callback != 'function') {
-      throw new Error("missing a callback for Listener");
+    if (!callback || typeof callback !== 'function') {
+      throw new Error('missing a callback for Listener');
     }
 
     this.robot = robot;
@@ -54,7 +54,7 @@ export class Listener {
       this.robot.logger.debug(
           `Executing listener callback for Message ${message}`, this.callback);
 
-      if (responseMiddleware && typeof responseMiddleware == 'function') {
+      if (responseMiddleware && typeof responseMiddleware === 'function') {
         responseMiddleware(response);
       }
 

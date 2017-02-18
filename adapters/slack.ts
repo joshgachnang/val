@@ -1,16 +1,16 @@
 // Forked from Slackbots to throw out vow, use TS
 import {EventEmitter} from 'events';
 
-import {TextMessage} from '../message';
-import Robot from '../robot';
-import * as winston from 'winston';
-import * as request from 'request';
 import * as _ from 'lodash';
+import * as request from 'request';
+import * as winston from 'winston';
 import * as WebSocket from 'ws';
 import Adapter from '../adapter';
+import {TextMessage} from '../message';
+import Robot from '../robot';
 
 function find(arr, params) {
-  var result = {};
+  let result = {};
 
   arr.forEach(function(item) {
     if (Object.keys(params).every(function(key) {
@@ -73,7 +73,7 @@ class SlackBot extends EventEmitter {
 
       this.connect();
     }.bind(this)).catch(function(data) {
-      console.error("SlackBot login error: ", data)
+      console.error('SlackBot login error: ', data); // tslint:disable-line
       assert(false, data.error);
     });
   };
@@ -96,7 +96,7 @@ class SlackBot extends EventEmitter {
       try {
         this.emit('message', JSON.parse(data));
       } catch (e) {
-        console.log("SlackBot message error", e, e.stack);
+        this.robot.logger.debug('SlackBot message error', e, e.stack);
       }
     }.bind(this));
   };
@@ -278,7 +278,7 @@ class SlackBot extends EventEmitter {
    * @private
    */
   _post(type, name, text, params, cb) {
-    var method = ({
+    let method = ({
       'group': 'getGroupId',
       'channel': 'getChannelId',
       'user': 'getChatId'
@@ -293,7 +293,7 @@ class SlackBot extends EventEmitter {
       return this.postMessage(itemId, text, params);
     }.bind(this))
         .catch((err) => {
-          console.error("POST ERROR", err, err.stack);
+          console.error('POST ERROR', err, err.stack); // tslint:disable-line
         })
         .then(function(data) {
           if (cb) {
@@ -313,8 +313,8 @@ class SlackBot extends EventEmitter {
   postTo(name, text, params, cb) {
     let promise: Promise<any> = Promise.all([this.getChannels(), this.getUsers(), this.getGroups()]).then(function(data) {
 
-      var all = [].concat(data[0].rooms, data[1].members, data[2].groups);
-      var result = find(all, {name: name});
+      let all = [].concat(data[0].rooms, data[1].members, data[2].groups);
+      let result = find(all, {name: name});
 
       assert(Object.keys(result).length, 'wrong name');
 
@@ -339,7 +339,7 @@ class SlackBot extends EventEmitter {
     params = _.extend(params || {}, {token: this.token});
 
     Object.keys(params).forEach(function(name) {
-      var param = params[name];
+      let param = params[name];
 
       if (param && typeof param === 'object') {
         params[name] = JSON.stringify(param);
@@ -358,7 +358,7 @@ class SlackBot extends EventEmitter {
    */
   _api(methodName, params) {
 
-    var data = {
+    let data = {
       url: 'https://slack.com/api/' + methodName,
       form: this._preprocessParams(params)
     };
@@ -382,7 +382,7 @@ class SlackBot extends EventEmitter {
           }
 
         } catch (e) {
-          console.error("SlackBot API error: ", e);
+          console.error('SlackBot API error: ', e);  // tslint:disable-line
           reject(e);
         }
       });
@@ -395,7 +395,7 @@ class SlackBot extends EventEmitter {
       return false;
     }
 
-    var reg = new RegExp("@" + this.me.name, "i");
+    let reg = new RegExp('@' + this.me.name, 'i');
 
     return (data.text !== undefined && data.text.match(reg) != null);
   }
@@ -419,7 +419,7 @@ export default class SlackAdapter extends Adapter {
     this.rooms = [];
     this.users = [];
     this.me = {};
-    this.adapterName = "Slack";
+    this.adapterName = 'Slack';
   }
 
   send(envelope, strings) {
@@ -444,10 +444,10 @@ export default class SlackAdapter extends Adapter {
 
   run() {
     this.logger.info('[Robot] Running Slack adapter');
-    var config = this.robot.config;
+    let config = this.robot.config;
 
     this.slackBot = new SlackBot({
-      token: this.robot.envKey("SLACK_TOKEN"),
+      token: this.robot.envKey('SLACK_TOKEN'),
       name: config.name
     });
 
@@ -471,13 +471,13 @@ export default class SlackAdapter extends Adapter {
           for (let member of data.members) {
             if (member.name && member.name.toLowerCase() == config.name.toLowerCase()) {
               this.me = member;
-              config.id = this.me.id
+              config.id = this.me.id;
             }
             this.users[member.id] = member;
           }
         }
         this.logger.debug('SlackAdatper: finished getting list of users');
-      })
+      });
 
       // more information about additional params https://api.slack.com/methods/chat.postMessage
       // var params = {};
@@ -518,7 +518,7 @@ export default class SlackAdapter extends Adapter {
 
         let message = new TextMessage(user, text, room, data.id, this, data);
         this.receive(message);
-        return
+        return;
       }
 
       this.logger.warn(`Unhandled message type: ${data.type}`);
@@ -548,7 +548,7 @@ export default class SlackAdapter extends Adapter {
     let copy = _.extend({}, data);
     data.originalText = copy.text;
 
-    let idRegex = new RegExp("<@(\\w+)>", "ig");
+    let idRegex = new RegExp('<@(\w+)>', 'ig');
     let matches = data.text.match(idRegex);
 
     if (matches === null) {
@@ -557,14 +557,14 @@ export default class SlackAdapter extends Adapter {
 
     for (let match of matches) {
       // Match again to get the captured group
-      let idMatchRegex = new RegExp(match, "i");
+      let idMatchRegex = new RegExp(match, 'i');
       let idMatch = idMatchRegex.exec(data.text);
       if (idMatch) {
         // Find user in users
         let userString = idMatch[0].slice(2, -1);
         let user = this.users[userString];
         if (user) {
-          data.text = data.text.replace(idMatch[0], "@" + user.name);
+          data.text = data.text.replace(idMatch[0], '@' + user.name);
         }
       }
     }
