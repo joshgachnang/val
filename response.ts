@@ -3,6 +3,7 @@
 import {Message} from './message';
 import Robot from './robot';
 import Envelope from './envelope';
+import User from './user';
 
 export default class Response {
   bot: Robot;
@@ -29,7 +30,7 @@ export default class Response {
 
   // Actually takes a list of 1 to n arguments
   reply(...strings) {
-    this.bot.reply(this.envelope, this.envelope.user.name, strings)
+    this.bot.reply(this.envelope, this.envelope.user, strings)
   }
 
   // Actually takes a list of 1 to n arguments

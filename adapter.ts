@@ -7,7 +7,7 @@ export default class Adapter extends EventEmitter {
     robot: Robot;
     adapterName: string;
 
-    constructor(robot) {
+    constructor(robot: Robot) {
         super();
         this.robot = robot
     }

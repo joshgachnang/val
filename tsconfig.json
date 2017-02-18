@@ -23,6 +23,7 @@
         "server.ts",
         "user.ts",
 				"adapters/*",
-				"plugins/*"
+				"plugins/*",
+        "test/*"
     ]
 }

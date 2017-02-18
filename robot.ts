@@ -12,11 +12,13 @@ import * as https from 'https';
 import * as fs from 'fs';
 
 import Config from './config';
+import Envelope from './envelope';
 import Response from './response';
 import {TextListener, Listener} from './listener';
 import frontend from './frontend';
 import Brain from './brain';
 import {TextMessage} from './message';
+import User from './user';
 
 let HUBOT_DOCUMENTATION_SECTIONS = [
   'description',
@@ -31,44 +33,39 @@ let HUBOT_DOCUMENTATION_SECTIONS = [
   'urls',
 ];
 
-interface ResponseCallback {
+export interface ResponseCallback {
   (response: Response): void;
 }
 
 export default class Robot extends EventEmitter {
-    name: string;
-    alias: string;
-    config: Config;
-    pluginListeners: Array<Listener> = [];
-    commands: any;
-    errorHandlers: any;
-    TextMessage: TextMessage;
-    router: any;
-    logger: any;
-    brain: Brain;
-    frontend: any;
-    adapters: any;
-    plugins: any;
-    server: any;
+  name: string;
+  config: Config;
+  pluginListeners: Array<Listener> = [];
+  commands: any;
+  errorHandlers: any;
+  TextMessage: TextMessage;
+  router: any;
+  logger: any;
+  brain: Brain;
+  frontend: any;
+  adapters: any;
+  plugins: any;
+  server: any;
 
-  constructor(name, adapters, plugins, alias) {
-    super()
-    if (!name) {
+  constructor(config: Config) {
+    super();
+    this.config = config;
+
+    if (!config.name) {
       winston.error('`name` is importd to start robot');
       throw new Error('`name` is importd to start robot');
     } else {
-      this.name = name;
+      this.name = config.name;
     }
 
-    if (!adapters) {
-      throw new Error('A list of `adapters` is importd to start robot.')
+    if (!config.adapters) {
+      throw new Error('A list of `adapters` is required to start robot.')
     }
-
-    if (alias) {
-      this.alias = alias;
-    }
-
-    this.config = this.loadConfig();
 
     // Default variables
     this.pluginListeners = [];
@@ -90,7 +87,7 @@ export default class Robot extends EventEmitter {
 
     this.adapters = {};
     this.plugins = {};
-    for (let adapter of adapters) {
+    for (let adapter of config.adapters) {
       this.logger.info('[Robot] loading adapter:', adapter);
       let adapterModule = require(adapter);
       // Use default here to get the default exported class
@@ -100,7 +97,7 @@ export default class Robot extends EventEmitter {
     }
     this.emit('adapterInitialized');
 
-    for (let plugin of plugins) {
+    for (let plugin of config.plugins) {
       this.logger.info('[Robot] loading plugin:', plugin);
       let pluginModule = require(plugin);
       // Use default here to get the default exported function
@@ -118,15 +115,6 @@ export default class Robot extends EventEmitter {
     }
     //this.frontend.setup();
     this.listen();
-  }
-
-  loadConfig() {
-    // TODO load from env/config files
-    let conf = new Config();
-    conf.id = undefined
-    // TODO: deprecate
-    conf.name = process.env.BOT_NAME || conf.BOT_NAME;
-    return conf;
   }
 
   hear(regex: RegExp, options, callback: ResponseCallback) {
@@ -158,9 +146,6 @@ export default class Robot extends EventEmitter {
     }
 
     let name = this.name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-    if (this.alias) {
-      name = this.alias;
-    }
     let pattern = re.join('/');
 
     return new RegExp('^\\s*[@]*' + name.toLowerCase() + '[:,]?\\s*(?:' + pattern + ')', modifiers);
@@ -224,7 +209,7 @@ export default class Robot extends EventEmitter {
     }
   }
 
-  reply(envelope, user, messages) {
+  reply(envelope: Envelope, user: User, messages) {
     //console.log('ROBOT REPLY', envelope, user, messages)
     this.logger.debug(`Attempting to reply to ${user} in #${envelope.room}, message: ${messages}`);
 
@@ -235,7 +220,7 @@ export default class Robot extends EventEmitter {
     this.adapters[envelope.adapterName].reply(envelope, user, messages);
   }
 
-  send(envelope, messages) {
+  send(envelope: Envelope, messages) {
     this.logger.debug(`Sending in ${envelope.room}: ${messages}`);
 
     if (!Array.isArray(messages)) {
@@ -248,8 +233,8 @@ export default class Robot extends EventEmitter {
     adapter.send(envelope, messages);
   }
 
-  emote(envelope, emotes) {
-    this.logger.warn('Unsupported action: emote', envelope.channel, emotes);
+  emote(envelope: Envelope, emotes) {
+    this.logger.warn('Unsupported action: emote', envelope.room, emotes);
   }
 
   enter(options, callback) {
