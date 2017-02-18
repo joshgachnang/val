@@ -1,4 +1,5 @@
 import * as csv from 'fast-csv';
+import * as fs from 'fs';
 
 import AlexaAdapter from '../adapters/alexa';
 import Response from '../response';
@@ -25,10 +26,10 @@ function loadFromCSV(filename: string) {
   let stream = fs.createReadStream(filename);
   let csvStream = csv()
     .on('data', function(data){
-         robot.logger.debug(data);
+         console.log(data); // tslint:disable-line
     })
     .on('end', function(){
-         robot.logger.debug('done');
+         console.log('done'); // tslint:disable-line
     });
 
   stream.pipe(csvStream);

@@ -3,12 +3,10 @@ let readline = require('readline');
 let google = require('googleapis');
 let googleAuth = require('google-auth-library');
 
+import Robot from '../robot';
+
 let config;
-if (process.env.MAGIC_MIRROR_CONFIG) {
-  config = require(process.env.MAGIC_MIRROR_CONFIG);
-} else {
-  config = require('../../config/config.js');
-}
+let robot: Robot;
 
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/calendar-nodejs-quickstart.json
@@ -30,7 +28,7 @@ authorize(config.GOOGLE_CALENDAR_CLIENT_SECRET, listEvents);
 function authorize(credentials, callback) {
   if (config.GOOGLE_CALENDAR_CLIENT_SECRET === undefined ||
       config.GOOGLE_CALENDAR_CLIENT_SECRET.installed === undefined) {
-    console.log('Please configure GOOGLE_CALENDAR_CLIENT_SECRET in your config file.');
+    robot.logger.debug('Please configure GOOGLE_CALENDAR_CLIENT_SECRET in your config file.');
     return;
   }
 
@@ -40,7 +38,7 @@ function authorize(credentials, callback) {
   let auth = new googleAuth();
   let oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
   let cliFlag;
-  if (process.argv.length > 2 && process.argv[2] == '--add-calendar') {
+  if (process.argv.length > 2 && process.argv[2] === '--add-calendar') {
     cliFlag = process.argv.length;
   }
 
@@ -71,7 +69,7 @@ function getNewToken(oauth2Client, callback) {
     access_type: 'offline',
     scope: SCOPES
   });
-  console.log('Authorize this app by visiting this url: ', authUrl);
+  robot.logger.debug('Authorize this app by visiting this url: ', authUrl);
   let rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -80,7 +78,7 @@ function getNewToken(oauth2Client, callback) {
     rl.close();
     oauth2Client.getToken(code, function (err, token) {
       if (err) {
-        console.log('Error while trying to retrieve access token', err);
+        robot.logger.debug('Error while trying to retrieve access token', err);
         return;
       }
       oauth2Client.credentials = token;
@@ -99,14 +97,14 @@ function storeToken(token) {
   try {
     fs.mkdirSync(TOKEN_DIR);
   } catch (err) {
-    if (err.code != 'EEXIST') {
+    if (err.code !== 'EEXIST') {
       throw err;
     }
   }
   let existingTokens = JSON.parse(fs.readFileSync(TOKEN_PATH, 'utf8'));
   existingTokens.push(token);
   fs.writeFile(TOKEN_PATH, JSON.stringify(existingTokens));
-  console.log('Token stored to ' + TOKEN_PATH);
+  robot.logger.debug('Token stored to ' + TOKEN_PATH);
 }
 
 /**
@@ -125,18 +123,18 @@ function listEvents(auth) {
     orderBy: 'startTime'
   }, function (err, response) {
     if (err) {
-      console.log('The API returned an error: ' + err);
+      robot.logger.debug('The API returned an error: ' + err);
       return;
     }
     let events = response.items;
-    if (events.length == 0) {
-      // console.log('No upcoming events found.');
+    if (events.length === 0) {
+      // robot.logger.debug('No upcoming events found.');
     } else {
-      // console.log('Upcoming 10 events:');
+      // robot.logger.debug('Upcoming 10 events:');
       for (let i = 0; i < events.length; i++) {
         let event = events[i];
         let start = event.start.dateTime || event.start.date;
-        // console.log('%s - %s', start, event.summary);
+        // robot.logger.debug('%s - %s', start, event.summary);
       }
     }
     allEvents.push(events);

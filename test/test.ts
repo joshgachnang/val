@@ -7,10 +7,10 @@ import Robot from '../robot';
 // create a bot
 let config = new Config();
 config.adapters = ['test/fakeAdapter'];
-var robot = new Robot(config);
+let robot = new Robot(config);
 
 env.MONGODB_URL = 'mongodb://localhost/veronica-tests';
 
 process.on('uncaughtException', (err) => {
-  console.log(`uncaught exception: ${err}: ${err.stack}`);
+  console.log(`uncaught exception: ${err}: ${err.stack}`); // tslint:disable-line
 });

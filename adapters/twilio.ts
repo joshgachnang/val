@@ -10,7 +10,6 @@ export default class Twilio extends Adapter {
   token: string;
   fromNumber: string;
 
-
   constructor(robot) {
     super(robot);
     this.sid   = robot.envKey('TWILIO_SID');
@@ -64,9 +63,9 @@ export default class Twilio extends Adapter {
       return;
     }
     // TODO make this work
-    //let user = this.robot.brain.userForId(from);
+    // let user = this.robot.brain.userForId(from);
     let user = fromNumber;
-  // TODO Assign self.robot.name here instead of Nurph
+    // TODO Assign self.robot.name here instead of Nurph
     if (body.match(/^Nurph\b/i) === null) {
       this.robot.logger.debug(`I'm adding ${this.robot.name} as a prefix.`);
       body = `${this.robot.name}: ${body}`;

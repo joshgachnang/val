@@ -2,7 +2,7 @@ import Adapter from '../adapter';
 import Config from '../config';
 import Robot from '../robot';
 
-export class FakeAdapter extends Adapter {
+export default class FakeAdapter extends Adapter {
   public events = [];
 
   constructor(robot: Robot) {

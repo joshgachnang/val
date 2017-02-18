@@ -311,7 +311,9 @@ class SlackBot extends EventEmitter {
    * @returns {Promise}
    */
   postTo(name, text, params, cb) {
-    let promise: Promise<any> = Promise.all([this.getChannels(), this.getUsers(), this.getGroups()]).then(function(data) {
+    let promise: Promise<any> = Promise.all([
+      this.getChannels(), this.getUsers(), this.getGroups()
+    ]).then(function(data) {
 
       let all = [].concat(data[0].rooms, data[1].members, data[2].groups);
       let result = find(all, {name: name});
@@ -424,20 +426,19 @@ export default class SlackAdapter extends Adapter {
 
   send(envelope, strings) {
     if (envelope.room === undefined) {
-      for (let string of strings) {
-        this.slackBot.postMessageToUser(envelope.user.name, string, {link_names: 1}, undefined);
+      for (let str of strings) {
+        this.slackBot.postMessageToUser(envelope.user.name, str, {link_names: 1}, undefined);
       }
       return;
     }
-    for (let string of strings) {
-      this.slackBot.postMessageToChannel(envelope.room.name, string, {link_names: 1}, undefined);
+    for (let str of strings) {
+      this.slackBot.postMessageToChannel(envelope.room.name, str, {link_names: 1}, undefined);
     }
   }
 
-
   reply(envelope, user, strings) {
-    for (let string of strings) {
-      let text = `@${user}: ${string}`;
+    for (let str of strings) {
+      let text = `@${user}: ${str}`;
       this.slackBot.postMessageToChannel(envelope.room.name, text, {link_names: 1}, undefined);
     }
   }
@@ -455,7 +456,7 @@ export default class SlackAdapter extends Adapter {
       // save the list of users
       this.logger.debug('SlackAdapter: slack started');
       this.slackBot.getChannels().then((data: any) => {
-        //this.logger.debug("SlackAdapter: list  of channels: ", data);
+        // this.logger.debug("SlackAdapter: list  of channels: ", data);
         if (data.channels) {
           for (let channel of data.channels) {
             this.rooms[channel.id] = channel;
@@ -464,12 +465,11 @@ export default class SlackAdapter extends Adapter {
         this.logger.debug('SlackAdatper: finished getting list of channels');
       });
 
-
       this.slackBot.getUsers().then((data: any) => {
         // this.logger.debug("SlackAdapter: list of users: ", data);
         if (data.members) {
           for (let member of data.members) {
-            if (member.name && member.name.toLowerCase() == config.name.toLowerCase()) {
+            if (member.name && member.name.toLowerCase() === config.name.toLowerCase()) {
               this.me = member;
               config.id = this.me.id;
             }
@@ -580,6 +580,4 @@ export default class SlackAdapter extends Adapter {
     user.status = data.presence;
     this.logger.info(`Updated user ${user.name} to ${user.status}`);
   }
-
 }
-

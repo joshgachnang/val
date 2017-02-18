@@ -113,11 +113,11 @@ export default class Frontend {
   // Call after all plugins have registered their frontend components
   setup() {
     // Add the base frontend components
-    robot.logger.debug('SETTING UP FRONTEND', __dirname + 'js/frontend.js');
+    this.robot.logger.debug('SETTING UP FRONTEND', __dirname + 'js/frontend.js');
     this.addScript(__dirname + '/js/frontend.js', 'frontend/js/frontend.js');
     this.addStylesheet(__dirname + '/css/frontend.css', 'frontend/css/frontend.css');
 
-    robot.logger.debug('SCRIPTS', this.scripts);
+    this.robot.logger.debug('SCRIPTS', this.scripts);
 
     for (let script in this.scripts) {
       let path = this.scripts[script];

@@ -1,5 +1,3 @@
-'use strict';
-
 import {EventEmitter} from 'events';
 let httpClient = require('scoped-http-client');
 import * as bodyParser from 'body-parser';
@@ -11,12 +9,13 @@ import * as https from 'https';
 import {env, exit} from 'process';
 import * as winston from 'winston';
 
+import Adapter from './adapter';
 import Brain from './brain';
 import Config from './config';
 import Envelope from './envelope';
 import frontend from './frontend';
 import {Listener, TextListener} from './listener';
-import {TextMessage} from './message';
+import {Message, TextMessage} from './message';
 import Response from './response';
 import User from './user';
 
@@ -117,14 +116,16 @@ export default class Robot extends EventEmitter {
     this.listen();
   }
 
-  hear(regex: RegExp, options, callback: ResponseCallback) {
-    this.logger.info('creating listener for regex', regex);
+  hear(regex: RegExp, options: any, callback: ResponseCallback) {
+    this.logger.info('creating hear listener for regex', regex);
     let listener = new TextListener(this, regex, options, callback);
     this.pluginListeners.push(listener);
   }
 
-  respond(regex: RegExp, options, callback: ResponseCallback) {
-    this.hear(this.respondPattern(regex), options, callback);
+  respond(regex: RegExp, options: any, callback: ResponseCallback) {
+    this.logger.info('creating respond listener for regex', regex);
+    let listener = new TextListener(this, this.respondPattern(regex), options, callback);
+    this.pluginListeners.push(listener);
   }
 
   respondPattern(regex: RegExp) {
@@ -277,8 +278,8 @@ export default class Robot extends EventEmitter {
     return httpClient.create(url, options).header('User-Agent', `${this.name}/1.0`);
   }
 
-  receive(message, adapter, callback) {
-    this.logger.info('received message', message.text);
+  receive(message: Message, adapter: Adapter, callback) {
+    this.logger.info('received message');
 
     for (let listener of this.pluginListeners) {
       this.logger.debug(listener.matcher);

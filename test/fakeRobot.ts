@@ -1,6 +1,6 @@
 import Config from '../config';
-import { ResponseCallback, default as Robot } from '../robot';
 import Envelope from '../envelope';
+import { default as Robot, ResponseCallback } from '../robot';
 import User from '../user';
 
 export default class FakeRobot extends Robot {
@@ -13,7 +13,7 @@ export default class FakeRobot extends Robot {
   constructor(config: Config) {
     super(config);
     this.config = config;
-    this.name = name;
+    this.name = config.name;
   }
 
   hear(regex: RegExp, options, callback: ResponseCallback) {
@@ -35,5 +35,4 @@ export default class FakeRobot extends Robot {
   http(url: string, options: any = {}) {
 
   }
-
 }

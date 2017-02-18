@@ -15,7 +15,6 @@ interface EmitFunction {
   (slots: any): string;
 }
 
-
 class AlexaIntent {
   intent: string;
   utterances: string[];
@@ -91,7 +90,7 @@ export default class AlexaAdapter extends Adapter {
     }, slots);
     this.intents.push(numberIntent);
 
-    //app.intent("saynumber", {
+    // app.intent("saynumber", {
     //    slots: { number: "NUMBER" },
     //    utterances: ["say the number {1-2|number}"]
     //  }, (req, res) => {
@@ -99,7 +98,7 @@ export default class AlexaAdapter extends Adapter {
     //    var number = req.slot("number");
     //    res.say("You asked for the number " + number);
     //  }
-    //);
+    // );
   }
 
   postPluginInit() {

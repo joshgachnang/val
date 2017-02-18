@@ -1,0 +1,25 @@
+language: node_js
+
+node_js:
+  - '6'
+
+sudo: false
+
+env:
+  - workerCount=3
+
+matrix:
+  fast_finish: true
+
+install:
+  - npm uninstall typescript
+  - npm uninstall tslint
+  - npm install
+  - npm update
+
+cache:
+  directories:
+    - node_modules
+
+git:
+  depth: 1
