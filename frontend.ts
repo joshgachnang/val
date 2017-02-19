@@ -1,8 +1,8 @@
 import * as browserify from 'browserify';
 import * as express from 'express';
 import {existsSync} from 'fs';
-import Robot from './robot';
 import * as _ from 'lodash';
+import Robot from './robot';
 
 export default class Frontend {
   robot: Robot;
@@ -12,7 +12,7 @@ export default class Frontend {
   templates: any;
   config: any;
   router: any;
- 
+
   constructor(robot) {
     this.robot = robot;
     this.configKeys = {};
@@ -21,7 +21,7 @@ export default class Frontend {
     this.templates = {};
     this.config = robot.config;
     this.router = express.Router();
-  
+
     // Expose the root page
     this.router.get('/', (req, res) => {
       res.render('frontend.jade', {
@@ -30,7 +30,7 @@ export default class Frontend {
         stylesheets: Object.keys(this.stylesheets)
       });
     });
-    
+
     // Expose configuration variables
     this.router.get('/config.js', (req, res) => {
       let base = 'angular.module("config", [])';
@@ -46,7 +46,7 @@ export default class Frontend {
       res.write(base);
       res.end();
     });
-    
+
     this.router.use('/bundle.js', (req, res) => {
       res.setHeader('content-type', 'application/javascript');
       browserify('./js/frontend.js', {
@@ -64,43 +64,43 @@ export default class Frontend {
       }
       res.render(this.templates[req.params.partial], {});
     });
-    
-    this.router.use('/bower_components', express.static(__dirname + '/../bower_components/')); 
-    this.robot.router.use('/frontend', this.router)
+
+    this.router.use('/bower_components', express.static(__dirname + '/../bower_components/'));
+    this.robot.router.use('/frontend', this.router);
   }
-  
+
   // Expose a script to the frontend
   addScript(filesystemPath, url) {
     if (this.scripts[url]) {
-      throw new Error(`Duplicated script URL: ${url}`)
+      throw new Error(`Duplicated script URL: ${url}`);
     }
     if (!existsSync(filesystemPath)) {
-      throw new Error(`Script does not exist: ${filesystemPath}`)
+      throw new Error(`Script does not exist: ${filesystemPath}`);
     }
     this.scripts[url] = filesystemPath;
   }
-  
+
   // Expose a stylesheet to the frontend
   addStylesheet(filesystemPath, url) {
     if (this.stylesheets[url]) {
-      throw new Error(`Duplicated script URL: ${url}`)
+      throw new Error(`Duplicated script URL: ${url}`);
     }
     if (!existsSync(filesystemPath)) {
-      throw new Error(`Stylesheet does not exist: ${filesystemPath}`)
+      throw new Error(`Stylesheet does not exist: ${filesystemPath}`);
     }
     this.stylesheets[url] = filesystemPath;
   }
-  
+
   addTemplate(filesystemPath, url) {
     if (this.templates[url]) {
-      throw new Error(`Duplicated template URL: ${url}`)
+      throw new Error(`Duplicated template URL: ${url}`);
     }
     if (!existsSync(filesystemPath)) {
-      throw new Error(`Template does not exist: ${filesystemPath}`)
+      throw new Error(`Template does not exist: ${filesystemPath}`);
     }
     this.templates[url] = filesystemPath;
   }
-  
+
   addConfigKeys(config) {
     for (let key in config) {
       if (this.configKeys[key]) {
@@ -109,22 +109,22 @@ export default class Frontend {
     }
     _.extend(this.configKeys, config);
   }
-  
+
   // Call after all plugins have registered their frontend components
   setup() {
     // Add the base frontend components
-    console.log("SETTING UP FRONTEND", __dirname + 'js/frontend.js');
+    this.robot.logger.debug('SETTING UP FRONTEND', __dirname + 'js/frontend.js');
     this.addScript(__dirname + '/js/frontend.js', 'frontend/js/frontend.js');
     this.addStylesheet(__dirname + '/css/frontend.css', 'frontend/css/frontend.css');
 
-    console.log("SCRIPTS", this.scripts);
+    this.robot.logger.debug('SCRIPTS', this.scripts);
 
     for (let script in this.scripts) {
       let path = this.scripts[script];
       this.robot.logger.debug(`Adding script. Path: ${path}; script: ${script}`);
       this.robot.addStaticFile(path, script);
     }
-  
+
     for (let stylesheet in this.stylesheets) {
       let path = this.stylesheets[stylesheet];
       this.robot.logger.debug(`Adding stylesheet. Path: ${path}; script: ${stylesheet}`);
@@ -135,5 +135,5 @@ export default class Frontend {
       this.robot.logger.debug(`Adding template. Path: ${path}; script: ${template}`);
       this.robot.addStaticFile(path, template);
     }
-   }  
+   }
 }

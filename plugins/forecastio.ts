@@ -1,7 +1,7 @@
-import * as request from "request"
+import * as request from 'request';
 
 export default function(robot) {
-  console.log(robot.config.LATITUDE, robot.config.LONGITUDE, robot.config.DARKSKY_KEY)
+  robot.logger.debug(robot.config.LATITUDE, robot.config.LONGITUDE, robot.config.DARKSKY_KEY);
   if (!robot.config.LATITUDE || !robot.config.LONGITUDE || !robot.config.DARKSKY_KEY) {
     robot.logger.warn(`[ForecastIO] LATITUDE, LONGITUDE, and DARKSKY_KEY config keys
         required, not configuring`);
@@ -27,7 +27,7 @@ export default function(robot) {
   refreshForecast();
 
   robot.router.get('/forecastio/', (req, res) => {
-  	console.log("Get forecast");
+    robot.logger.info('[forecastio] Get forecast');
     res.json(forecast);
-  })
+  });
 }

@@ -2,11 +2,11 @@ import * as process from 'process';
 
 export default class Config {
   id: string;
-  name: string;
-  baseUrl = process.env.BASE_URL || "http://localhost:8080";
+  name = process.env.VERONICA_NAME || 'veronica';
+  baseUrl = process.env.BASE_URL || 'http://localhost:8080';
   MODULES = [
-    //"./modules/googleCalendar",
-    //"./modules/uber"
+    // './modules/googleCalendar',
+    // './modules/uber'
   ];
 
   adapters = [
@@ -27,18 +27,18 @@ export default class Config {
     './plugins/meditation',
     './plugins/alarm',
     './plugins/dogecoin',
-    //'./plugins/remember',
-    //'./plugins/echo',
-    //'./plugins/deploy',
-    //'./plugins/help',
-    //'./plugins/frontendQuote/index',
-    //'./plugins/goodmorning',
-    //'./plugins/weather',
-    //'../node_modules/hubot-scripts/src/scripts/ackbar.coffee',
-    //'../node_modules/hubot-scripts/src/scripts/coin.coffee',
-    //'./node_modules/hubot-scripts/src/scripts/dealwithit.coffee',
-    //'../node_modules/hubot-scripts/src/scripts/go-for-it.coffee',
-    //'../node_modules/hubot-scripts/src/scripts/xkcd.coffee',
+    // './plugins/remember',
+    // './plugins/echo',
+    // './plugins/deploy',
+    // './plugins/help',
+    // './plugins/frontendQuote/index',
+    // './plugins/goodmorning',
+    // './plugins/weather',
+    // '../node_modules/hubot-scripts/src/scripts/ackbar.coffee',
+    // '../node_modules/hubot-scripts/src/scripts/coin.coffee',
+    // './node_modules/hubot-scripts/src/scripts/dealwithit.coffee',
+    // '../node_modules/hubot-scripts/src/scripts/go-for-it.coffee',
+    // '../node_modules/hubot-scripts/src/scripts/xkcd.coffee',
   ];
   UBER_CLIENT_ID = '';
   UBER_CLIENT_SECRET = '';
@@ -50,47 +50,49 @@ export default class Config {
   CTA_TRAIN_MAP_ID = process.env.CTA_TRAIN_MAP_ID || '41320';
   DARKSKY_KEY = process.env.DARKSKY_KEY;
   GOOGLE_CALENDAR_CLIENT_SECRET = {
-    "installed": {
-      "client_id": "",
-      "project_id": "",
-      "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-      "token_uri": "https://accounts.google.com/o/oauth2/token",
-      "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-      "client_secret": "",
-      "redirect_uris": ["urn:ietf:wg:oauth:2.0:oob", "http://localhost"]
+    'installed': {
+      'client_id': '',
+      'project_id': '',
+      'auth_uri': 'https://accounts.google.com/o/oauth2/auth',
+      'token_uri': 'https://accounts.google.com/o/oauth2/token',
+      'auth_provider_x509_cert_url': 'https://www.googleapis.com/oauth2/v1/certs',
+      'client_secret': '',
+      'redirect_uris': ['urn:ietf:wg:oauth:2.0:oob', 'http://localhost']
     }
   };
   CALENDAR_NAMES = ['LBB', 'Bills', 'pcsforeducation@gmail.com', 'josh.gachnang@triggrhealth.com'];
+  /* tslint:disable */
   QUOTES = [
-    "Look at that sexy dude!",
-    "Woah, stylin' today",
-    "Damn guuuurrrrl",
-    "Such sexy, much handsome, wow",
-    "You are having a great hair day",
-    "I'm jealous of that shirt",
-    "Go kick some ass today!",
-    "Who's world is that? Josh Gachnang's world."
+    'Look at that sexy dude!',
+    'Woah, stylin\' today',
+    'Damn guuuurrrrl',
+    'Such sexy, much handsome, wow',
+    'You are having a great hair day',
+    'I\'m jealous of that shirt',
+    'Go kick some ass today!',
+    'Who\'s world is that? Josh Gachnang\'s world.'
   ];
   INSPIRATIONAL_QUOTES = [
-    `"It is not the mountain we conquer, but ourselves." ―Sir Edmund Hillary`,
-    `"Twenty years from now you will be more disappointed by the things you didn't do than by the ones you did do. So throw off the bowlines. Sail away from the safe harbor. Catch the trade winds in your sail. Explore. Dream. Discover." ―Mark Twain`,
-    `"Multitasking is a lie" ―Gary Keller`,
+    `'It is not the mountain we conquer, but ourselves.' ―Sir Edmund Hillary`,
+    `'Twenty years from now you will be more disappointed by the things you didn't do than by the ones you did do. So throw off the bowlines. Sail away from the safe harbor. Catch the trade winds in your sail. Explore. Dream. Discover.' ―Mark Twain`,
+    `'Multitasking is a lie' ―Gary Keller`,
   ];
+  /* tslint:enable */
   GUIDED_MEDITATION_URL = process.env.GUIDED_MEDITATION_URL;
   LAYOUT = {
     topLeft: [
-      "clock-simple",
-      "google-calendar"
+      'clock-simple',
+      'google-calendar'
     ],
     topCenter: [
-      "reason-sober"
+      'reason-sober'
     ],
     topRight: [
-      "forecastio-simple"
+      'forecastio-simple'
     ],
     bottomLeft: [
-      "cta-train-schedule",
-      "uber-estimate"
+      'cta-train-schedule',
+      'uber-estimate'
     ],
     bottomCenter: [],
     bottomRight: [
@@ -103,18 +105,18 @@ export default class Config {
       'callbackURL': 'https://recipe.nang.in/auth/google/callback'
     }
   };
-  JWT_SECRET = "lol";
-  SESSION_SECRET = "lmao";
-  IMGUR_CLIENT_ID = "";
-  IMGUR_CLIENT_SECRET = "";
-  IMGUR_PASSWORD = "";
-  IMGUR_EMAIL = "";
+  JWT_SECRET = 'lol';
+  SESSION_SECRET = 'lmao';
+  IMGUR_CLIENT_ID = '';
+  IMGUR_CLIENT_SECRET = '';
+  IMGUR_PASSWORD = '';
+  IMGUR_EMAIL = '';
   // API Token from Slack custom bot integration
-  SLACK_TOKEN = "";
-  BOT_NAME: string = "R2-D2";
+  SLACK_TOKEN = '';
+  BOT_NAME: string = 'R2-D2';
   PLUGINS = {
       DEPLOY: {
-        DEPLOY_COMMAND: "cd /var/deploy && make deploy"
+        DEPLOY_COMMAND: 'cd /var/deploy && make deploy'
       }
-    }
+    };
 };

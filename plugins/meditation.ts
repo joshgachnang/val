@@ -1,7 +1,6 @@
-import {default as AlexaAdapter, AlexaMessage} from '../adapters/alexa';
+import {AlexaMessage, default as AlexaAdapter} from '../adapters/alexa';
 import Response from '../response';
 import Robot from '../robot';
-
 
 export default function(robot: Robot) {
   // Register an Alexa Intent
@@ -12,18 +11,18 @@ export default function(robot: Robot) {
   }
 
   robot.hear(/start meditation/i, {}, (response: Response) => {
-    if(!response) return;
+    if (!response) return;
     if (response.message.msgType === 'alexa') {
       let msg = response.message as AlexaMessage;
-      console.log(msg);
-      var stream = {
-        "url": robot.config.GUIDED_MEDITATION_URL,
-        "token": 'sometoken',
-        "offsetInMilliseconds": 0
+      robot.logger.debug(msg);
+      let stream = {
+        'url': robot.config.GUIDED_MEDITATION_URL,
+        'token': 'sometoken',
+        'offsetInMilliseconds': 0
       };
-      msg.alexaResponse.audioPlayerPlayStream("REPLACE_ALL", stream);
+      msg.alexaResponse.audioPlayerPlayStream('REPLACE_ALL', stream);
       msg.alexaResponse.send();
-      console.log('sent meditation');
+      robot.logger.debug('sent meditation');
     } else {
       response.reply(robot.config.GUIDED_MEDITATION_URL);
     }

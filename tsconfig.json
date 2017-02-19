@@ -1,12 +1,14 @@
 {
     "compilerOptions": {
-        "sourceMap":  true,
-        "outDir": "./built",
         "allowJs": true,
-        "target": "es5",
+        "experimentalDecorators": true,
         "moduleResolution": "node",
         "noImplicitReturns": true,
-        "noFallthroughCasesInSwitch": true
+        "noFallthroughCasesInSwitch": true,
+        "outDir": "./built",
+        "removeComments": false,
+        "sourceMap":  true,
+        "target": "es5"
     },
     "typeRoots": [ "node_modules/@types" ],
     "include": [
@@ -23,6 +25,7 @@
         "server.ts",
         "user.ts",
 				"adapters/*",
-				"plugins/*"
+				"plugins/*",
+        "test/*"
     ]
 }

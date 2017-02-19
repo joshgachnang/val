@@ -4,20 +4,22 @@
   "description": "A chat bot based on Hubot to automate your life",
   "main": "server.js",
   "scripts": {
-    "build": "npm build:clean & npm compile",
+    "build": "npm run build:clean && npm run compile",
     "build:clean": "rm -rf built/*",
-    "compile": "mkdir -p built/config/ && tsc && cp envfile built/",
+    "compile": "mkdir -p built/config/ && cp -a cta-node built/ && cp -a thirdParty built/ && cp envfile built/ | true && tsc",
     "docker": "npm run compile && docker build -t servercobra/veronica . && docker push servercobra/veronica",
     "dev": "npm run watch",
     "deploy": "npm run docker && npm run hyper",
     "hyper": "hyper stop veronica; hyper rm veronica; hyper pull servercobra/veronica; hyper run -d --name veronica -p 8080:8080 --env-file prodenvfile servercobra/veronica && hyper fip attach 199.245.57.103 veronica",
+    "lint": "tslint adapters/*.ts plugins/*.ts test/*.ts *.ts",
+    "mocha": "mocha built/test/testPlugins.js",
     "prebuild": "npm run build:clean",
     "serve": "npm run watch:node",
     "start": "node built/server.js",
-    "test": "mocha",
+    "test": "npm run lint && npm run build && npm run mocha",
     "watch": "concurrently --kill-others 'npm run watch:typescript' 'npm run serve'",
     "watch:node": "nodemon built/server.js",
-    "watch:typescript": "tsc -w"
+    "watch:typescript": "mocha-typescript-watch built/test/testPlugins.js"
   },
   "author": "Josh Gachnang",
   "license": "GPL-3.0",
@@ -62,6 +64,7 @@
     "mongoose": "^4.4.14",
     "morgan": "^1.7.0",
     "multer": "^1.2.0",
+    "node-gyp": "^3.4.0",
     "node-rescuetime": "^0.1.1",
     "node-uber": "0.0.7",
     "parse5": "^2.2.2",
@@ -89,6 +92,7 @@
     "js-combinatorics": "^0.5.0"
   },
   "devDependencies": {
+    "@types/node": "^6.0.63",
     "babel-cli": "^6.14.0",
     "babel-polyfill": "^6.13.0",
     "babel-preset-es2015": "^6.14.0",
@@ -98,9 +102,11 @@
     "csscomb": "^3.1.7",
     "debowerify": "^1.5.0",
     "mocha": "^2.5.3",
+    "mocha-typescript": "^1.0.21",
     "nodemon": "^1.9.2",
     "rimraf": "^2.5.4",
-    "typescript-eslint-parser": "^1.0.2",
+    "tslint": "^4.4.2",
+    "typescript": "^2.1.6",
     "watchify": "^3.7.0"
   },
   "babel": {

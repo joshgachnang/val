@@ -1,5 +1,5 @@
-import * as moment from 'moment-timezone';
 import * as crypto from 'crypto';
+import * as moment from 'moment-timezone';
 
 import Response from '../response';
 import Robot from '../robot';
@@ -32,7 +32,7 @@ export default function(robot) {
   function getAlarms() {
     let alarms = robot.brain.get('alarms');
     robot.logger.debug(`[alarm] existing alarms: ${alarms}`);
-    if (!alarms) { return [] };
+    if (!alarms) { return []; };
     alarms = alarms.map((a) => JSON.parse(a));
     return alarms;
   }
@@ -44,7 +44,7 @@ export default function(robot) {
 
   robot.hear(/add (\w+) alarm at ([\w\d:]+)/i, {}, (response: Response) => {
     if (!response) {
-      return
+      return;
     }
     let repeat = response.match[1];
     let time = response.match[2];
@@ -61,7 +61,7 @@ export default function(robot) {
 
     let existingAlarms = getAlarms();
     if (existingAlarms.find((a) => {
-        return a.time === alarm.time && a.repeats === alarm.repeats
+        return a.time === alarm.time && a.repeats === alarm.repeats;
       })) {
       response.reply('alarm already exists');
       return;
@@ -81,6 +81,6 @@ export default function(robot) {
 
   robot.router.get('/alarms', (req, res) => {
     let alarms = getAlarms();
-    res.json({alarms: alarms});
+    res.json({alarms});
   });
 }

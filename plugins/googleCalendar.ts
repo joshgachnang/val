@@ -5,8 +5,8 @@ import * as moment from 'moment-timezone';
 
 import AlexaAdapter from '../adapters/alexa';
 import Config from '../config';
-import Robot from '../robot';
 import Response from '../response';
+import Robot from '../robot';
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
 const AUTH_TOKEN_KEY = 'googleAuthToken';
@@ -17,7 +17,7 @@ export default function(robot: Robot) {
   let credentials = getClientSecret();
   let clientSecret = credentials.installed.client_secret;
   let clientId = credentials.installed.client_id;
-  //let redirectUrl = robot.config.baseUrl + '/calendars/oauth_redirect';
+  // let redirectUrl = robot.config.baseUrl + '/calendars/oauth_redirect';
   let redirectUrl = credentials.installed.redirect_uris[0];
   let auth = new googleAuth();
   let oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
@@ -30,7 +30,7 @@ export default function(robot: Robot) {
         });
       });
     } catch (e) {
-      res.status(400).send({error: "No calendars configured"});
+      res.status(400).send({error: 'No calendars configured'});
     }
   });
 
@@ -68,7 +68,7 @@ export default function(robot: Robot) {
         'mainText': quote,
 
       }]);
-    })
+    });
   });
 
   function getRandomQuote() {
@@ -82,29 +82,29 @@ export default function(robot: Robot) {
     try {
       authorize(() => {
         listEvents((events) => {
-          let dayEvents = "";
-          let timeEvents = "";
-          let res = "";
+          let dayEvents = '';
+          let timeEvents = '';
+          let res = '';
           for (let event of events) {
             if (!event.start) {
               robot.logger.warn(`[googleCalendar] Event has no start: ${event}`);
             }
             let start = moment(event.start.dateTime || event.start.date, 'YYYY-MM-DD[T]HH:mmss-Z');
-            if (start.diff(today, 'days') == 0) {
+            if (start.diff(today, 'days') === 0) {
               let summary = event.summary;
               if (event.start.date) {
-                if (dayEvents != "") {
-                  dayEvents += " and ";
+                if (dayEvents !== '') {
+                  dayEvents += ' and ';
                 }
                 dayEvents += `${summary}`;
               } else {
-                timeEvents += ` At ${start.format('h:mm a')}: ${summary}.`
+                timeEvents += ` At ${start.format('h:mm a')}: ${summary}.`;
               }
             }
           }
-          let leader = "";
+          let leader = '';
           if (dayEvents || timeEvents) {
-            leader = "Here's today's agenda:";
+            leader = 'Here\'s today\'s agenda:';
           }
           if (dayEvents) {
             dayEvents = `All day, you have: ${dayEvents}`;
@@ -213,11 +213,12 @@ export default function(robot: Robot) {
 
     for (let calendarName of config.CALENDAR_NAMES) {
       let calendarIds = calendars.filter((c) => {
-        return c.summary == calendarName
+        return c.summary === calendarName;
       });
 
       if (calendarIds.length !== 1) {
-        robot.logger.warn(`[googleCalendar] Number of calendars matching name '${calendarName}' was not 1, was ${calendarIds.length}. Not fetching.`);
+        robot.logger.warn(`[googleCalendar] Number of calendars matching name '${calendarName}' was not 1,
+was ${calendarIds.length}. Not fetching.`);
         continue;
       }
       let min = moment.tz('America/Chicago').toISOString();
@@ -241,7 +242,7 @@ export default function(robot: Robot) {
 
         // Eww. Promise.all this..
         counter += 1;
-        if (counter == config.CALENDAR_NAMES.length) {
+        if (counter === config.CALENDAR_NAMES.length) {
           // flatten
           events = [].concat.apply([], events);
           callback(events);
@@ -270,6 +271,6 @@ export default function(robot: Robot) {
         // TODO could use calendars.etag to not fetch more often than necessary
         robot.brain.set('calendarList', calendars.items);
       }
-    })
+    });
   }
 };

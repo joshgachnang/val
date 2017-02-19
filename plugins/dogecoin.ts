@@ -2,7 +2,6 @@ import * as moment from 'moment-timezone';
 import Response from '../response';
 import Robot from '../robot';
 
-
 // Standalone alexa app for dogecoin
 export default function(robot: Robot) {
   let price = 0.0;
@@ -18,7 +17,7 @@ export default function(robot: Robot) {
   }
 
   setInterval(getDogecoinPrice, 5 * 60 * 1000);
-  getDogecoinPrice()
+  getDogecoinPrice();
 
   robot.router.get('/dogecoin/flashbriefing', (req, res) => {
     let pricePer = (price * 10000).toFixed(2);
@@ -29,6 +28,4 @@ export default function(robot: Robot) {
       'mainText': `The current dogecoin price is $${pricePer} per ten thousand. Wow. Much price.`,
     });
   });
-
-
 }

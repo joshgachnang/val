@@ -1,6 +1,8 @@
 Veronica
 ----
 
+[](https://travis-ci.org/pcsforeducation/veronica#)
+
 An chatbot for running my life. Based on Hubot, but with multiple simultaneous
 adapters. Currently Alexa, Twilio, and Slack are supported.
 

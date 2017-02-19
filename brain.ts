@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 
 import {EventEmitter} from 'events';
-import User from "./user";
-import Robot from "./robot";
-import * as _ from "lodash";
+import * as _ from 'lodash';
+import Robot from './robot';
+import User from './user';
 
 export default class Brain extends EventEmitter {
   robot: Robot;
@@ -17,15 +17,15 @@ export default class Brain extends EventEmitter {
     this.data = {
       users: {},
       _private: {}
-    }
+    };
     this.autoSave = true;
-    this.robot.on("running", () => {
-      this.resetSaveInterval(5)
+    this.robot.on('running', () => {
+      this.resetSaveInterval(5);
     });
   }
 
   set(key, value) {
-    let pair: any
+    let pair: any;
     if (key === Object(key)) {
       pair = key;
     } else {
