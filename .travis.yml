@@ -16,6 +16,7 @@ matrix:
 install:
   - npm uninstall typescript
   - npm uninstall tslint
+  - npm install -g node-gyp
   - npm install
   - npm update
 
