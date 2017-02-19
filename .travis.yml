@@ -8,8 +8,7 @@ env:
 
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y build-essential make python
-  - npm install npm -g
+  - sudo apt-get install -y build-essential make python gcc-4.8 g++-4.8
 
 matrix:
   fast_finish: true
