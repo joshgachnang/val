@@ -9,6 +9,7 @@ env:
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y build-essential make python
+  - npm install npm -g
 
 matrix:
   fast_finish: true
