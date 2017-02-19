@@ -64,6 +64,7 @@
     "mongoose": "^4.4.14",
     "morgan": "^1.7.0",
     "multer": "^1.2.0",
+    "node-gyp": "^3.4.0",
     "node-rescuetime": "^0.1.1",
     "node-uber": "0.0.7",
     "parse5": "^2.2.2",
