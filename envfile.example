@@ -1,3 +1,4 @@
+DEV=true
 FORECASTIO_KEY=something
 LATITUDE=something
 LONGITUDE=something

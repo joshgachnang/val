@@ -1,16 +1,15 @@
-'use strict';
-
 const HTTP = require('http');
 const QS = require('querystring');
 import Adapter from '../adapter';
 import {TextMessage} from '../message';
+import Robot from '../robot';
 
 export default class Twilio extends Adapter {
   sid: string;
   token: string;
   fromNumber: string;
 
-  constructor(robot) {
+  constructor(robot: Robot) {
     super(robot);
     this.sid   = robot.envKey('TWILIO_SID');
     this.token = robot.envKey('TWILIO_TOKEN');

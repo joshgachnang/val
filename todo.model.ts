@@ -1,5 +1,5 @@
 export default class Todo {
-  todoId: number; // required
+  id: number; // required
   text: string; // required
   order: number; // required
   list: string = 'default';
@@ -10,7 +10,11 @@ export default class Todo {
   removed: boolean = false;
 
   constructor(data) {
-    if (!data.todoId) data.todoId = this.generateTodoId();
+    if (!data.id) {
+      data.id = this.generateTodoId();
+    } else {
+      this.id = data.id;
+    };
     if (!data.text) throw new Error('text is a required field');
     if (!data.text) throw new Error('order is a required field');
     this.todoId = data.todoId;

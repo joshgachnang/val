@@ -1,5 +1,3 @@
-'use strict';
-
 import {EventEmitter} from 'events';
 import * as _ from 'lodash';
 import Robot from './robot';
@@ -15,7 +13,7 @@ export default class Brain extends EventEmitter {
     super();
     this.robot = robot;
     this.data = {
-      users: {},
+      users: {}, // id: User
       _private: {}
     };
     this.autoSave = true;
@@ -24,7 +22,7 @@ export default class Brain extends EventEmitter {
     });
   }
 
-  set(key, value) {
+  public set(key, value) {
     let pair: any;
     if (key === Object(key)) {
       pair = key;
@@ -38,56 +36,72 @@ export default class Brain extends EventEmitter {
     return this;
   }
 
-  get(key) {
+  public get(key) {
     return this.data._private[key] != null ? this.data._private[key] : null;
   }
 
-  remove(key) {
+  public remove(key) {
     if (this.data._private[key] != null) { return delete this.data._private[key]; } else {
       return null;
     }
   }
 
-  mergeData(data) {
+  public mergeData(data) {
     if (data) {
       _.extend(this.data, data);
     }
+    this.robot.logger.info(`[brain] Merged data, current keys: ${Object.keys(this.data._private)}`);
     this.emit('loaded', this.data);
   }
 
-  save() {
+  public save() {
     this.emit('save', this.data);
   }
 
-  close() {
+  public close() {
     clearInterval(this.saveInterval);
     this.save();
     this.emit('close');
   }
 
-  setAutoSave(enabled) {
+  public setAutoSave(enabled) {
     this.autoSave = enabled;
   }
 
-  resetSaveInterval(seconds) {
+  public resetSaveInterval(seconds) {
     if (this.saveInterval) { clearInterval(this.saveInterval); }
     return this.saveInterval = setInterval(() => {
       if (this.autoSave) { return this.save(); }
     }, seconds * 1000);
   }
 
-  userForId(id, options) {
-    let user = this.data.users[id];
-    if (!user) {
-      user = new User(id, options);
-      this.data.users[id] = user;
+  public userForId(id, options = {}): User {
+    if (!id) {
+      this.robot.logger.warn('userForId cannot search for undefined id');
+      return undefined;
     }
-
-    if (options && options.room && (!user.room || user.room !== options.room)) {
-    user = new User(id, options);
-    this.data.users[id] = user;
+    // Ask each user object if the id is contained in thir user object
+    let user: User;
+    //this.robot.logger.debug(`searching for user by id: ${id}`);
+    for (let u of Object.values(this.data.users)) {
+      if (u.containsId(id)) {
+        user = u;
+        break;
       }
+    }
+    if (!user) {
+      return undefined;
+    } else {
+      return user;
+    }
+  }
 
-    return user;
+  // Update or create new user
+  public updateUser(user: User) {
+    if (!user || !user.id) {
+      this.robot.logger.warn(`Cannot update undefined user: ${user}`);
+      return;
+    }
+    this.data.users[user.id] = user;
   }
 }

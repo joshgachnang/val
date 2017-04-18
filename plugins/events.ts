@@ -44,12 +44,23 @@ export default function(robot: Robot) {
     return res.json({events: getEvents()});
   });
 
+  robot.router.get('/standup', (req, res) => {
+    let html = '<h1>Since yesterday</h1>';
+    for (let e of getEvents()) {
+      let time = moment(e.created);
+      if (moment().diff(time, 'hours') < 27) {
+        html += `<p>${time.format('ddd, HH:mm')}: ${e.label} - ${e.description}</p>`;
+      }
+    }
+    return res.send(html);
+  });
+
   robot.router.get('/eventSummary', (req, res) => {
     let html = '<h1>This weeks events</h1>';
     for (let e of getEvents()) {
       let time = moment(e.created);
-      if (time.diff(moment(), 'days') < 7) {
-        html += `<p>${time.format('ddd, k:mA')}: ${e.label} - ${e.description}</p>`;
+      if (moment().diff(time, 'days') < 7) {
+        html += `<p>${time.format('ddd, HH:mm')}: ${e.label} - ${e.description}</p>`;
       }
     }
     return res.send(html);

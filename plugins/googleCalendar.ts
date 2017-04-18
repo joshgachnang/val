@@ -49,6 +49,10 @@ export default function(robot: Robot) {
 
   robot.hear(/What is on my agenda/i, {}, (response: Response) => {
     getAgenda((agenda) => {
+      if (!response) {
+        // TODO: What the fuck.
+        return;
+      };
       response.reply(agenda);
     });
   });
@@ -85,6 +89,7 @@ export default function(robot: Robot) {
           let dayEvents = '';
           let timeEvents = '';
           let res = '';
+          events = events.sort((a, b) => a.start.dateTime - b.start.dateTime);
           for (let event of events) {
             if (!event.start) {
               robot.logger.warn(`[googleCalendar] Event has no start: ${event}`);

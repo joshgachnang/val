@@ -15,7 +15,6 @@ export default function (robot: Robot) {
   updateTrainSchedule();
 
   robot.router.get('/cta', (req, res) => {
-    robot.logger.debug('get cta');
     res.json({trains: trainArrivals});
   });
 

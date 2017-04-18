@@ -16,6 +16,7 @@ import Envelope from './envelope';
 import frontend from './frontend';
 import {Listener, TextListener} from './listener';
 import {Message, TextMessage} from './message';
+import './polyfill';
 import Response from './response';
 import User from './user';
 
@@ -98,9 +99,20 @@ export default class Robot extends EventEmitter {
 
     for (let plugin of config.plugins) {
       this.logger.info('[Robot] loading plugin:', plugin);
-      let pluginModule = require(plugin);
-      // Use default here to get the default exported function
-      pluginModule.default(this);
+      let pluginModule;
+      try {
+        pluginModule = require(plugin);
+      } catch (e) {
+        this.logger.warn(`Could not find plugin ${plugin}: ${e}`);
+        continue;
+      }
+      try {
+        // Use default here to get the default exported function
+        pluginModule.default(this);
+      } catch (e) {
+        this.logger.warn(`Failed to initialize plugin ${plugin}: ${e}`);
+        continue;
+      }
       let filename = require.resolve(plugin);
       this.parseHelp(filename);
     }
@@ -213,8 +225,7 @@ export default class Robot extends EventEmitter {
   }
 
   reply(envelope: Envelope, user: User, messages) {
-    // robot.logger.debug('ROBOT REPLY', envelope, user, messages)
-    this.logger.debug(`Attempting to reply to ${user} in #${envelope.room}, message: ${messages}`);
+    this.logger.debug(`Attempting to reply to ${user} in #${envelope.room.name}, message: ${messages}`);
 
     if (!Array.isArray(messages)) {
       messages = [messages];
@@ -279,7 +290,12 @@ export default class Robot extends EventEmitter {
   }
 
   receive(message: Message, adapter: Adapter, callback) {
-    this.logger.info('received message');
+    let msg = message as TextMessage;
+    if (msg) {
+      this.logger.info('received message', msg.text);
+    } else {
+      this.logger.info('msg error');
+    }
 
     for (let listener of this.pluginListeners) {
       this.logger.debug(listener.matcher);

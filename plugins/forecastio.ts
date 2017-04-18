@@ -17,17 +17,17 @@ export default function(robot) {
 
   function refreshForecast() {
     request(DARKSKY_URL, (error, res, body) => {
+      robot.logger.debug('[forecastio] Refreshed forecast');
       forecast = JSON.parse(body);
     });
   }
 
-  setTimeout(() => {
+  setInterval(() => {
     refreshForecast();
-  }, 60 * 1000);
+  }, 5 * 60 * 1000);
   refreshForecast();
 
   robot.router.get('/forecastio/', (req, res) => {
-    robot.logger.info('[forecastio] Get forecast');
     res.json(forecast);
   });
 }

@@ -44,21 +44,24 @@ export default function(robot) {
           priv[doc.key] = doc.value;
         }
         cache = deepClone(priv);
-        robot.brain.mergeData({priv});
+        robot.brain.mergeData({_private: priv});
         robot.brain.resetSaveInterval(10);
         return robot.brain.setAutoSave(true);
       })
     );
 
     // save data into mongodb
-    return robot.brain.on('save', data =>
-      db.collection('brain', (err, collection) =>
-        (() => {
+    return robot.brain.on('save', data => {
+      db.collection('brain', (err, collection) => {
           let result = [];
           for (let k in data._private) {
             let v = data._private[k];
-            result.push((function(k, v) {
-              if (_.isEqual(cache[k], v)) { return; }  // skip not modified key
+//            	robot.logger.debug(`cache same? ${cache[k]},  ${v}`);
+              if (_.isEqual(cache[k], v)) {
+                // skip unmodified keys
+                // robot.logger.debug(`[mongo-brain] cache is equal, not saving`);
+                continue;
+              }
               robot.logger.debug(`save \"${k}\" into mongodb-brain`);
               cache[k] = deepClone(v);
               collection.update({
@@ -69,13 +72,13 @@ export default function(robot) {
               }, {
                 upsert: true
               }, function(err, res) {
-                if (err) { return robot.logger.error(err); }
-              });
-            })(k, v));
+                if (err) {
+                  robot.logger.error(`[mongo-brain] ${err}`);
+                }
+              }
+            );
           }
-          return result;
-        })()
-      )
-    );
+        });
+    });
   });
 };

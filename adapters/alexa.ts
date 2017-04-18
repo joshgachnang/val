@@ -120,7 +120,8 @@ export default class AlexaAdapter extends Adapter {
   }
 
   receivedIntent(req, res, intent) {
-    let user = new User('josh', 'josh');
+    // TODO: save this to the brain when we actually have login
+    let user = new User({alexa: {id: 'josh', name: 'josh'}});
     this.robot.logger.debug('SLOTS', req.data.request.slots);
     let text = intent.getText(req.slots);
     let message = new AlexaMessage(user, req, res, intent, this);

@@ -8,11 +8,13 @@ export default class Config {
     // './modules/googleCalendar',
     // './modules/uber'
   ];
+  DEV = process.env.DEV || 'false';
 
   adapters = [
     './adapters/slack',
     './adapters/twilio',
     './adapters/alexa',
+    './adapters/ionic',
   ];
 
   plugins = [
@@ -27,6 +29,9 @@ export default class Config {
     './plugins/meditation',
     './plugins/alarm',
     './plugins/dogecoin',
+    './plugins/events',
+    './plugins/todo',
+    './plugins/triviastats',
     // './plugins/remember',
     // './plugins/echo',
     // './plugins/deploy',
@@ -173,7 +178,8 @@ export default class Config {
     `'It is not the mountain we conquer, but ourselves.' ― Sir Edmund Hillary`,
     `'Twenty years from now you will be more disappointed by the things you didn't do than by the ones you did do. So throw off the bowlines. Sail away from the safe harbor. Catch the trade winds in your sail. Explore. Dream. Discover.' ― Mark Twain`,
     `'Multitasking is a lie' ― Gary Keller`,
-  	`"Your time is limited, so don't waste it living someone else's life. Don't be trapped by dogma - which is living with the results of other people's thinking. Don't let the noise of other's opinions drown out your own inner voice. And most important, have the courage to follow your heart and intuition." - Steve Jobs`,
+    `"Your time is limited, so don't waste it living someone else's life. Don't be trapped by dogma - which is living with the results of other people's thinking. Don't let the noise of other's opinions drown out your own inner voice. And most important, have the courage to follow your heart and intuition." - Steve Jobs`,
+    `"Conquer yourself rather than the world."`,
   ];
   /* tslint:enable */
   GUIDED_MEDITATION_URL = process.env.GUIDED_MEDITATION_URL;

@@ -21,7 +21,7 @@ class PluginTestSuite {
   }
 
   getUser(): User {
-    return new User('fakeId', 'fakeUser');
+    return new User({id: 'id', slack: {id: 'someId', name: 'fakeUser'}});
   }
 
   getTextMessage(text: string): TextMessage {
