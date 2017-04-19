@@ -6,13 +6,11 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 # Install app dependencies
-COPY package.json /usr/src/app/
-COPY node_modules/ /usr/src/app/node_modules/
 RUN npm install -g bower typescript
-
-# Install frontend dependencies
-COPY bower.json /usr/src/app/
-RUN bower install --allow-root
+COPY package.json yarn.lock /usr/src/app/
+RUN npm install -g -s --no-progress yarn && \
+    yarn && \
+    yarn cache clean
 
 # Install and compile app
 COPY ./ /usr/src/app
@@ -21,6 +19,4 @@ RUN tsc
 
 EXPOSE 8080
 
-CMD [ "npm", "build" ]
-
-CMD [ "npm", "start" ]
+CMD [ "bash", "start.sh" ]

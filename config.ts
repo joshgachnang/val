@@ -32,6 +32,7 @@ export default class Config {
     './plugins/events',
     './plugins/todo',
     './plugins/triviastats',
+    './plugins/healthcheck',
     // './plugins/remember',
     // './plugins/echo',
     // './plugins/deploy',
