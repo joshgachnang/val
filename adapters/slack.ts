@@ -570,6 +570,21 @@ export default class SlackAdapter extends Adapter {
     this.robot.receive(message, this, undefined);
   }
 
+  addSlashCommand(name: string, callback: any) {
+    this.robot.logger.debug(`[slack] adding slash command /${name}`);
+    this.robot.router.post(`/slack/slash/${name}`, (req, res) => {
+      const reply = function(data: string, inChannel: boolean = true) {
+        // TODO: allow data to return more complex types
+        let slashResponse = {
+          'response_type': inChannel ? 'in_channel' : 'ephemeral',
+          'text': data,
+        };
+        res.send(slashResponse);
+      };
+      callback(req.body, reply);
+    });
+  }
+
   // util functions
 
   // Take a slack message and replace the <ID>'s with users, save original

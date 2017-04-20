@@ -33,6 +33,7 @@ export default class Config {
     './plugins/todo',
     './plugins/triviastats',
     './plugins/healthcheck',
+    './plugins/tableflip',
     // './plugins/remember',
     // './plugins/echo',
     // './plugins/deploy',

@@ -40,9 +40,8 @@ export default function(robot: Robot) {
 
       let brainData = robot.brain.get(BRAIN_KEY);
       if (!brainData) {
-        console.log(brainData);
-        console.log('[triviastats] No brain data, not doing anything. Run `resetts`');
-        return
+        this.robot.logger.warn('[triviastats] No brain data, not doing anything. Run `resetts`');
+        return;
       }
       if (brainData.latestHour === hour && brainData.latestYear === year) {
         robot.logger.debug(`[triviastats] Already sent scores for hour ${hour}, ${year}`);
@@ -125,7 +124,7 @@ export default function(robot: Robot) {
   robot.hear(/resetts/i, {}, (res: Response) => {
     robot.logger.debug('Resetting triviastats database');
     robot.brain.set(BRAIN_KEY, {latestHour: 54, latestYear: 2016});
-    robot.send(res.envelope, 'reset the triviastats database');
+    robot.reply(res.envelope, res.envelope.user, 'reset the triviastats database');
     updateScores();
   });
 }

@@ -39,9 +39,9 @@ export class Listener {
   call(message, adapter, responseMiddleware) {
     let match = this.matcher(message);
     if (match) {
-      this.robot.logger.debug(`Listener found match: ${match}`);
+      this.robot.logger.debug(`[listener] found match: ${match}`);
       if (this.regex) {
-        this.robot.logger.debug(`Message '${message.text}' matched regex ${this.regex};` +
+        this.robot.logger.debug(`[listener] Message '${message.text}' matched regex ${this.regex};` +
             `listener.options = ${this.options}`);
       }
 
@@ -49,19 +49,19 @@ export class Listener {
       try {
         response = new Response(this.robot, message, match, adapter);
       } catch (e) {
-        this.robot.logger.error(`Creating response from listener error: ${e}`);
+        this.robot.logger.error(`[listener] Creating response from listener error: ${e}`);
       }
-      this.robot.logger.debug(
-          `Executing listener callback for Message ${message}`, this.callback);
-
-      if (responseMiddleware && typeof responseMiddleware === 'function') {
+     if (responseMiddleware && typeof responseMiddleware === 'function') {
+        this.robot.logger.debug('[listener] executing response middleware');
         responseMiddleware(response);
       }
 
+      this.robot.logger.debug(
+          `[listener] Executing listener callback for Message ${message}`, this.callback);
       try {
         this.callback(response);
       } catch (err) {
-        this.robot.logger.error(`Listener callback error: ${err} ${err.stack}`);
+        this.robot.logger.error(`[listener] callback error: ${err} ${err.stack}`);
         this.robot.emit('error', err);
       }
       return true;

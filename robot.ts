@@ -225,7 +225,7 @@ export default class Robot extends EventEmitter {
   }
 
   reply(envelope: Envelope, user: User, messages) {
-    this.logger.debug(`Attempting to reply to ${user} in #${envelope.room.name}, message: ${messages}`);
+    this.logger.debug(`[Robot] Attempting to reply to ${user} in #${envelope.room.name}, message: ${messages}`);
 
     if (!Array.isArray(messages)) {
       messages = [messages];
@@ -235,14 +235,14 @@ export default class Robot extends EventEmitter {
   }
 
   send(envelope: Envelope, messages) {
-    this.logger.debug(`Sending in ${envelope.room}: ${messages}`);
+    this.logger.debug(`[Robot] Sending in ${envelope.room}: ${messages}`);
 
     if (!Array.isArray(messages)) {
       messages = [messages];
     }
     let adapter = this.adapters[envelope.adapterName];
     if (!adapter) {
-      throw new Error(`Invalid adapter name: ${envelope.adapterName}`);
+      throw new Error(`[Robot] Invalid adapter name: ${envelope.adapterName}`);
     }
     adapter.send(envelope, messages);
   }
@@ -291,14 +291,12 @@ export default class Robot extends EventEmitter {
 
   receive(message: Message, adapter: Adapter, callback) {
     let msg = message as TextMessage;
-    if (msg) {
-      this.logger.info('received message', msg.text);
-    } else {
-      this.logger.info('msg error');
+    if (!msg) {
+      this.logger.info('[Robot] blank message error');
+      return;
     }
-
     for (let listener of this.pluginListeners) {
-      this.logger.debug(listener.matcher);
+      // this.logger.debug('[Robot]', listener.matcher);
       listener.call(message, adapter, callback);
     }
   }
