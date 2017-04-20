@@ -23,7 +23,7 @@ export default function(robot) {
   let mongoUrl = process.env.MONGODB_URL ||
              'mongodb://localhost/hubot-brain';
 
-  robot.logger.debug(`MONGO URL: ${mongoUrl}`);
+  robot.logger.debug(`[mongo-brain] connecting to mongo url: ${mongoUrl}`);
 
   return MongoClient.connect(mongoUrl, function(err, db) {
     if (err) { throw err; }
@@ -56,13 +56,13 @@ export default function(robot) {
           let result = [];
           for (let k in data._private) {
             let v = data._private[k];
-//            	robot.logger.debug(`cache same? ${cache[k]},  ${v}`);
+//              robot.logger.debug(`cache same? ${cache[k]},  ${v}`);
               if (_.isEqual(cache[k], v)) {
                 // skip unmodified keys
                 // robot.logger.debug(`[mongo-brain] cache is equal, not saving`);
                 continue;
               }
-              robot.logger.debug(`save \"${k}\" into mongodb-brain`);
+              robot.logger.debug(`[mongo-brain] save \"${k}\" into mongodb-brain`);
               cache[k] = deepClone(v);
               collection.update({
                 type: '_private',

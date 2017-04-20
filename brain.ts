@@ -77,12 +77,12 @@ export default class Brain extends EventEmitter {
 
   public userForId(id, options = {}): User {
     if (!id) {
-      this.robot.logger.warn('userForId cannot search for undefined id');
+      this.robot.logger.warn('[brain] userForId cannot search for undefined id');
       return undefined;
     }
     // Ask each user object if the id is contained in thir user object
     let user: User;
-    //this.robot.logger.debug(`searching for user by id: ${id}`);
+    // this.robot.logger.debug(`searching for user by id: ${id}`);
     for (let u of Object.values(this.data.users)) {
       if (u.containsId(id)) {
         user = u;
@@ -99,7 +99,7 @@ export default class Brain extends EventEmitter {
   // Update or create new user
   public updateUser(user: User) {
     if (!user || !user.id) {
-      this.robot.logger.warn(`Cannot update undefined user: ${user}`);
+      this.robot.logger.warn(`[brain] Cannot update undefined user: ${user}`);
       return;
     }
     this.data.users[user.id] = user;
