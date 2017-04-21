@@ -31,7 +31,7 @@ export default class Config {
     './plugins/dogecoin',
     './plugins/events',
     './plugins/todo',
-    './plugins/triviastats',
+    // './plugins/triviastats',
     './plugins/healthcheck',
     './plugins/tableflip',
     // './plugins/remember',
