@@ -56,6 +56,10 @@ export class Listener {
         responseMiddleware(response);
       }
 
+      if (!response) {
+        this.robot.logger.warn('[listener] response is undefined, not calling callback');
+        return false;
+      }
       this.robot.logger.debug(
           `[listener] Executing listener callback for Message ${message}`, this.callback);
       try {

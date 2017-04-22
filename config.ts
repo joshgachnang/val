@@ -37,7 +37,7 @@ export default class Config {
     // './plugins/remember',
     // './plugins/echo',
     // './plugins/deploy',
-    // './plugins/help',
+   './plugins/help',
     // './plugins/frontendQuote/index',
     // './plugins/goodmorning',
     // './plugins/weather',

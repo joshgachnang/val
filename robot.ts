@@ -235,7 +235,7 @@ export default class Robot extends EventEmitter {
   }
 
   send(envelope: Envelope, messages) {
-    this.logger.debug(`[Robot] Sending in ${envelope.room}: ${messages}`);
+    this.logger.debug(`[Robot] Sending in ${envelope.room.id} via ${envelope.adapterName}: ${messages}`);
 
     if (!Array.isArray(messages)) {
       messages = [messages];
