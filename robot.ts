@@ -191,7 +191,7 @@ export default class Robot extends EventEmitter {
       if (cleanedLine.toLowerCase() === 'none') {
         continue;
       }
-      nextSection = cleanedLine.toLowerCase().replace(':', '');
+      nextSection = cleanedLine.toLowerCase().replace(':', '').trim();
       if (indexOf.call(HUBOT_DOCUMENTATION_SECTIONS, nextSection) >= 0) {
         currentSection = nextSection;
         scriptDocumentation[currentSection] = [];
