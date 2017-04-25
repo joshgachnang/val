@@ -89,7 +89,9 @@ export default function(robot: Robot) {
           let dayEvents = '';
           let timeEvents = '';
           let res = '';
-          events = events.sort((a, b) => a.start.dateTime - b.start.dateTime);
+          events = events.sort((a, b) => {
+            return (new Date(a.start.dateTime)).getTime() - (new Date(b.start.dateTime)).getTime();
+          });
           for (let event of events) {
             if (!event.start) {
               robot.logger.warn(`[googleCalendar] Event has no start: ${event}`);
@@ -117,7 +119,11 @@ export default function(robot: Robot) {
           if (timeEvents && dayEvents) {
             timeEvents = `And then ${timeEvents}`;
           }
-          callback(`${leader} ${dayEvents}. ${timeEvents}`);
+          if (dayEvents) {
+            callback(`${leader} ${dayEvents}. ${timeEvents}`);
+          } else {
+            callback(`${leader} ${timeEvents}`);
+          }
         });
       });
     } catch (e) {

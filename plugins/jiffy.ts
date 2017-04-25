@@ -2,6 +2,7 @@ import Response from '../response';
 import Robot from '../robot';
 
 const BRAIN_KEY = 'JIFFY';
+
 function intersect(a, b) {
   let t;
   if (b.length > a.length) t = b, b = a, a = t; // indexOf to loop over shorter
@@ -19,12 +20,12 @@ export default function(robot: Robot) {
     let data = robot.brain.get(BRAIN_KEY) || {};
     if (!data.gifs) data.gifs = {};
     let tokens = text.split(' ');
-    if (tokens.length < 3) { // 'add $url ...$tags
-      return reply('usage: "/jiffy add tag1 tag2 ..."');
+    if (tokens.length < 2) { // 'add $url ...$tags
+      return reply('usage: "/jiffyadd tag1 tag2 ..."', false);
     }
 
-    let url = tokens[1];
-    let tags = text.split(' ').splice(2);
+    let url = tokens[0];
+    let tags = text.split(' ').splice(1);
     let updated = false;
     for (let tag of tags) {
       let urls = data.gifs[tag];
@@ -41,9 +42,9 @@ export default function(robot: Robot) {
 
     if (updated) {
       robot.brain.set(BRAIN_KEY, data);
-      return reply(`Added/updated url: ${url}, tags: ${tags}`);
+      return reply(`Added/updated url: ${url}, tags: ${tags}`, false);
     } else {
-      return reply(`Already exists with tags: ${tags}`, true);
+      return reply(`Already exists with tags: ${tags}`, false);
     }
   }
 
@@ -52,12 +53,12 @@ export default function(robot: Robot) {
     let tags = text.split(' ');
 
     if (!data.gifs) {
-      return reply('no gifs yet, please submit one!', true);
+      return reply('no gifs yet, please submit one!', false);
     }
 
     let urls = {};
     for (let tag of tags) {
-      let matches = data.gifs[tag];
+      let matches = data.gifs[tag] || [];
       for (let match of matches) {
         if (urls[match]) {
           urls[match]++;
@@ -77,18 +78,18 @@ export default function(robot: Robot) {
         winnersScore = matches;
         winners = [url];
       } else {
-        return reply(`no gifs match ${tags.join(' ')}, please add one!`, true);
+        return reply(`no gifs match ${tags.join(' ')}, please add one!`, false);
       }
     }
-    return reply(randomFrom(winners), false);
+    return reply(randomFrom(winners), true);
   }
 
   robot.adapters['Slack'].addSlashCommand('jiffy', (body: any, reply: any) => {
-    let tokens = body.text.split(' ');
-    if (tokens.length > 0 && tokens[0] === 'add') {
-      return add(body.text, reply);
-    } else {
-      return search(body.text, reply);
-    }
+    return search(body.text, reply);
   });
+
+  robot.adapters['Slack'].addSlashCommand('jiffyadd', (body: any, reply: any) => {
+    return add(body.text, reply);
+  });
+
 }

@@ -8,7 +8,8 @@ import Robot from '../robot';
 export class Recipe {
   public id: string;
   constructor(public name: string, public description: string, public ingredients: string[],
-              public instructions: string[], public calories: number, id?: string) {
+              public instructions: string[], public calories: number, public cost: number, public servings: number,
+              public ingredientMatches: any, id?: string) {
     if (!id) {
       this.id = (Math.random() + 1).toString(36).substr(2, 16);
     } else {
@@ -27,7 +28,7 @@ export default function(robot: Robot) {
     for (let rd of recipeData) {
       let recipe: Recipe;
       try {
-        recipe = new Recipe(rd.name, rd.description, rd.ingredients, rd.instructions, rd.calories, rd.id);
+        recipe = new Recipe(rd.name, rd.description, rd.ingredients, rd.instructions, rd.calories, rd.cost, rd.servings, rd.ingredientMatches, rd.id);
       } catch (e) {
         robot.logger.warn(`Failed to create recipe instance from data: ${rd}`);
         continue;
@@ -84,12 +85,12 @@ export default function(robot: Robot) {
   });
 
   robot.router.post('/recipes', (req, res) => {
-    robot.logger.debug(`Creating recipe from ${req.body}`);
+    robot.logger.debug(`Creating recipe from ${req.body}`, req.body);
     let recipe: Recipe;
     let ingredients = req.body.ingredients;
     let instructions = req.body.instructions;
     try {
-      recipe = new Recipe(req.body.name, req.body.description, ingredients, instructions, req.body.calories);
+      recipe = new Recipe(req.body.name, req.body.description, ingredients, instructions, req.body.calories, req.body.cost, req.body.servings, req.body.ingredientMatches);
     } catch (e) {
       robot.logger.warn(`Failed to construct recipe from ${req.body}: ${e}`);
       return res.status(400).send(`Failed to construct recipe from ${req.body}: ${e}`);
@@ -100,7 +101,7 @@ export default function(robot: Robot) {
   });
 
   robot.router.put('/recipes/:id', (req, res) => {
-    robot.logger.debug(`updating recipe ${req.params.id}: ${req.body}`);
+    robot.logger.debug(`updating recipe ${req.params.id}: ${req.body}`, req.body);
     let recipe = getRecipe(req.params.id);
     Object.assign(recipe, req.body);
     res.json(saveRecipe(recipe));
@@ -111,5 +112,21 @@ export default function(robot: Robot) {
     let recipes = loadRecipes();
     recipes = recipes.filter((r) => r.id !== req.params.id);
     saveRecipes(recipes);
+  });
+
+  robot.router.get('/ingredients', (req, res) => {
+    let data = robot.brain.get('ingredients') || {};
+    console.log('get ingredients', data);
+    return res.json({ingredients: data});
+  });
+
+  robot.router.post('/ingredients', (req, res) => {
+    let data = req.body;
+    console.log('saving ingredients', data);
+    if (data.ingredients && (Object.keys(data.ingredients).length) > 0) {
+      robot.brain.set('ingredients', data.ingredients);
+      return res.json({});
+    }
+    res.status(400).send();
   });
 }
