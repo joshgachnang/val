@@ -7,6 +7,7 @@ import {existsSync, readFileSync} from 'fs';
 import * as fs from 'fs';
 import * as https from 'https';
 import {env, exit} from 'process';
+import * as request from 'request';
 import * as winston from 'winston';
 
 import Adapter from './adapter';
@@ -170,8 +171,6 @@ export default class Robot extends EventEmitter {
         if (i in this && this[i] === item) return i; } return -1;
       };
 
-    this.logger.debug('[Robot] Parsing help for ' + path);
-
     scriptDocumentation = {};
 
     body = readFileSync(path, 'utf-8');
@@ -285,8 +284,19 @@ export default class Robot extends EventEmitter {
     this.logger.warn('Unsupported action: catchAll', options);
   }
 
+  // Deprecated: use request()
   http(url: string, options: any = {}) {
     return httpClient.create(url, options).header('User-Agent', `${this.name}/1.0`);
+  }
+
+  // Await wrapper around request. The preferred way to make HTTP requests from a plugin
+  async request(body: any) {
+    return new Promise((resolve, reject) => {
+      request(body, (error, response, body) => {
+        if(error) reject(error);
+        else resolve(body);
+      });
+    });
   }
 
   receive(message: Message, adapter: Adapter, callback) {
@@ -299,6 +309,15 @@ export default class Robot extends EventEmitter {
       // this.logger.debug('[Robot]', listener.matcher);
       listener.call(message, adapter, callback);
     }
+  }
+
+  /* Wrap an express .get/.post/etc call so async/await works. See setupExpress for usage. */
+  expressWrap(fn) {
+    return function(req, res, next) {
+      // Make sure to `.catch()` any errors and pass them along to the `next()`
+      // middleware in the chain, in this case the error handler.
+      fn(req).then(returnVal => res.json(returnVal)).catch(next);
+    };
   }
 
   setupExpress() {

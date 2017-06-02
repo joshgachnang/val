@@ -8,12 +8,34 @@ adapters. Currently Alexa, Twilio, and Slack are supported.
 
 Hosts the backend for a magic mirror and a recipe app currently. More to come soon :)
 
-Dev
-----
+# Dev
 
     npm install -g watchify browserify
     
     npm start
+
+# Docs
+
+## Plugin start
+
+A simple boilerplate plugin is available at `plugins/pluginStarter.ts`.
+
+## Async/Await Express
+
+`Robot` contains a function to wrap `Robot.router` Express functions to make
+them handle async/await correctly called `expressWrap()`. Simply wrap the
+callback function you give to the router in this wrapper and you can use
+async/await as you'd expect.
+
+```
+    async function hello() {
+      return 'hello world~';
+    }
+
+    robot.router.get('/hello', robot.expressWrap(async (req) => {
+      return await hello();
+    }));
+```
 
 Icon
 ----
