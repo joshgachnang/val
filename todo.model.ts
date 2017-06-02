@@ -2,7 +2,7 @@ export default class Todo {
   id: number; // required
   text: string; // required
   order: number; // required
-  list: string = 'default';
+  list: string = "default";
   labels: string[] = [];
   due: Date;
   reminder: Date;
@@ -14,9 +14,9 @@ export default class Todo {
       data.id = this.generateTodoId();
     } else {
       this.id = data.id;
-    };
-    if (!data.text) throw new Error('text is a required field');
-    if (!data.text) throw new Error('order is a required field');
+    }
+    if (!data.text) throw new Error("text is a required field");
+    if (!data.text) throw new Error("order is a required field");
     this.todoId = data.todoId;
     this.text = data.text;
     this.order = data.order;

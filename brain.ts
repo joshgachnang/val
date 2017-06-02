@@ -1,7 +1,7 @@
-import {EventEmitter} from 'events';
-import * as _ from 'lodash';
-import Robot from './robot';
-import User from './user';
+import { EventEmitter } from "events";
+import * as _ from "lodash";
+import Robot from "./robot";
+import User from "./user";
 
 export default class Brain extends EventEmitter {
   robot: Robot;
@@ -14,10 +14,10 @@ export default class Brain extends EventEmitter {
     this.robot = robot;
     this.data = {
       users: {}, // id: User
-      _private: {}
+      _private: {},
     };
     this.autoSave = true;
-    this.robot.on('running', () => {
+    this.robot.on("running", () => {
       this.resetSaveInterval(5);
     });
   }
@@ -32,7 +32,7 @@ export default class Brain extends EventEmitter {
     }
 
     _.extend(this.data._private, pair);
-    this.emit('loaded', this.data);
+    this.emit("loaded", this.data);
     return this;
   }
 
@@ -41,7 +41,9 @@ export default class Brain extends EventEmitter {
   }
 
   public remove(key) {
-    if (this.data._private[key] != null) { return delete this.data._private[key]; } else {
+    if (this.data._private[key] != null) {
+      return delete this.data._private[key];
+    } else {
       return null;
     }
   }
@@ -51,17 +53,17 @@ export default class Brain extends EventEmitter {
       _.extend(this.data, data);
     }
     this.robot.logger.info(`[brain] Merged data, current keys: ${Object.keys(this.data._private)}`);
-    this.emit('loaded', this.data);
+    this.emit("loaded", this.data);
   }
 
   public save() {
-    this.emit('save', this.data);
+    this.emit("save", this.data);
   }
 
   public close() {
     clearInterval(this.saveInterval);
     this.save();
-    this.emit('close');
+    this.emit("close");
   }
 
   public setAutoSave(enabled) {
@@ -69,15 +71,19 @@ export default class Brain extends EventEmitter {
   }
 
   public resetSaveInterval(seconds) {
-    if (this.saveInterval) { clearInterval(this.saveInterval); }
-    return this.saveInterval = setInterval(() => {
-      if (this.autoSave) { return this.save(); }
-    }, seconds * 1000);
+    if (this.saveInterval) {
+      clearInterval(this.saveInterval);
+    }
+    return (this.saveInterval = setInterval(() => {
+      if (this.autoSave) {
+        return this.save();
+      }
+    }, seconds * 1000));
   }
 
   public userForId(id, options = {}): User {
     if (!id) {
-      this.robot.logger.warn('[brain] userForId cannot search for undefined id');
+      this.robot.logger.warn("[brain] userForId cannot search for undefined id");
       return undefined;
     }
     // Ask each user object if the id is contained in thir user object

@@ -1,16 +1,16 @@
-import { TextMessage } from '../message';
-import Response from '../response';
-import Robot from '../robot';
+import { TextMessage } from "../message";
+import Response from "../response";
+import Robot from "../robot";
 
-export default function (robot: Robot) {
+export default function(robot: Robot) {
   function echoMessage(res: Response) {
     // Remove the bot's name
-    let replaceRegex = new RegExp(`^@${robot.config.name}`, 'i');
+    let replaceRegex = new RegExp(`^@${robot.config.name}`, "i");
     let message = res.envelope.message as TextMessage;
-    let messageText = message.text.replace(replaceRegex, '');
+    let messageText = message.text.replace(replaceRegex, "");
     res.reply(messageText);
   }
 
   // Register the response handler
   robot.respond(/.+/i, {}, echoMessage);
-};
+}

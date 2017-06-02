@@ -1,11 +1,10 @@
-import Envelope from '../envelope';
-import Response from '../response';
-import Robot from '../robot';
+import Envelope from "../envelope";
+import Response from "../response";
+import Robot from "../robot";
 
 export default function(robot: Robot) {
-
   function extractPhoneNumber(str: string): string {
-    let num = str.match(/\d/g).join('');
+    let num = str.match(/\d/g).join("");
     if (num.length === 10) {
       return num;
     } else {
@@ -24,11 +23,11 @@ export default function(robot: Robot) {
     if (!phoneNumber) {
       robot.logger.debug(`[Users] Invalid phone number, not configuring: ${response.match[1]}`);
       return;
-    };
+    }
 
-    let twilioAdapter = robot.adapters['TwilioAdapter'];
+    let twilioAdapter = robot.adapters["TwilioAdapter"];
     if (!twilioAdapter) {
-      robot.logger.debug('Twilio Adapter not configured, not adding phone number to user');
+      robot.logger.debug("Twilio Adapter not configured, not adding phone number to user");
       return;
     }
 

@@ -1,4 +1,4 @@
-import * as request from 'request';
+import * as request from "request";
 
 export default function(robot) {
   robot.logger.debug(robot.config.LATITUDE, robot.config.LONGITUDE, robot.config.DARKSKY_KEY);
@@ -17,7 +17,7 @@ export default function(robot) {
 
   function refreshForecast() {
     request(DARKSKY_URL, (error, res, body) => {
-      robot.logger.debug('[forecastio] Refreshed forecast');
+      robot.logger.debug("[forecastio] Refreshed forecast");
       forecast = JSON.parse(body);
     });
   }
@@ -27,7 +27,7 @@ export default function(robot) {
   }, 5 * 60 * 1000);
   refreshForecast();
 
-  robot.router.get('/forecastio/', (req, res) => {
+  robot.router.get("/forecastio/", (req, res) => {
     res.json(forecast);
   });
 }

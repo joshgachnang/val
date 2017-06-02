@@ -1,9 +1,9 @@
-'use strict';
+"use strict";
 
-import Adapter from './adapter';
-import Robot from './robot';
-import Room from './room';
-import User from './user';
+import Adapter from "./adapter";
+import Robot from "./robot";
+import Room from "./room";
+import User from "./user";
 
 export class Message {
   robot: Robot;
@@ -11,7 +11,7 @@ export class Message {
   user: User;
   done: any;
   rawData: any;
-  msgType = 'message';
+  msgType = "message";
 
   constructor(user, adapter, done) {
     this.robot = adapter.robot;
@@ -35,11 +35,13 @@ export class TextMessage extends Message {
 
   constructor(user: User, text: string, room: any, id: string, adapter: Adapter, rawData: any) {
     if (!user || !text) {
-      throw new Error(`Cannot create text message without user or text. user:
-        ${user} text: ${text}`);
+      throw new Error(
+        `Cannot create text message without user or text. user:
+        ${user} text: ${text}`,
+      );
     }
     super(user, adapter, false);
-    this.msgType = 'text';
+    this.msgType = "text";
     this.text = text;
     this.room = room;
     this.id = id;

@@ -1,7 +1,7 @@
-import Config from '../config';
-import Envelope from '../envelope';
-import { default as Robot, ResponseCallback } from '../robot';
-import User from '../user';
+import Config from "../config";
+import Envelope from "../envelope";
+import { default as Robot, ResponseCallback } from "../robot";
+import User from "../user";
 
 export default class FakeRobot extends Robot {
   name: string;
@@ -16,23 +16,13 @@ export default class FakeRobot extends Robot {
     this.name = config.name;
   }
 
-  hear(regex: RegExp, options, callback: ResponseCallback) {
+  hear(regex: RegExp, options, callback: ResponseCallback) {}
 
-  }
+  response(regex: RegExp, options, callback: ResponseCallback) {}
 
-  response(regex: RegExp, options, callback: ResponseCallback) {
+  reply(envelope: Envelope, user: User, messages) {}
 
-  }
+  send(envelope: Envelope, messages) {}
 
-  reply(envelope: Envelope, user: User, messages) {
-
-  }
-
-  send(envelope: Envelope, messages) {
-
-  }
-
-  http(url: string, options: any = {}) {
-
-  }
+  http(url: string, options: any = {}) {}
 }

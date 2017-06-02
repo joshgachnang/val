@@ -2,6 +2,8 @@ Veronica
 ----
 
 [](https://travis-ci.org/pcsforeducation/veronica#)
+[![styled with
+prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 
 An chatbot for running my life. Based on Hubot, but with multiple simultaneous
 adapters. Currently Alexa, Twilio, and Slack are supported.

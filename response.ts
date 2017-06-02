@@ -1,9 +1,9 @@
-'use strict';
+"use strict";
 
-import Envelope from './envelope';
-import {Message} from './message';
-import Robot from './robot';
-import User from './user';
+import Envelope from "./envelope";
+import { Message } from "./message";
+import Robot from "./robot";
+import User from "./user";
 
 export default class Response {
   bot: Robot;
@@ -52,9 +52,7 @@ export default class Response {
     return items[Math.floor(Math.random() * items.length)];
   }
 
-  finish() {
-
-  }
+  finish() {}
 
   http(url, options) {
     return this.bot.http(url, options);

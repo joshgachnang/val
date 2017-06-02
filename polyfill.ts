@@ -1,17 +1,17 @@
 interface ObjectConstructor {
-    assign(target: any, ...sources: any[]): any;
-    values(target: any): any;
+  assign(target: any, ...sources: any[]): any;
+  values(target: any): any;
 }
 
 interface Array<T> {
   find(predicate: (search: T) => boolean): T;
 }
 
-if (typeof Object.assign !== 'function') {
-  (function () {
-    Object.assign = function (target) {
+if (typeof Object.assign !== "function") {
+  (function() {
+    Object.assign = function(target) {
       if (target === undefined || target === null) {
-        throw new TypeError('Cannot convert undefined or null to object');
+        throw new TypeError("Cannot convert undefined or null to object");
       }
 
       let output = Object(target);
@@ -30,9 +30,9 @@ if (typeof Object.assign !== 'function') {
   })();
 }
 
-if (typeof Object.values !== 'function') {
-  (function () {
-    Object.values = function (target) {
+if (typeof Object.values !== "function") {
+  (function() {
+    Object.values = function(target) {
       let vals = [];
       for (let key in target) {
         if (target.hasOwnProperty(key)) {

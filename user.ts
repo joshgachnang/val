@@ -30,7 +30,8 @@ export class TwilioUser {
 
 export class AlexaUser {
   public id: string;
-  public name; string;
+  public name;
+  string;
 
   constructor(data: any) {
     this.id = data.id;
@@ -55,7 +56,7 @@ export default class User {
 
   constructor(data: any) {
     if (!data.id) {
-       this.id = Math.random().toString(36).slice(2);
+      this.id = Math.random().toString(36).slice(2);
     } else {
       this.id = data.id;
     }
@@ -93,8 +94,7 @@ export default class User {
   public containsId(id: string) {
     if (this.slack && this.slack.id === id) {
       return true;
-    }
-    else if (this.twilio && this.twilio.id === id) {
+    } else if (this.twilio && this.twilio.id === id) {
       return true;
     }
     return false;

@@ -1,8 +1,8 @@
-'use strict';
+"use strict";
 
-import {TextMessage} from './message';
-import Response from './response';
-import Robot from './robot';
+import { TextMessage } from "./message";
+import Response from "./response";
+import Robot from "./robot";
 
 export class Listener {
   robot: Robot;
@@ -13,7 +13,7 @@ export class Listener {
 
   constructor(robot, matcher, options, callback) {
     if (!matcher) {
-      throw new Error('Missing a matcher for Listener');
+      throw new Error("Missing a matcher for Listener");
     }
 
     if (!callback) {
@@ -25,8 +25,8 @@ export class Listener {
       options.id = null;
     }
 
-    if (!callback || typeof callback !== 'function') {
-      throw new Error('missing a callback for Listener');
+    if (!callback || typeof callback !== "function") {
+      throw new Error("missing a callback for Listener");
     }
 
     this.robot = robot;
@@ -41,8 +41,10 @@ export class Listener {
     if (match) {
       this.robot.logger.debug(`[listener] found match: ${match}`);
       if (this.regex) {
-        this.robot.logger.debug(`[listener] Message '${message.text}' matched regex ${this.regex};` +
-            `listener.options = ${this.options}`);
+        this.robot.logger.debug(
+          `[listener] Message '${message.text}' matched regex ${this.regex};` +
+            `listener.options = ${this.options}`,
+        );
       }
 
       let response: Response;
@@ -51,22 +53,24 @@ export class Listener {
       } catch (e) {
         this.robot.logger.error(`[listener] Creating response from listener error: ${e}`);
       }
-     if (responseMiddleware && typeof responseMiddleware === 'function') {
-        this.robot.logger.debug('[listener] executing response middleware');
+      if (responseMiddleware && typeof responseMiddleware === "function") {
+        this.robot.logger.debug("[listener] executing response middleware");
         responseMiddleware(response);
       }
 
       if (!response) {
-        this.robot.logger.warn('[listener] response is undefined, not calling callback');
+        this.robot.logger.warn("[listener] response is undefined, not calling callback");
         return false;
       }
       this.robot.logger.debug(
-          `[listener] Executing listener callback for Message ${message}`, this.callback);
+        `[listener] Executing listener callback for Message ${message}`,
+        this.callback,
+      );
       try {
         this.callback(response);
       } catch (err) {
         this.robot.logger.error(`[listener] callback error: ${err} ${err.stack}`);
-        this.robot.emit('error', err);
+        this.robot.emit("error", err);
       }
       return true;
     } else {

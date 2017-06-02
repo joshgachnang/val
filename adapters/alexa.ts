@@ -1,11 +1,11 @@
-const alexa = require('../thirdParty/alexa-app/');
-const app = new alexa.app('veronica');
+const alexa = require("../thirdParty/alexa-app/");
+const app = new alexa.app("veronica");
 
-import Adapter from '../adapter';
-import Envelope from '../envelope';
-import {TextMessage} from '../message';
-import Room from '../room';
-import User from '../user';
+import Adapter from "../adapter";
+import Envelope from "../envelope";
+import { TextMessage } from "../message";
+import Room from "../room";
+import User from "../user";
 
 interface AlexaCallback {
   (req: any, res: any): void;
@@ -41,12 +41,11 @@ export class AlexaMessage extends TextMessage {
   alexaIntent: any;
   adapter: Adapter;
 
-  constructor(user: User, request: any, response: any, intent: AlexaIntent,
-        adapter: Adapter) {
+  constructor(user: User, request: any, response: any, intent: AlexaIntent, adapter: Adapter) {
     let text = intent.getText();
-    let room = new Room('alexa');
+    let room = new Room("alexa");
     super(user, text, room, undefined, adapter, undefined);
-    this.msgType = 'alexa';
+    this.msgType = "alexa";
     this.alexaRequest = request;
     this.alexaResponse = response;
     this.alexaIntent = intent;
@@ -56,38 +55,43 @@ export class AlexaMessage extends TextMessage {
 
 export default class AlexaAdapter extends Adapter {
   intents: AlexaIntent[] = [];
-  adapterName = 'AlexaAdapter';
+  adapterName = "AlexaAdapter";
 
   constructor(robot) {
     super(robot);
     this.robot = robot;
 
-//    robot.on('pluginInitialized', this.postPluginInit());
+    //    robot.on('pluginInitialized', this.postPluginInit());
   }
 
   run() {
-    this.robot.router.get('/alexa/schema', (req, res) => {
+    this.robot.router.get("/alexa/schema", (req, res) => {
       let schema = app.schema();
-//      robot.logger.debug('schema', schema);
+      //      robot.logger.debug('schema', schema);
       let utterances = app.utterances();
-      this.robot.logger.debug('UTTERANCES', utterances);
-      utterances = utterances.replace(new RegExp('\\n', 'g'), '<br />');
+      this.robot.logger.debug("UTTERANCES", utterances);
+      utterances = utterances.replace(new RegExp("\\n", "g"), "<br />");
       let template = `<h2>Schema:</h2><p>${schema}</p><h2>Utterances:</h2><p>${utterances}</p>`;
       res.send(template);
     });
 
     // Expose alexa-app
-    app.express(this.robot.router, '/alexa/api/', true);
+    app.express(this.robot.router, "/alexa/api/", true);
 
     app.launch((req, res) => {
-      res.say('hello, my name is veronica.');
+      res.say("hello, my name is veronica.");
     });
 
-    let utterances = ['say the number {1-2|number}'];
-    let slots = { number: 'NUMBER' };
-    let numberIntent = new AlexaIntent('saynumber', utterances, (slots) => {
-      return `you wanted the number ${slots.number}`;
-    }, slots);
+    let utterances = ["say the number {1-2|number}"];
+    let slots = { number: "NUMBER" };
+    let numberIntent = new AlexaIntent(
+      "saynumber",
+      utterances,
+      slots => {
+        return `you wanted the number ${slots.number}`;
+      },
+      slots,
+    );
     this.intents.push(numberIntent);
 
     // app.intent("saynumber", {
@@ -102,17 +106,17 @@ export default class AlexaAdapter extends Adapter {
   }
 
   postPluginInit() {
-    this.robot.logger.debug('[Alexa] Running post plugin init');
+    this.robot.logger.debug("[Alexa] Running post plugin init");
     // Register all the intents and such
 
     for (let intent of this.intents) {
-      let options = {slots: undefined, utterances: intent.utterances};
+      let options = { slots: undefined, utterances: intent.utterances };
       if (intent.slots) {
         options.slots = intent.slots;
       }
       app.intent(intent.intent, options, (req, res) => {
-        this.robot.logger.debug('intent', req.data);
-        this.robot.logger.info('Alexa intent ' + req.name);
+        this.robot.logger.debug("intent", req.data);
+        this.robot.logger.info("Alexa intent " + req.name);
         this.receivedIntent(req, res, intent);
         return false;
       });
@@ -121,8 +125,8 @@ export default class AlexaAdapter extends Adapter {
 
   receivedIntent(req, res, intent) {
     // TODO: save this to the brain when we actually have login
-    let user = new User({alexa: {id: 'josh', name: 'josh'}});
-    this.robot.logger.debug('SLOTS', req.data.request.slots);
+    let user = new User({ alexa: { id: "josh", name: "josh" } });
+    this.robot.logger.debug("SLOTS", req.data.request.slots);
     let text = intent.getText(req.slots);
     let message = new AlexaMessage(user, req, res, intent, this);
     this.receive(message);
@@ -142,10 +146,10 @@ export default class AlexaAdapter extends Adapter {
     let message = envelope.message as AlexaMessage;
     let alexaResponse = message.alexaResponse;
     if (!alexaResponse) {
-      throw new Error('Message did not contain an Alexa Response object. Cannot send.');
+      throw new Error("Message did not contain an Alexa Response object. Cannot send.");
     }
 
-    let res = strings.join('. ');
+    let res = strings.join(". ");
     alexaResponse.say(res).send();
   }
 

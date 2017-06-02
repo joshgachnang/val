@@ -1,15 +1,15 @@
 // Forked from Slackbots to throw out vow, use TS
-import {EventEmitter} from 'events';
+import { EventEmitter } from "events";
 
-import * as _ from 'lodash';
-import * as request from 'request';
-import * as winston from 'winston';
-import * as WebSocket from 'ws';
-import Adapter from '../adapter';
-import {TextMessage} from '../message';
-import Robot from '../robot';
-import Room from '../room';
-import {default as User, SlackUser} from '../user';
+import * as _ from "lodash";
+import * as request from "request";
+import * as winston from "winston";
+import * as WebSocket from "ws";
+import Adapter from "../adapter";
+import { TextMessage } from "../message";
+import Robot from "../robot";
+import Room from "../room";
+import { default as User, SlackUser } from "../user";
 
 interface UserIdMap {
   [id: string]: User;
@@ -19,9 +19,11 @@ function find(arr, params) {
   let result = {};
 
   arr.forEach(function(item) {
-    if (Object.keys(params).every(function(key) {
-          return item[key] === params[key];
-        })) {
+    if (
+      Object.keys(params).every(function(key) {
+        return item[key] === params[key];
+      })
+    ) {
       result = item;
     }
   });
@@ -31,7 +33,7 @@ function find(arr, params) {
 
 function assert(condition, error) {
   if (!condition) {
-    throw new Error('[SlackBot Error] ' + error);
+    throw new Error("[SlackBot Error] " + error);
   }
 }
 
@@ -66,23 +68,27 @@ class SlackBot extends EventEmitter {
    * Starts a Real Time Messaging API session
    */
   login() {
-    this._api('rtm.start', {}).then(function(data) {
-      this.wsUrl = data.url;
-      this.self = data.self;
-      this.team = data.team;
-      this.rooms = data.channels;
-      this.users = data.users;
-      this.ims = data.ims;
-      this.groups = data.groups;
+    this._api("rtm.start", {})
+      .then(
+        function(data) {
+          this.wsUrl = data.url;
+          this.self = data.self;
+          this.team = data.team;
+          this.rooms = data.channels;
+          this.users = data.users;
+          this.ims = data.ims;
+          this.groups = data.groups;
 
-      this.emit('start');
+          this.emit("start");
 
-      this.connect();
-    }.bind(this)).catch(function(data) {
-      console.error('SlackBot login error: ', data); // tslint:disable-line
-      assert(false, data.error);
-    });
-  };
+          this.connect();
+        }.bind(this),
+      )
+      .catch(function(data) {
+        console.error("SlackBot login error: ", data); // tslint:disable-line
+        assert(false, data.error);
+      });
+  }
 
   /**
    * Establish a WebSocket connection
@@ -90,54 +96,62 @@ class SlackBot extends EventEmitter {
   connect() {
     this.ws = new WebSocket(this.wsUrl);
 
-    this.ws.on('open', function(data) {
-      this.emit('open', data);
-    }.bind(this));
+    this.ws.on(
+      "open",
+      function(data) {
+        this.emit("open", data);
+      }.bind(this),
+    );
 
-    this.ws.on('close', function(data) {
-      this.emit('close', data);
-    }.bind(this));
+    this.ws.on(
+      "close",
+      function(data) {
+        this.emit("close", data);
+      }.bind(this),
+    );
 
-    this.ws.on('message', function(data) {
-      try {
-        this.emit('message', JSON.parse(data));
-      } catch (e) {
-        console.error('SlackBot message error', e, e.stack); // tslint:disable-line
-      }
-    }.bind(this));
-  };
+    this.ws.on(
+      "message",
+      function(data) {
+        try {
+          this.emit("message", JSON.parse(data));
+        } catch (e) {
+          console.error("SlackBot message error", e, e.stack); // tslint:disable-line
+        }
+      }.bind(this),
+    );
+  }
 
   /**
    * Get channels
    * @returns {Promise}
    */
   getChannels() {
-    return this._api('channels.list', {});
-  };
+    return this._api("channels.list", {});
+  }
 
   /**
    * Get users
    * @returns {Promise}
    */
   getUsers(forceRefresh: Boolean = false) {
-
     if (!forceRefresh) {
       let brainUsers = this.filterUsers();
       if (brainUsers.length > 0) {
-        return Promise.resolve({members: brainUsers});
+        return Promise.resolve({ members: brainUsers });
       }
     }
 
-    return this._api('users.list', {}).then((users: any) => {
+    return this._api("users.list", {}).then((users: any) => {
       //console.log('user list', users);
       this.saveUsers(users.members);
-      return {members: this.filterUsers()};
+      return { members: this.filterUsers() };
     });
-  };
+  }
 
   private filterUsers() {
     //console.log('USERS: ', this.robot.brain.data.users);
-    return Object.values(this.robot.brain.data.users).filter((u) => u.slack !== undefined);
+    return Object.values(this.robot.brain.data.users).filter(u => u.slack !== undefined);
   }
 
   /**
@@ -146,11 +160,11 @@ class SlackBot extends EventEmitter {
    */
   getGroups() {
     if (this.groups) {
-      return Promise.resolve({groups: this.groups});
+      return Promise.resolve({ groups: this.groups });
     }
 
-    return this._api('groups.list', {});
-  };
+    return this._api("groups.list", {});
+  }
 
   /**
    * Get user by name
@@ -159,9 +173,9 @@ class SlackBot extends EventEmitter {
    */
   getUser(name) {
     return this.getUsers().then(function(data: any) {
-      return find(data.members, {name: name});
+      return find(data.members, { name: name });
     });
-  };
+  }
 
   /**
    * Get channel by name
@@ -170,9 +184,9 @@ class SlackBot extends EventEmitter {
    */
   getChannel(name) {
     return this.getChannels().then(function(data: any) {
-      return find(data.channels, {name: name});
+      return find(data.channels, { name: name });
     });
-  };
+  }
 
   /**
    * Get group by name
@@ -181,9 +195,9 @@ class SlackBot extends EventEmitter {
    */
   getGroup(name) {
     return this.getGroups().then(function(data: any) {
-      return find(data.groups, {name: name});
+      return find(data.groups, { name: name });
     });
-  };
+  }
 
   /**
    * Get channel ID
@@ -194,7 +208,7 @@ class SlackBot extends EventEmitter {
     return this.getChannel(name).then(function(channel: any) {
       return channel.id;
     });
-  };
+  }
 
   /**
    * Get group ID
@@ -205,7 +219,7 @@ class SlackBot extends EventEmitter {
     return this.getGroup(name).then(function(group: any) {
       return group.id;
     });
-  };
+  }
 
   /**
    * Get "direct message" channel ID
@@ -213,16 +227,20 @@ class SlackBot extends EventEmitter {
    * @returns {Promise}
    */
   getChatId(name) {
-    return this.getUser(name).then(function(data: any) {
-      //console.log("GETCHATID", data);
-      let chatUser: any = find(this.ims, {user: data.id});
-      let chatId = chatUser.slack.id;
+    return this.getUser(name)
+      .then(
+        function(data: any) {
+          //console.log("GETCHATID", data);
+          let chatUser: any = find(this.ims, { user: data.id });
+          let chatId = chatUser.slack.id;
 
-      return chatId || this.openIm(data.id);
-    }.bind(this)).then(function(data: any) {
-      return typeof data === 'string' ? data : data.room.id;
-    });
-  };
+          return chatId || this.openIm(data.id);
+        }.bind(this),
+      )
+      .then(function(data: any) {
+        return typeof data === "string" ? data : data.room.id;
+      });
+  }
 
   /**
    * Opens a "direct message" channel with another member of your Slack team
@@ -230,8 +248,8 @@ class SlackBot extends EventEmitter {
    * @returns {Promise}
    */
   openIm(userId) {
-    return this._api('im.open', {user: userId});
-  };
+    return this._api("im.open", { user: userId });
+  }
 
   /**
    * Posts a message to a channel by ID
@@ -241,14 +259,17 @@ class SlackBot extends EventEmitter {
    * @returns {Promise}
    */
   postMessage(id, text, params) {
-    params = _.extend({
-      text: text,
-      channel: id,
-      username: this.name
-    }, params || {});
+    params = _.extend(
+      {
+        text: text,
+        channel: id,
+        username: this.name,
+      },
+      params || {},
+    );
 
-    return this._api('chat.postMessage', params);
-  };
+    return this._api("chat.postMessage", params);
+  }
 
   /**
    * Posts a message to user by name
@@ -260,8 +281,8 @@ class SlackBot extends EventEmitter {
    */
   postMessageToUser(name, text, params, cb) {
     //console.log('posting  message to', name);
-    return this._post('user', name, text, params, cb);
-  };
+    return this._post("user", name, text, params, cb);
+  }
 
   /**
    * Posts a message to channel by name
@@ -272,8 +293,8 @@ class SlackBot extends EventEmitter {
    * @returns {Promise}
    */
   postMessageToChannel(name, text, params, cb) {
-    return this._post('channel', name, text, params, cb);
-  };
+    return this._post("channel", name, text, params, cb);
+  }
 
   /**
    * Posts a message to group by name
@@ -284,8 +305,8 @@ class SlackBot extends EventEmitter {
    * @returns {Promise}
    */
   postMessageToGroup(name, text, params, cb) {
-    return this._post('group', name, text, params, cb);
-  };
+    return this._post("group", name, text, params, cb);
+  }
 
   /**
    * Common method for posting messages
@@ -298,30 +319,33 @@ class SlackBot extends EventEmitter {
    * @private
    */
   _post(type, name, text, params, cb) {
-    let method = ({
-      'group': 'getGroupId',
-      'channel': 'getChannelId',
-      'user': 'getChatId'
-    })[type];
+    let method = {
+      group: "getGroupId",
+      channel: "getChannelId",
+      user: "getChatId",
+    }[type];
 
-    if (typeof params === 'function') {
+    if (typeof params === "function") {
       cb = params;
       params = null;
     }
     //console.log('posting', name, method, text, params);
 
-    return this[method](name).then(function(itemId) {
-      return this.postMessage(itemId, text, params);
-    }.bind(this))
-        .catch((err) => {
-          console.error('POST ERROR', err, err.stack); // tslint:disable-line
-        })
-        .then(function(data) {
-          if (cb) {
-            cb(data._value);
-          }
-        });
-  };
+    return this[method](name)
+      .then(
+        function(itemId) {
+          return this.postMessage(itemId, text, params);
+        }.bind(this),
+      )
+      .catch(err => {
+        console.error("POST ERROR", err, err.stack); // tslint:disable-line
+      })
+      .then(function(data) {
+        if (cb) {
+          cb(data._value);
+        }
+      });
+  }
 
   /**
    * Posts a message to group | channel | user
@@ -333,24 +357,27 @@ class SlackBot extends EventEmitter {
    */
   postTo(name, text, params, cb) {
     let promise: Promise<any> = Promise.all([
-      this.getChannels(), this.getUsers(), this.getGroups()
-    ]).then(function(data) {
+      this.getChannels(),
+      this.getUsers(),
+      this.getGroups(),
+    ]).then(
+      function(data) {
+        let all = [].concat(data[0].rooms, data[1].members, data[2].groups);
+        let result = find(all, { name: name });
+        //console.log("RESULT", result);
+        assert(Object.keys(result).length, "wrong name");
 
-      let all = [].concat(data[0].rooms, data[1].members, data[2].groups);
-      let result = find(all, {name: name});
-      //console.log("RESULT", result);
-      assert(Object.keys(result).length, 'wrong name');
-
-      if (result['is_channel']) {
-        return this.postMessageToChannel(name, text, params, cb);
-      } else if (result['is_group']) {
-        return this.postMessageToGroup(name, text, params, cb);
-      } else {
-        return this.postMessageToUser(name, text, params, cb);
-      }
-    }.bind(this));
+        if (result["is_channel"]) {
+          return this.postMessageToChannel(name, text, params, cb);
+        } else if (result["is_group"]) {
+          return this.postMessageToGroup(name, text, params, cb);
+        } else {
+          return this.postMessageToUser(name, text, params, cb);
+        }
+      }.bind(this),
+    );
     return promise;
-  };
+  }
 
   /**
    * Preprocessing of params
@@ -359,18 +386,18 @@ class SlackBot extends EventEmitter {
    * @private
    */
   _preprocessParams(params) {
-    params = _.extend(params || {}, {token: this.token});
+    params = _.extend(params || {}, { token: this.token });
 
     Object.keys(params).forEach(function(name) {
       let param = params[name];
 
-      if (param && typeof param === 'object') {
+      if (param && typeof param === "object") {
         params[name] = JSON.stringify(param);
       }
     });
 
     return params;
-  };
+  }
 
   /**
    * Send request to API method
@@ -380,14 +407,12 @@ class SlackBot extends EventEmitter {
    * @private
    */
   _api(methodName, params) {
-
     let data = {
-      url: 'https://slack.com/api/' + methodName,
-      form: this._preprocessParams(params)
+      url: "https://slack.com/api/" + methodName,
+      form: this._preprocessParams(params),
     };
 
     return new Promise(function(resolve, reject) {
-
       request.post(data, function(err, request, body) {
         if (err) {
           reject(err);
@@ -403,9 +428,8 @@ class SlackBot extends EventEmitter {
           } else {
             reject(body);
           }
-
         } catch (e) {
-          console.error('SlackBot API error: ', e);  // tslint:disable-line
+          console.error("SlackBot API error: ", e); // tslint:disable-line
           reject(e);
         }
       });
@@ -418,14 +442,13 @@ class SlackBot extends EventEmitter {
       let user = this.robot.brain.userForId(u.id);
       if (!user) {
         this.robot.logger.debug(`Could not find user: ${u.id}`);
-        this.robot.brain.updateUser(new User({slack: u}));
+        this.robot.brain.updateUser(new User({ slack: u }));
       } else {
         this.robot.logger.debug(`Updating user: ${u.id}`);
         user.updateSlackUser(u);
       }
     }
   }
-
 }
 
 export default class SlackAdapter extends Adapter {
@@ -443,18 +466,18 @@ export default class SlackAdapter extends Adapter {
     this.robot = robot;
     this.logger = robot.logger;
     this.rooms = [];
-    this.adapterName = 'Slack';
+    this.adapterName = "Slack";
   }
 
   send(envelope, strings) {
     if (envelope.room === undefined) {
       for (let str of strings) {
-        this.slackBot.postMessageToUser(envelope.user.name, str, {link_names: 1}, undefined);
+        this.slackBot.postMessageToUser(envelope.user.name, str, { link_names: 1 }, undefined);
       }
       return;
     }
     for (let str of strings) {
-      this.slackBot.postMessageToChannel(envelope.room.name, str, {link_names: 1}, undefined);
+      this.slackBot.postMessageToChannel(envelope.room.name, str, { link_names: 1 }, undefined);
     }
   }
 
@@ -463,22 +486,22 @@ export default class SlackAdapter extends Adapter {
     for (let str of strings) {
       let text = `@${user.slack.name}: ${str}`;
       if (envelope.room.isDirectMessage) {
-        this.slackBot.postMessage(envelope.room.id, text, {link_names: 1});
+        this.slackBot.postMessage(envelope.room.id, text, { link_names: 1 });
       } else {
-        this.slackBot.postMessageToChannel(envelope.room.name, text, {link_names: 1}, undefined);
+        this.slackBot.postMessageToChannel(envelope.room.name, text, { link_names: 1 }, undefined);
       }
     }
   }
 
   run() {
-    this.logger.info('[Robot] Running Slack adapter');
+    this.logger.info("[Robot] Running Slack adapter");
     let config = this.robot.config;
 
-    this.slackBot = new SlackBot(this.robot.envKey('SLACK_TOKEN'), config.name, this.robot);
+    this.slackBot = new SlackBot(this.robot.envKey("SLACK_TOKEN"), config.name, this.robot);
 
-    this.slackBot.on('start', () => {
+    this.slackBot.on("start", () => {
       // save the list of users
-      this.logger.debug('[slack] slack started');
+      this.logger.debug("[slack] slack started");
       this.slackBot.getChannels().then((data: any) => {
         //console.log("[slack] list  of channels: ", data);
         if (data.channels) {
@@ -486,22 +509,21 @@ export default class SlackAdapter extends Adapter {
             this.rooms[channel.id] = new Room(channel, channel.id, false);
           }
         }
-        this.logger.debug('[slack] finished getting list of channels');
+        this.logger.debug("[slack] finished getting list of channels");
       });
 
       this.slackBot.getUsers(true).then((data: any) => {
         //console.log(data);
         for (let user of this.getSlackUsers()) {
-
           if (user.slack.name && user.slack.name.toLowerCase() === config.name.toLowerCase()) {
             this.me = user.slack;
             this.robot.logger.info(`[slack] Found my slack id: ${this.me}`);
             //console.log('ME: ', this.me);
             config.id = this.me.id;
-           }
+          }
         }
 
-        this.logger.debug('[slack] finished getting list of users');
+        this.logger.debug("[slack] finished getting list of users");
       });
 
       // more information about additional params https://api.slack.com/methods/chat.postMessage
@@ -518,29 +540,31 @@ export default class SlackAdapter extends Adapter {
     });
 
     // all incoming events https://api.slack.com/rtm
-    this.slackBot.on('message', (data) => {
+    this.slackBot.on("message", data => {
       // Throw out unsupported/experimental/not useful messages:
-      if (['reconnect_url', 'user_typing', 'hello', 'desktop_notification'].indexOf(data.type) > -1) {
+      if (
+        ["reconnect_url", "user_typing", "hello", "desktop_notification"].indexOf(data.type) > -1
+      ) {
         return;
       }
 
       this.logger.debug(`[slack] received "${data.type}" message`);
 
-      if (['presence_change'].indexOf(data.type) > -1) {
-      // TODO: this isn't finding the user to update for some reason
-//        this.updateUserStatus(data);
+      if (["presence_change"].indexOf(data.type) > -1) {
+        // TODO: this isn't finding the user to update for some reason
+        //        this.updateUserStatus(data);
         return;
       }
 
-      if (['message'].indexOf(data.type) > -1) {
-        if (['message_changed', 'bot_message'].indexOf(data.subtype) > -1) {
+      if (["message"].indexOf(data.type) > -1) {
+        if (["message_changed", "bot_message"].indexOf(data.subtype) > -1) {
           this.logger.debug(`[slack] skipping processing of ${data.subtype}`);
           return;
         }
         //console.log(data);
         data = this.formatMessage(data);
         let room: Room;
-        if (data.channel[0] === 'D') {
+        if (data.channel[0] === "D") {
           // DM
           room = new Room(data.channel, data.channel, true);
         } else {
@@ -558,12 +582,14 @@ export default class SlackAdapter extends Adapter {
 
       this.logger.warn(`Unhandled message type: ${data.type}`);
     });
-
   }
 
   receive(message: TextMessage) {
     // Filter out messages sent by us
-    if (message.rawData.username && this.me.name.toLowerCase() === message.rawData.username.toLowerCase()) {
+    if (
+      message.rawData.username &&
+      this.me.name.toLowerCase() === message.rawData.username.toLowerCase()
+    ) {
       return;
     }
 
@@ -576,8 +602,8 @@ export default class SlackAdapter extends Adapter {
       const reply = function(data: string, inChannel: boolean = true) {
         // TODO: allow data to return more complex types
         let slashResponse = {
-          'response_type': inChannel ? 'in_channel' : 'ephemeral',
-          'text': data,
+          response_type: inChannel ? "in_channel" : "ephemeral",
+          text: data,
         };
         res.send(slashResponse);
       };
@@ -598,7 +624,7 @@ export default class SlackAdapter extends Adapter {
     let copy = _.extend({}, data);
     data.originalText = copy.text;
 
-    for (let match of data.text.match(/<@(\w+)>/ig) || []) {
+    for (let match of data.text.match(/<@(\w+)>/gi) || []) {
       let userString = match.slice(2, -1);
       //console.log('format user for id', userString);
       let user = this.robot.brain.userForId(userString);
@@ -608,12 +634,12 @@ export default class SlackAdapter extends Adapter {
       }
       //console.log('pre', match, user.id, data.text);
 
-      data.text = data.text.replace(new RegExp(match, 'i'), '@' + user.slack.name);
+      data.text = data.text.replace(new RegExp(match, "i"), "@" + user.slack.name);
       //console.log('post', data.text);
     }
 
     // Check if this is a DM, if so, add bot name in front for matchers
-    if (data.channel[0] === 'D') {
+    if (data.channel[0] === "D") {
       data.text = `@${this.me.name}: ${data.text}`;
     }
 
@@ -627,7 +653,7 @@ export default class SlackAdapter extends Adapter {
     let user = this.robot.brain.userForId(data.user);
     //console.log('user for id', user);
     if (!user) {
-//      this.logger.warn(`Could not find user ${data.user}`);
+      //      this.logger.warn(`Could not find user ${data.user}`);
       return;
     }
     user.slack.status = data.presence;
@@ -635,6 +661,6 @@ export default class SlackAdapter extends Adapter {
   }
 
   private getSlackUsers() {
-    return Object.values(this.robot.brain.data.users).filter((u) => u.slack !== undefined);
+    return Object.values(this.robot.brain.data.users).filter(u => u.slack !== undefined);
   }
 }

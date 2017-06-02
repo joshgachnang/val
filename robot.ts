@@ -1,37 +1,37 @@
-import {EventEmitter} from 'events';
-let httpClient = require('scoped-http-client');
-import * as bodyParser from 'body-parser';
-import * as cors from 'cors';
-import * as express from 'express';
-import {existsSync, readFileSync} from 'fs';
-import * as fs from 'fs';
-import * as https from 'https';
-import {env, exit} from 'process';
-import * as request from 'request';
-import * as winston from 'winston';
+import { EventEmitter } from "events";
+let httpClient = require("scoped-http-client");
+import * as bodyParser from "body-parser";
+import * as cors from "cors";
+import * as express from "express";
+import { existsSync, readFileSync } from "fs";
+import * as fs from "fs";
+import * as https from "https";
+import { env, exit } from "process";
+import * as request from "request";
+import * as winston from "winston";
 
-import Adapter from './adapter';
-import Brain from './brain';
-import Config from './config';
-import Envelope from './envelope';
-import frontend from './frontend';
-import {Listener, TextListener} from './listener';
-import {Message, TextMessage} from './message';
-import './polyfill';
-import Response from './response';
-import User from './user';
+import Adapter from "./adapter";
+import Brain from "./brain";
+import Config from "./config";
+import Envelope from "./envelope";
+import frontend from "./frontend";
+import { Listener, TextListener } from "./listener";
+import { Message, TextMessage } from "./message";
+import "./polyfill";
+import Response from "./response";
+import User from "./user";
 
 let HUBOT_DOCUMENTATION_SECTIONS = [
-  'description',
-  'dependencies',
-  'configuration',
-  'commands',
-  'notes',
-  'author',
-  'authors',
-  'examples',
-  'tags',
-  'urls',
+  "description",
+  "dependencies",
+  "configuration",
+  "commands",
+  "notes",
+  "author",
+  "authors",
+  "examples",
+  "tags",
+  "urls",
 ];
 
 export interface ResponseCallback {
@@ -44,7 +44,7 @@ export default class Robot extends EventEmitter {
   pluginListeners: Array<Listener> = [];
   commands: any;
   errorHandlers: any;
-  TextMessage: TextMessage;  // tslint:disable-line
+  TextMessage: TextMessage; // tslint:disable-line
   router: any;
   logger: any;
   brain: Brain;
@@ -58,14 +58,14 @@ export default class Robot extends EventEmitter {
     this.config = config;
 
     if (!config.name) {
-      winston.error('`name` is importd to start robot');
-      throw new Error('`name` is importd to start robot');
+      winston.error("`name` is importd to start robot");
+      throw new Error("`name` is importd to start robot");
     } else {
       this.name = config.name;
     }
 
     if (!config.adapters) {
-      throw new Error('A list of `adapters` is required to start robot.');
+      throw new Error("A list of `adapters` is required to start robot.");
     }
 
     // Default variables
@@ -73,33 +73,33 @@ export default class Robot extends EventEmitter {
     this.commands = [];
     this.errorHandlers = [];
     this.router = undefined;
-    this.logger = new (winston.Logger)({
+    this.logger = new winston.Logger({
       transports: [
-        new (winston.transports.Console)({level: 'debug'}),
-        new (winston.transports.File)({filename: 'bot.log', level: 'debug'})
-      ]
+        new winston.transports.Console({ level: "debug" }),
+        new winston.transports.File({ filename: "bot.log", level: "debug" }),
+      ],
     });
     this.brain = new Brain(this);
     this.setupExpress();
 
     this.frontend = new frontend(this);
 
-    this.logger.debug('[Robot] Starting Robot');
+    this.logger.debug("[Robot] Starting Robot");
 
     this.adapters = {};
     this.plugins = {};
     for (let adapter of config.adapters) {
-      this.logger.info('[Robot] loading adapter:', adapter);
+      this.logger.info("[Robot] loading adapter:", adapter);
       let adapterModule = require(adapter);
       // Use default here to get the default exported class
       let adapterClass = new adapterModule.default(this);
       this.adapters[adapterClass.adapterName] = adapterClass;
       adapterClass.run();
     }
-    this.emit('adapterInitialized');
+    this.emit("adapterInitialized");
 
     for (let plugin of config.plugins) {
-      this.logger.info('[Robot] loading plugin:', plugin);
+      this.logger.info("[Robot] loading plugin:", plugin);
       let pluginModule;
       try {
         pluginModule = require(plugin);
@@ -117,12 +117,12 @@ export default class Robot extends EventEmitter {
       let filename = require.resolve(plugin);
       this.parseHelp(filename);
     }
-    this.logger.debug('[Robot] Finished loading plugins');
-    this.emit('pluginsInitialized');
+    this.logger.debug("[Robot] Finished loading plugins");
+    this.emit("pluginsInitialized");
 
     // TODO: can't register for an on('pluginsInitialized'..) in adapters for some reason.
     if (this.adapters.AlexaAdapter) {
-      this.logger.debug('initing alexa plugins');
+      this.logger.debug("initing alexa plugins");
       this.adapters.AlexaAdapter.postPluginInit();
     }
     // this.frontend.setup();
@@ -130,74 +130,94 @@ export default class Robot extends EventEmitter {
   }
 
   hear(regex: RegExp, options: any, callback: ResponseCallback) {
-    this.logger.info('creating hear listener for regex', regex);
+    this.logger.info("creating hear listener for regex", regex);
     let listener = new TextListener(this, regex, options, callback);
     this.pluginListeners.push(listener);
   }
 
   respond(regex: RegExp, options: any, callback: ResponseCallback) {
-    this.logger.info('creating respond listener for regex', regex);
+    this.logger.info("creating respond listener for regex", regex);
     let listener = new TextListener(this, this.respondPattern(regex), options, callback);
     this.pluginListeners.push(listener);
   }
 
   respondPattern(regex: RegExp) {
-    let re = regex.toString().split('/');
+    let re = regex.toString().split("/");
     re.shift();
     let modifiers = re.pop();
 
     // Default to case insensitive if not otherwise declared, or bot name gets messed up
     // NOTE: change from upstream
     if (!modifiers) {
-      modifiers = 'i';
+      modifiers = "i";
     }
 
-    if (re[0] && re[0][0] === '^') {
-      this.logger.warn('Anchors don\'t work well with respond, perhaps you ' +
-          'want to use "hear"');
+    if (re[0] && re[0][0] === "^") {
+      this.logger.warn("Anchors don't work well with respond, perhaps you " + 'want to use "hear"');
       this.logger.warn(`The regex in question was ${regex.toString()}`);
     }
 
-    let name = this.name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-    let pattern = re.join('/');
+    let name = this.name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+    let pattern = re.join("/");
 
-    return new RegExp('^\\s*[@]*' + name.toLowerCase() + '[:,]?\\s*(?:' + pattern + ')', modifiers);
+    return new RegExp("^\\s*[@]*" + name.toLowerCase() + "[:,]?\\s*(?:" + pattern + ")", modifiers);
   }
 
   parseHelp(path) {
-    let body, cleanedLine, currentSection, i, j, len, len1, line, nextSection, ref, ref1,
-      scriptDocumentation, scriptName,
-      indexOf = [].indexOf || function(item) { for (let i = 0, l = this.length; i < l; i++) {
-        if (i in this && this[i] === item) return i; } return -1;
-      };
+    let body,
+      cleanedLine,
+      currentSection,
+      i,
+      j,
+      len,
+      len1,
+      line,
+      nextSection,
+      ref,
+      ref1,
+      scriptDocumentation,
+      scriptName,
+      indexOf =
+        [].indexOf ||
+        function(item) {
+          for (
+            let i = 0,
+              l = this.length;
+            i < l;
+            i++
+          ) {
+            if (i in this && this[i] === item) return i;
+          }
+          return -1;
+        };
 
     scriptDocumentation = {};
 
-    body = readFileSync(path, 'utf-8');
+    body = readFileSync(path, "utf-8");
 
     currentSection = null;
 
-    ref = body.split('\n');
+    ref = body.split("\n");
     for (i = 0, len = ref.length; i < len; i++) {
       line = ref[i];
-      if (!(line[0] === '#' || line.substr(0, 2) === '//')) {
+      if (!(line[0] === "#" || line.substr(0, 2) === "//")) {
         break;
       }
-      cleanedLine = line.replace(/^(#|\/\/)\s?/, '').trim();
+      cleanedLine = line.replace(/^(#|\/\/)\s?/, "").trim();
       if (cleanedLine.length === 0) {
         continue;
       }
-      if (cleanedLine.toLowerCase() === 'none') {
+      if (cleanedLine.toLowerCase() === "none") {
         continue;
       }
-      nextSection = cleanedLine.toLowerCase().replace(':', '').trim();
+      nextSection = cleanedLine.toLowerCase().replace(":", "").trim();
       if (indexOf.call(HUBOT_DOCUMENTATION_SECTIONS, nextSection) >= 0) {
         currentSection = nextSection;
         scriptDocumentation[currentSection] = [];
       } else {
         if (currentSection) {
           scriptDocumentation[currentSection].push(cleanedLine.trim());
-          if (currentSection === 'commands') {
+          if (currentSection === "commands") {
             this.commands.push(cleanedLine.trim());
           }
         }
@@ -205,15 +225,15 @@ export default class Robot extends EventEmitter {
     }
 
     if (currentSection === null) {
-      this.logger.info('[Robot] ' + path + ' is using deprecated documentation syntax');
+      this.logger.info("[Robot] " + path + " is using deprecated documentation syntax");
       scriptDocumentation.commands = [];
-      ref1 = body.split('\n');
+      ref1 = body.split("\n");
       for (j = 0, len1 = ref1.length; j < len1; j++) {
         line = ref1[j];
-        if (!(line[0] === '#' || line.substr(0, 2) === '//')) {
+        if (!(line[0] === "#" || line.substr(0, 2) === "//")) {
           break;
         }
-        if (!line.match('-')) {
+        if (!line.match("-")) {
           continue;
         }
         cleanedLine = line.slice(2, +line.length + 1 || 9e9).replace(/^hubot/i, this.name).trim();
@@ -224,7 +244,9 @@ export default class Robot extends EventEmitter {
   }
 
   reply(envelope: Envelope, user: User, messages) {
-    this.logger.debug(`[Robot] Attempting to reply to ${user} in #${envelope.room.name}, message: ${messages}`);
+    this.logger.debug(
+      `[Robot] Attempting to reply to ${user} in #${envelope.room.name}, message: ${messages}`,
+    );
 
     if (!Array.isArray(messages)) {
       messages = [messages];
@@ -234,7 +256,9 @@ export default class Robot extends EventEmitter {
   }
 
   send(envelope: Envelope, messages) {
-    this.logger.debug(`[Robot] Sending in ${envelope.room.id} via ${envelope.adapterName}: ${messages}`);
+    this.logger.debug(
+      `[Robot] Sending in ${envelope.room.id} via ${envelope.adapterName}: ${messages}`,
+    );
 
     if (!Array.isArray(messages)) {
       messages = [messages];
@@ -247,19 +271,19 @@ export default class Robot extends EventEmitter {
   }
 
   emote(envelope: Envelope, emotes) {
-    this.logger.warn('Unsupported action: emote', envelope.room, emotes);
+    this.logger.warn("Unsupported action: emote", envelope.room, emotes);
   }
 
   enter(options, callback) {
-    this.logger.warn('Unsupported action: enter', options);
+    this.logger.warn("Unsupported action: enter", options);
   }
 
   leave(options, callback) {
-    this.logger.warn('Unsupported action: leave', options);
+    this.logger.warn("Unsupported action: leave", options);
   }
 
   topic(options, callback) {
-    this.logger.warn('Unsupported action: topic', options);
+    this.logger.warn("Unsupported action: topic", options);
   }
 
   error(callback) {
@@ -281,19 +305,19 @@ export default class Robot extends EventEmitter {
       options = {};
     }
 
-    this.logger.warn('Unsupported action: catchAll', options);
+    this.logger.warn("Unsupported action: catchAll", options);
   }
 
   // Deprecated: use request()
   http(url: string, options: any = {}) {
-    return httpClient.create(url, options).header('User-Agent', `${this.name}/1.0`);
+    return httpClient.create(url, options).header("User-Agent", `${this.name}/1.0`);
   }
 
   // Await wrapper around request. The preferred way to make HTTP requests from a plugin
   async request(body: any) {
     return new Promise((resolve, reject) => {
       request(body, (error, response, body) => {
-        if(error) reject(error);
+        if (error) reject(error);
         else resolve(body);
       });
     });
@@ -302,7 +326,7 @@ export default class Robot extends EventEmitter {
   receive(message: Message, adapter: Adapter, callback) {
     let msg = message as TextMessage;
     if (!msg) {
-      this.logger.info('[Robot] blank message error');
+      this.logger.info("[Robot] blank message error");
       return;
     }
     for (let listener of this.pluginListeners) {
@@ -326,37 +350,37 @@ export default class Robot extends EventEmitter {
     app.use(cors());
 
     app.use((req, res, next) => {
-      res.setHeader('X-Powered-By', `hubot/${this.name}/1.0`);
+      res.setHeader("X-Powered-By", `hubot/${this.name}/1.0`);
       next();
     });
 
-    app.use(bodyParser.urlencoded({extended: false}));
+    app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.json());
-    app.use('/static', express.static('static'));
-    app.use('/bower_components', express.static('bower_components'));
+    app.use("/static", express.static("static"));
+    app.use("/bower_components", express.static("bower_components"));
     this.router = app;
   }
 
   listen() {
     let port = process.env.EXPRESS_BIND_PORT || 8080;
-    let address = process.env.EXPRESS_BIND_ADDRESS || '0.0.0.0';
-    this.logger.debug('[Robot] All routes:');
-//    this.logger.debug(this.router.stack);
-    this.router._router.stack.forEach((r) => {
+    let address = process.env.EXPRESS_BIND_ADDRESS || "0.0.0.0";
+    this.logger.debug("[Robot] All routes:");
+    //    this.logger.debug(this.router.stack);
+    this.router._router.stack.forEach(r => {
       if (r.route && r.route.path) {
-        this.logger.debug('[Robot] ' + r.route.path);
+        this.logger.debug("[Robot] " + r.route.path);
       }
     });
 
     try {
       this.router.listen(port, address);
-//      this.server = https.createServer({
-//        key: fs.readFileSync('./certs/server/privkey.pem'),
-//        cert: fs.readFileSync('./certs/server/fullchain.pem'),
-//        rejectUnauthorized: false
-//    }, this.router).listen(port, () => {
+      //      this.server = https.createServer({
+      //        key: fs.readFileSync('./certs/server/privkey.pem'),
+      //        cert: fs.readFileSync('./certs/server/fullchain.pem'),
+      //        rejectUnauthorized: false
+      //    }, this.router).listen(port, () => {
       this.logger.info(`[Robot] Listening at ${address}:${port}`);
-//    });
+      //    });
     } catch (err) {
       this.logger.error(`[Robot] Error trying to start HTTP server: ${err}\n${err.stack}`);
       process.exit(1);
@@ -369,7 +393,7 @@ export default class Robot extends EventEmitter {
     if (!existsSync(filesystemPath)) {
       throw new Error(`[Robot] Script does not exist: ${filesystemPath}`);
     }
-    this.router.use('/static/' + url, (req, res) => {
+    this.router.use("/static/" + url, (req, res) => {
       this.logger.debug(`[Robot] Serving ${req.path}: ${filesystemPath}`);
       res.sendFile(filesystemPath);
     });

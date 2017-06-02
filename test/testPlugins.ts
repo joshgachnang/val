@@ -1,48 +1,55 @@
-import { assert } from 'chai';
-import { only, skip, slow, suite, test, timeout } from 'mocha-typescript';
+import { assert } from "chai";
+import { only, skip, slow, suite, test, timeout } from "mocha-typescript";
 
-import Config from '../config';
-import FakeRobot from './fakeRobot';
-import { TextMessage } from '../message'; // tslint:disable-line
-import User from '../user';
+import Config from "../config";
+import FakeRobot from "./fakeRobot";
+import { TextMessage } from "../message"; // tslint:disable-line
+import User from "../user";
 
 class PluginTestSuite {
   robot: FakeRobot;
-  robotName = 'k2so';
+  robotName = "k2so";
 
   getFakeRobot(plugins) {
     let config = new Config();
-    config.name = 'k2so';
+    config.name = "k2so";
     config.plugins = plugins;
-    config.adapters = ['./test/fakeAdapter'];
+    config.adapters = ["./test/fakeAdapter"];
 
     let robot = new FakeRobot(config);
     return robot;
   }
 
   getUser(): User {
-    return new User({id: 'id', slack: {id: 'someId', name: 'fakeUser'}});
+    return new User({ id: "id", slack: { id: "someId", name: "fakeUser" } });
   }
 
   getTextMessage(text: string): TextMessage {
-    return new TextMessage(this.getUser(), text, '#general', 'id', this.robot.adapters.fake, {});
+    return new TextMessage(this.getUser(), text, "#general", "id", this.robot.adapters.fake, {});
   }
 }
 
-@suite class EchoTest extends PluginTestSuite {
+@suite
+class EchoTest extends PluginTestSuite {
   before() {
-    this.robot = this.getFakeRobot(['./plugins/echo']);
+    this.robot = this.getFakeRobot(["./plugins/echo"]);
   }
 
-  @test noEcho() {
+  @test
+  noEcho() {
     assert.equal(this.robot.adapters.fake.events.length, 1);
-    this.robot.receive(this.getTextMessage('hello'), this.robot.adapters.fake, undefined);
+    this.robot.receive(this.getTextMessage("hello"), this.robot.adapters.fake, undefined);
     assert.equal(this.robot.adapters.fake.events.length, 1);
   }
 
-  @test echo() {
+  @test
+  echo() {
     assert.equal(this.robot.adapters.fake.events.length, 1);
-    this.robot.receive(this.getTextMessage(`@${this.robotName}: hello`), this.robot.adapters.fake, undefined);
+    this.robot.receive(
+      this.getTextMessage(`@${this.robotName}: hello`),
+      this.robot.adapters.fake,
+      undefined,
+    );
     // TODO: gross.
     setTimeout(() => {
       assert.equal(this.robot.adapters.fake.events.length, 2);

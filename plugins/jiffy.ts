@@ -1,12 +1,12 @@
-import Response from '../response';
-import Robot from '../robot';
+import Response from "../response";
+import Robot from "../robot";
 
-const BRAIN_KEY = 'JIFFY';
+const BRAIN_KEY = "JIFFY";
 
 function intersect(a, b) {
   let t;
-  if (b.length > a.length) t = b, b = a, a = t; // indexOf to loop over shorter
-  return a.filter(function (e) {
+  if (b.length > a.length) (t = b), (b = a), (a = t); // indexOf to loop over shorter
+  return a.filter(function(e) {
     return b.indexOf(e) > -1;
   });
 }
@@ -19,13 +19,14 @@ export default function(robot: Robot) {
   function add(text, reply) {
     let data = robot.brain.get(BRAIN_KEY) || {};
     if (!data.gifs) data.gifs = {};
-    let tokens = text.split(' ');
-    if (tokens.length < 2) { // 'add $url ...$tags
+    let tokens = text.split(" ");
+    if (tokens.length < 2) {
+      // 'add $url ...$tags
       return reply('usage: "/jiffyadd tag1 tag2 ..."', false);
     }
 
     let url = tokens[0];
-    let tags = text.split(' ').splice(1);
+    let tags = text.split(" ").splice(1);
     let updated = false;
     for (let tag of tags) {
       let urls = data.gifs[tag];
@@ -50,10 +51,10 @@ export default function(robot: Robot) {
 
   function search(text, reply) {
     let data = robot.brain.get(BRAIN_KEY);
-    let tags = text.split(' ');
+    let tags = text.split(" ");
 
     if (!data.gifs) {
-      return reply('no gifs yet, please submit one!', false);
+      return reply("no gifs yet, please submit one!", false);
     }
 
     let urls = {};
@@ -78,18 +79,17 @@ export default function(robot: Robot) {
         winnersScore = matches;
         winners = [url];
       } else {
-        return reply(`no gifs match ${tags.join(' ')}, please add one!`, false);
+        return reply(`no gifs match ${tags.join(" ")}, please add one!`, false);
       }
     }
     return reply(randomFrom(winners), true);
   }
 
-  robot.adapters['Slack'].addSlashCommand('jiffy', (body: any, reply: any) => {
+  robot.adapters["Slack"].addSlashCommand("jiffy", (body: any, reply: any) => {
     return search(body.text, reply);
   });
 
-  robot.adapters['Slack'].addSlashCommand('jiffyadd', (body: any, reply: any) => {
+  robot.adapters["Slack"].addSlashCommand("jiffyadd", (body: any, reply: any) => {
     return add(body.text, reply);
   });
-
 }
