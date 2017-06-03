@@ -24,6 +24,7 @@ export default class Config {
     "./plugins/meditation",
     "./plugins/alarm",
     "./plugins/dogecoin",
+    "./plugins/productivityQuote",
     "./plugins/events",
     "./plugins/todo",
     // './plugins/triviastats',

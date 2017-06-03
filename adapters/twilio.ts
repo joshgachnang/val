@@ -11,9 +11,15 @@ export default class Twilio extends Adapter {
 
   constructor(robot: Robot) {
     super(robot);
-    this.sid = robot.envKey("TWILIO_SID");
-    this.token = robot.envKey("TWILIO_TOKEN");
-    this.fromNumber = robot.envKey("TWILIO_NUMBER");
+    try {
+      this.sid = robot.envKey("TWILIO_SID");
+      this.token = robot.envKey("TWILIO_TOKEN");
+      this.fromNumber = robot.envKey("TWILIO_NUMBER");
+    } catch (e) {
+      this.robot.logger.error(
+        "[twilio] one of TWILIO_SID, TWILIO_TOKEN, TWILIO_NUMBER is undefined, not running the twilio adapter.",
+      );
+    }
     this.robot = robot;
     this.adapterName = "Twilio";
   }
