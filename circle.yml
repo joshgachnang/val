@@ -1,0 +1,24 @@
+machine:
+  node:
+    version: 8
+  services:
+    - docker
+
+dependencies:
+  override:
+    - npm install -g yarn
+    - yarn global add typescript
+    - yarn install
+  post:
+    - docker build -t servercobra/veronica .
+
+test:
+  post:
+    - docker run -d -p 8080:8080 --name veronica servercobra/veronica; sleep 10
+    - curl --retry 10 --retry-delay 5 localhost:8080/healthcheck | grep "ok"
+
+deployment:
+  prod:
+    branch: master
+    commands:
+      - ./ecs-deploy.sh

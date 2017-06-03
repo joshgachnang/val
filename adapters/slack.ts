@@ -494,10 +494,15 @@ export default class SlackAdapter extends Adapter {
   }
 
   run() {
-    this.logger.info("[Robot] Running Slack adapter");
+    this.logger.info("[slack] Running Slack adapter");
     let config = this.robot.config;
 
-    this.slackBot = new SlackBot(this.robot.envKey("SLACK_TOKEN"), config.name, this.robot);
+    try {
+      this.slackBot = new SlackBot(this.robot.envKey("SLACK_TOKEN"), config.name, this.robot);
+    } catch (e) {
+      this.logger.error("[slack] SLACK_TOKEN is undefined, not running the slack adapter.");
+      return;
+    }
 
     this.slackBot.on("start", () => {
       // save the list of users

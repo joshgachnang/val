@@ -46,7 +46,12 @@ export default class Ionic extends Adapter {
   constructor(robot: Robot) {
     super(robot);
     this.robot = robot;
-    this.token = robot.envKey("IONIC_TOKEN");
+    try {
+      this.token = robot.envKey("IONIC_TOKEN");
+    } catch (e) {
+      this.robot.logger.error("[ionic] IONIC_TOKEN is undefined, not running the ionic adapter.");
+      return;
+    }
     this.fetchUsers();
 
     robot.hear(/testpush/i, {}, (res: Response) => {

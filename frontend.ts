@@ -33,7 +33,8 @@ export default class Frontend {
 
     // Expose configuration variables
     this.router.get("/config.js", (req, res) => {
-      let base = "angular.module(\"config\", [])";
+      // let base = 'angular.module("config", [])';
+      let base = "";
       for (let key in this.configKeys) {
         let val = this.configKeys[key];
         if (!val || !key) {
