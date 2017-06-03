@@ -1,7 +1,7 @@
-import Response from "../response";
-import Robot from "../robot";
 import * as moment from "moment";
 import * as request from "request";
+import Response from "../response";
+import Robot from "../robot";
 
 async function fetchForecast(robot: Robot, lat: string, lng: string, key: string) {
   let DARKSKY_URL = `https://api.darksky.net/forecast/${key}/${lat},${lng}`;
@@ -25,12 +25,10 @@ export default function(robot: Robot) {
     let lng = robot.config.LONGITUDE;
     let key = robot.config.DARKSKY_KEY;
     let forecast = await fetchForecast(robot, lat, lng, key);
-    console.log("forecast", forecast);
     return forecast;
   }
 
   async function getGoodMorning() {
-    console.log("get good morning");
     let forecast: any = await getForecast();
     let tempString = `It is currently ${Math.floor(
       forecast.currently.temperature,

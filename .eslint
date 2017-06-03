@@ -14,7 +14,7 @@
     "no-console": "warn",
     "no-trailing-spaces": "error",
     "no-unused-vars": ["error", {"args": "none"}],
-    "quotes": ["error", "single", {"avoidEscape": true}],
+    "quotes": ["error", "double", {"avoidEscape": true}],
     "semi": "error",
   },
   "globals": {

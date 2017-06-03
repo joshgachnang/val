@@ -143,13 +143,11 @@ export default function(robot: Robot) {
 
   robot.router.get("/ingredients", (req, res) => {
     let data = robot.brain.get("ingredients") || {};
-    console.log("get ingredients", data);
     return res.json({ ingredients: data });
   });
 
   robot.router.post("/ingredients", (req, res) => {
     let data = req.body;
-    console.log("saving ingredients", data);
     if (data.ingredients && Object.keys(data.ingredients).length > 0) {
       robot.brain.set("ingredients", data.ingredients);
       return res.json({});

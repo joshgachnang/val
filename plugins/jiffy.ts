@@ -22,7 +22,7 @@ export default function(robot: Robot) {
     let tokens = text.split(" ");
     if (tokens.length < 2) {
       // 'add $url ...$tags
-      return reply('usage: "/jiffyadd tag1 tag2 ..."', false);
+      return reply("usage: '/jiffyadd tag1 tag2 ...'", false);
     }
 
     let url = tokens[0];

@@ -143,14 +143,14 @@ class SlackBot extends EventEmitter {
     }
 
     return this._api("users.list", {}).then((users: any) => {
-      //console.log('user list', users);
+      // console.log('user list', users);
       this.saveUsers(users.members);
       return { members: this.filterUsers() };
     });
   }
 
   private filterUsers() {
-    //console.log('USERS: ', this.robot.brain.data.users);
+    // console.log('USERS: ', this.robot.brain.data.users);
     return Object.values(this.robot.brain.data.users).filter(u => u.slack !== undefined);
   }
 
@@ -230,7 +230,7 @@ class SlackBot extends EventEmitter {
     return this.getUser(name)
       .then(
         function(data: any) {
-          //console.log("GETCHATID", data);
+          // console.log("GETCHATID", data);
           let chatUser: any = find(this.ims, { user: data.id });
           let chatId = chatUser.slack.id;
 
@@ -280,7 +280,7 @@ class SlackBot extends EventEmitter {
    * @returns {Promise}
    */
   postMessageToUser(name, text, params, cb) {
-    //console.log('posting  message to', name);
+    // console.log('posting  message to', name);
     return this._post("user", name, text, params, cb);
   }
 
@@ -329,7 +329,7 @@ class SlackBot extends EventEmitter {
       cb = params;
       params = null;
     }
-    //console.log('posting', name, method, text, params);
+    // console.log('posting', name, method, text, params);
 
     return this[method](name)
       .then(
@@ -364,7 +364,7 @@ class SlackBot extends EventEmitter {
       function(data) {
         let all = [].concat(data[0].rooms, data[1].members, data[2].groups);
         let result = find(all, { name: name });
-        //console.log("RESULT", result);
+        // console.log("RESULT", result);
         assert(Object.keys(result).length, "wrong name");
 
         if (result["is_channel"]) {
@@ -438,7 +438,7 @@ class SlackBot extends EventEmitter {
 
   saveUsers(users: any) {
     for (let u of users) {
-      //console.log("U", u);
+      // console.log("U", u);
       let user = this.robot.brain.userForId(u.id);
       if (!user) {
         this.robot.logger.debug(`Could not find user: ${u.id}`);
@@ -482,7 +482,7 @@ export default class SlackAdapter extends Adapter {
   }
 
   reply(envelope, user, strings) {
-    //console.log("REPLY", envelope, user, envelope.user.slack.name);
+    // console.log("REPLY", envelope, user, envelope.user.slack.name);
     for (let str of strings) {
       let text = `@${user.slack.name}: ${str}`;
       if (envelope.room.isDirectMessage) {
@@ -503,7 +503,7 @@ export default class SlackAdapter extends Adapter {
       // save the list of users
       this.logger.debug("[slack] slack started");
       this.slackBot.getChannels().then((data: any) => {
-        //console.log("[slack] list  of channels: ", data);
+        // console.log("[slack] list  of channels: ", data);
         if (data.channels) {
           for (let channel of data.channels) {
             this.rooms[channel.id] = new Room(channel, channel.id, false);
@@ -513,12 +513,12 @@ export default class SlackAdapter extends Adapter {
       });
 
       this.slackBot.getUsers(true).then((data: any) => {
-        //console.log(data);
+        // console.log(data);
         for (let user of this.getSlackUsers()) {
           if (user.slack.name && user.slack.name.toLowerCase() === config.name.toLowerCase()) {
             this.me = user.slack;
             this.robot.logger.info(`[slack] Found my slack id: ${this.me}`);
-            //console.log('ME: ', this.me);
+            // console.log('ME: ', this.me);
             config.id = this.me.id;
           }
         }
@@ -561,7 +561,7 @@ export default class SlackAdapter extends Adapter {
           this.logger.debug(`[slack] skipping processing of ${data.subtype}`);
           return;
         }
-        //console.log(data);
+        // console.log(data);
         data = this.formatMessage(data);
         let room: Room;
         if (data.channel[0] === "D") {
@@ -570,9 +570,9 @@ export default class SlackAdapter extends Adapter {
         } else {
           room = this.rooms[data.channel];
         }
-        //console.log('GET USER', data.user);
+        // console.log('GET USER', data.user);
         let user = this.robot.brain.userForId(data.user);
-        //console.log('GOT USER', user);
+        // console.log('GOT USER', user);
         let text = data.text;
 
         let message = new TextMessage(user, text, room, data.id, this, data);
@@ -626,16 +626,16 @@ export default class SlackAdapter extends Adapter {
 
     for (let match of data.text.match(/<@(\w+)>/gi) || []) {
       let userString = match.slice(2, -1);
-      //console.log('format user for id', userString);
+      // console.log('format user for id', userString);
       let user = this.robot.brain.userForId(userString);
       if (!user) {
         this.robot.logger.warn(`[slack] found unknown user ${userString}, match: ${match}`);
         continue;
       }
-      //console.log('pre', match, user.id, data.text);
+      // console.log('pre', match, user.id, data.text);
 
       data.text = data.text.replace(new RegExp(match, "i"), "@" + user.slack.name);
-      //console.log('post', data.text);
+      // console.log('post', data.text);
     }
 
     // Check if this is a DM, if so, add bot name in front for matchers
@@ -649,9 +649,9 @@ export default class SlackAdapter extends Adapter {
 
   // TODO: this isn't working
   private updateUserStatus(data) {
-    //console.log('update user', data);
+    // console.log('update user', data);
     let user = this.robot.brain.userForId(data.user);
-    //console.log('user for id', user);
+    // console.log('user for id', user);
     if (!user) {
       //      this.logger.warn(`Could not find user ${data.user}`);
       return;

@@ -37,7 +37,7 @@ export default function(robot: Robot) {
   robot.hear(/authorize google calendar/i, {}, (response: Response) => {
     redirectResponse = response;
     getNewToken(response);
-    response.reply('Please type the "authkey" then the provided auth key');
+    response.reply("Please type the 'authkey' then the provided auth key");
   });
 
   // TODO: add these as part of a conversation

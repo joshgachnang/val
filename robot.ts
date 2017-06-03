@@ -153,7 +153,7 @@ export default class Robot extends EventEmitter {
     }
 
     if (re[0] && re[0][0] === "^") {
-      this.logger.warn("Anchors don't work well with respond, perhaps you " + 'want to use "hear"');
+      this.logger.warn("Anchors don't work well with respond, perhaps you want to use 'hear'");
       this.logger.warn(`The regex in question was ${regex.toString()}`);
     }
 
