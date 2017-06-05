@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npm run build:clean && npm run compile",
     "build:clean": "rm -rf built/*",
-    "compile": "mkdir -p built/config/ && cp -a cta-node built/ && cp -a thirdParty built/ && cp envfile built/ | true && tsc",
+    "compile": "mkdir -p built/config/  && cp -a thirdParty built/ && cp envfile built/ | true && tsc",
     "docker": "npm run compile && docker build -t servercobra/veronica . && docker push servercobra/veronica",
     "dev": "npm run watch",
     "deploy": "npm run docker && npm run hyper",

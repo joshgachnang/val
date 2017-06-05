@@ -1,6 +1,6 @@
 import Robot from "../robot";
 
-const cta = require("../cta-node/lib/cta-node");
+const cta = require("../thirdParty/cta-node/lib/cta-node");
 let trainArrivals = [];
 let robot: Robot;
 
