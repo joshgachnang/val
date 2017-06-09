@@ -17,6 +17,10 @@ export default function(robot) {
 
   function refreshForecast() {
     request(DARKSKY_URL, (error, res, body) => {
+      if (error) {
+        robot.logger.warn(`[forecastio] refresh error ${error}`);
+        return;
+      }
       robot.logger.debug("[forecastio] Refreshed forecast");
       forecast = JSON.parse(body);
     });
