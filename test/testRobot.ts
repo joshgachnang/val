@@ -1,15 +1,25 @@
 import { assert } from "chai";
 import { only, skip, slow, suite, test, timeout } from "mocha-typescript";
 
+import Adapter from "../adapter";
 import Config from "../config";
-import FakeRobot from "./fakeRobot";
 import { TextMessage } from "../message"; // tslint:disable-line
+import Response from "../response";
 import Robot from "../robot";
 import User from "../user";
 
-class PluginTestSuite {
+@suite
+class RobotTestSuite {
   robot: Robot;
   robotName = "k2so";
+
+  before() {
+    this.robot = this.getFakeRobot([]);
+  }
+
+  after() {
+    this.robot.shutdown();
+  }
 
   getFakeRobot(plugins) {
     let config = new Config();
@@ -21,11 +31,6 @@ class PluginTestSuite {
     return robot;
   }
 
-  after() {
-    if (this.robot) {
-      this.robot.shutdown();
-    }
-  }
   getUser(): User {
     return new User({ id: "id", slack: { id: "someId", name: "fakeUser" } });
   }
@@ -33,33 +38,30 @@ class PluginTestSuite {
   getTextMessage(text: string): TextMessage {
     return new TextMessage(this.getUser(), text, "#general", "id", this.robot.adapters.fake, {});
   }
-}
-
-@suite
-class EchoTest extends PluginTestSuite {
-  before() {
-    this.robot = this.getFakeRobot(["./plugins/echo"]);
-  }
 
   @test
-  noEcho() {
-    assert.equal(this.robot.adapters.fake.events.length, 1);
-    this.robot.receive(this.getTextMessage("hello"), this.robot.adapters.fake, undefined);
-    assert.equal(this.robot.adapters.fake.events.length, 1);
-  }
-
-  @test
-  echo(done) {
-    assert.equal(this.robot.adapters.fake.events.length, 1);
+  hear(done) {
+    this.robot.hear(/hear test/, {}, (response: Response) => {
+      // assert true
+      done();
+    });
     this.robot.receive(
-      this.getTextMessage(`@${this.robotName}: hello`),
+      this.getTextMessage("this is a hear test"),
       this.robot.adapters.fake,
       undefined,
     );
-    // TODO: gross.
-    setTimeout(() => {
-      assert.equal(this.robot.adapters.fake.events.length, 2);
+  }
+
+  @test
+  respond(done) {
+    this.robot.respond(/can you hear me/, {}, (response: Response) => {
+      // assert true
       done();
-    }, 10);
+    });
+    this.robot.receive(
+      this.getTextMessage("@k2so can you hear me?"),
+      this.robot.adapters.fake,
+      undefined,
+    );
   }
 }

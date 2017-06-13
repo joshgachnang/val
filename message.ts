@@ -49,7 +49,6 @@ export class TextMessage extends Message {
   }
 
   match(regex) {
-    console.log("matching", this.text, regex);
     return this.text.match(regex);
   }
 

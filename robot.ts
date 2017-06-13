@@ -55,6 +55,7 @@ export default class Robot extends EventEmitter {
   plugins: any;
   server: any;
   cronjobs: any[] = [];
+  private expressServer: any;
 
   constructor(config: Config) {
     super();
@@ -156,7 +157,7 @@ export default class Robot extends EventEmitter {
     }
 
     if (re[0] && re[0][0] === "^") {
-      this.logger.warn("Anchors don't work well with respond, perhaps you " + 'want to use "hear"');
+      this.logger.warn("Anchors don't work well with respond, perhaps you want to use 'hear'");
       this.logger.warn(`The regex in question was ${regex.toString()}`);
     }
 
@@ -174,7 +175,9 @@ export default class Robot extends EventEmitter {
     let currentSection = null;
 
     for (let line of body.split("\n")) {
+      // tslint:disable
       if (line === '"use strict";') {
+        // tslint:enable
         // Typescript -> JS compilation adds 'use strict'
         continue;
       }
@@ -299,15 +302,13 @@ export default class Robot extends EventEmitter {
     });
   }
 
-  receive(message: Message, adapter: Adapter, callback) {
+  receive(message: Message, adapter: Adapter, callback: (res: Response) => any) {
     let msg = message as TextMessage;
     if (!msg) {
       this.logger.info("[Robot] blank message error");
       return;
     }
-    //console.log('received: ', msg)
     for (let listener of this.pluginListeners) {
-      // this.logger.debug('[Robot]', listener.matcher);
       listener.call(msg, adapter, callback);
     }
   }
@@ -356,7 +357,7 @@ export default class Robot extends EventEmitter {
     });
 
     try {
-      this.router.listen(port, address);
+      this.expressServer = this.router.listen(port, address);
       //      this.server = https.createServer({
       //        key: fs.readFileSync('./certs/server/privkey.pem'),
       //        cert: fs.readFileSync('./certs/server/fullchain.pem'),
@@ -369,6 +370,11 @@ export default class Robot extends EventEmitter {
       process.exit(1);
     }
   }
+
+  shutdown() {
+    this.expressServer.close();
+  }
+
   // filesystemPath: Relative path to the file
   // url: the URL to expose the file at. Will be served as `/static/${url}`
   addStaticFile(filesystemPath, url) {

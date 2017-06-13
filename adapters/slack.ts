@@ -5,12 +5,13 @@ import * as _ from "lodash";
 import * as request from "request";
 import * as winston from "winston";
 import * as WebSocket from "ws";
+
 import Adapter from "../adapter";
+import { APIError } from "../errors";
 import { TextMessage } from "../message";
 import Robot from "../robot";
 import Room from "../room";
 import { default as User, SlackUser } from "../user";
-import { APIError } from "../errors";
 
 interface UserIdMap {
   [id: string]: User;

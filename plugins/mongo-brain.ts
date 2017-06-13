@@ -12,7 +12,6 @@
 // Author:
 //   Sho Hashimoto <hashimoto@shokai.org>
 //   Josh Gachnang <josh@servercobra.com>
-"use strict";
 
 import * as _ from "lodash";
 import { MongoClient } from "mongodb";
