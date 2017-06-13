@@ -2,6 +2,7 @@ import { EventEmitter } from "events";
 let httpClient = require("scoped-http-client");
 import * as bodyParser from "body-parser";
 import * as cors from "cors";
+import * as cron from "cron";
 import * as express from "express";
 import { existsSync, readFileSync } from "fs";
 import * as fs from "fs";
@@ -14,6 +15,7 @@ import Adapter from "./adapter";
 import Brain from "./brain";
 import Config from "./config";
 import Envelope from "./envelope";
+import { APIError } from "./errors";
 import frontend from "./frontend";
 import { Listener, TextListener } from "./listener";
 import { Message, TextMessage } from "./message";
@@ -52,6 +54,8 @@ export default class Robot extends EventEmitter {
   adapters: any;
   plugins: any;
   server: any;
+  cronjobs: any[] = [];
+  private expressServer: any;
 
   constructor(config: Config) {
     super();
@@ -112,7 +116,7 @@ export default class Robot extends EventEmitter {
         pluginModule.default(this);
       } catch (e) {
         this.logger.warn(`Failed to initialize plugin ${plugin}: ${e}`);
-        continue;
+
       }
       let filename = require.resolve(plugin);
       this.parseHelp(filename);
@@ -127,6 +131,7 @@ export default class Robot extends EventEmitter {
     }
     // this.frontend.setup();
     this.listen();
+    this.emit('running');
   }
 
   hear(regex: RegExp, options: any, callback: ResponseCallback) {
@@ -164,86 +169,46 @@ export default class Robot extends EventEmitter {
   }
 
   parseHelp(path) {
-    let body,
-      cleanedLine,
-      currentSection,
-      i,
-      j,
-      len,
-      len1,
-      line,
-      nextSection,
-      ref,
-      ref1,
-      scriptDocumentation,
-      scriptName,
-      indexOf =
-        [].indexOf ||
-        function(item) {
-          for (
-            let i = 0,
-              l = this.length;
-            i < l;
-            i++
-          ) {
-            if (i in this && this[i] === item) return i;
-          }
-          return -1;
-        };
+    let scriptDocumentation = {};
 
-    scriptDocumentation = {};
+    let body = readFileSync(path, "utf-8");
 
-    body = readFileSync(path, "utf-8");
+    let currentSection = null;
 
-    currentSection = null;
-
-    ref = body.split("\n");
-    for (i = 0, len = ref.length; i < len; i++) {
-      line = ref[i];
+    for (let line of body.split("\n")) {
+      // tslint:disable
+      if (line === '"use strict";') {
+        // tslint:enable
+        // Typescript -> JS compilation adds 'use strict'
+        continue;
+      }
       if (!(line[0] === "#" || line.substr(0, 2) === "//")) {
         break;
       }
-      cleanedLine = line.replace(/^(#|\/\/)\s?/, "").trim();
+      let cleanedLine = line.replace(/^(#|\/\/)\s?/, "").trim();
       if (cleanedLine.length === 0) {
         continue;
       }
       if (cleanedLine.toLowerCase() === "none") {
         continue;
       }
-      nextSection = cleanedLine.toLowerCase().replace(":", "").trim();
-      if (indexOf.call(HUBOT_DOCUMENTATION_SECTIONS, nextSection) >= 0) {
+      let nextSection = cleanedLine.toLowerCase().replace(":", "").trim();
+      if (HUBOT_DOCUMENTATION_SECTIONS.indexOf(nextSection) >= 0) {
         currentSection = nextSection;
         scriptDocumentation[currentSection] = [];
       } else {
         if (currentSection) {
           scriptDocumentation[currentSection].push(cleanedLine.trim());
           if (currentSection === "commands") {
-            this.commands.push(cleanedLine.trim());
+            let command = cleanedLine.replace("hubot", this.name).trim();
+            this.commands.push(command);
           }
         }
       }
     }
-
-    if (currentSection === null) {
-      this.logger.info("[Robot] " + path + " is using deprecated documentation syntax");
-      scriptDocumentation.commands = [];
-      ref1 = body.split("\n");
-      for (j = 0, len1 = ref1.length; j < len1; j++) {
-        line = ref1[j];
-        if (!(line[0] === "#" || line.substr(0, 2) === "//")) {
-          break;
-        }
-        if (!line.match("-")) {
-          continue;
-        }
-        cleanedLine = line.slice(2, +line.length + 1 || 9e9).replace(/^hubot/i, this.name).trim();
-        scriptDocumentation.commands.push(cleanedLine);
-        this.commands.push(cleanedLine);
-      }
-    }
   }
 
-  reply(envelope: Envelope, user: User, messages) {
+  reply(envelope: Envelope, user: User, messages: string[] | string) {
     this.logger.debug(
       `[Robot] Attempting to reply to ${user} in #${envelope.room.name}, message: ${messages}`,
     );
@@ -255,9 +220,9 @@ export default class Robot extends EventEmitter {
     this.adapters[envelope.adapterName].reply(envelope, user, messages);
   }
 
-  send(envelope: Envelope, messages) {
+  send(envelope: Envelope, messages: string[] | string) {
     this.logger.debug(
-      `[Robot] Sending in ${envelope.room.id} via ${envelope.adapterName}: ${messages}`,
+      `[Robot] Sending in ${envelope.room} via ${envelope.adapterName}: ${messages}`,
     );
 
     if (!Array.isArray(messages)) {
@@ -288,6 +253,21 @@ export default class Robot extends EventEmitter {
 
   error(callback) {
     this.errorHandlers.push(callback);
+  }
+
+  cron(name: string, schedule: string, callback: any) {
+    this.logger.info(`Adding cronjob ${name}, running at: ${schedule}`);
+    let job: any;
+    try {
+      job = new cron.CronJob({
+        cronTime: schedule,
+        onTick: callback,
+        start: true,
+      });
+    } catch (e) {
+      throw new Error(`Failed to create cronjob: ${e}`);
+    }
+    this.cronjobs.push(job);
   }
 
   // Get a key from the environment, or throw an error if it's not defined
@@ -323,15 +303,14 @@ export default class Robot extends EventEmitter {
     });
   }
 
-  receive(message: Message, adapter: Adapter, callback) {
+  receive(message: Message, adapter: Adapter, callback: (res: Response) => any) {
     let msg = message as TextMessage;
     if (!msg) {
       this.logger.info("[Robot] blank message error");
       return;
     }
     for (let listener of this.pluginListeners) {
-      // this.logger.debug('[Robot]', listener.matcher);
-      listener.call(message, adapter, callback);
+      listener.call(msg, adapter, callback);
     }
   }
 
@@ -340,7 +319,13 @@ export default class Robot extends EventEmitter {
     return function(req, res, next) {
       // Make sure to `.catch()` any errors and pass them along to the `next()`
       // middleware in the chain, in this case the error handler.
-      fn(req).then(returnVal => res.json(returnVal)).catch(next);
+      fn(req).then(returnVal => res.json(returnVal)).catch(err => {
+        if (err.message && err.status) {
+          res.sendStatus(err.status).send({ error: err.message });
+        } else {
+          next(err);
+        }
+      });
     };
   }
 
@@ -373,7 +358,7 @@ export default class Robot extends EventEmitter {
     });
 
     try {
-      this.router.listen(port, address);
+      this.expressServer = this.router.listen(port, address);
       //      this.server = https.createServer({
       //        key: fs.readFileSync('./certs/server/privkey.pem'),
       //        cert: fs.readFileSync('./certs/server/fullchain.pem'),
@@ -386,6 +371,11 @@ export default class Robot extends EventEmitter {
       process.exit(1);
     }
   }
+
+  shutdown() {
+    this.expressServer.close();
+  }
+
   // filesystemPath: Relative path to the file
   // url: the URL to expose the file at. Will be served as `/static/${url}`
   addStaticFile(filesystemPath, url) {
