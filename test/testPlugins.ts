@@ -63,3 +63,18 @@ class EchoTest extends PluginTestSuite {
     }, 10);
   }
 }
+
+@suite
+class FailedPluginInitTest extends PluginTestSuite {
+  @test
+  fail(done) {
+    let config = new Config();
+    config.name = "k2so";
+    config.plugins = ["./test/failPlugin"];
+    try {
+      let robot = new Robot(config);
+    } catch (e) {
+      done();
+    }
+  }
+}

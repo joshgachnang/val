@@ -115,8 +115,7 @@ export default class Robot extends EventEmitter {
         // Use default here to get the default exported function
         pluginModule.default(this);
       } catch (e) {
-        this.logger.warn(`Failed to initialize plugin ${plugin}: ${e}`);
-
+        throw new Error(`Failed to initialize plugin ${plugin}: ${e}`);
       }
       let filename = require.resolve(plugin);
       this.parseHelp(filename);
