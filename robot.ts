@@ -131,7 +131,7 @@ export default class Robot extends EventEmitter {
     }
     // this.frontend.setup();
     this.listen();
-    this.emit('running');
+    this.emit("running");
   }
 
   hear(regex: RegExp, options: any, callback: ResponseCallback) {
