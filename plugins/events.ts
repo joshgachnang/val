@@ -80,12 +80,12 @@ export default function(robot: Robot) {
 
   robot.cron("standup", "0 20 18 * * ", () => {
     robot.logger.info("[events] Sending standup info");
-    robot.adapters['Slack'].sendToName("josh", "Standup Summary:\n" + eventsText(27));
+    robot.adapters["Slack"].sendToName("josh", "Standup Summary:\n" + eventsText(27));
   });
 
   robot.cron("weekly email", "0 45 16 * * fri", () => {
     robot.logger.info("[events] Sending standup info");
-    robot.adapters['Slack'].sendToName("josh", "Weekly Email Summary:\n" + eventsText(180));
+    robot.adapters["Slack"].sendToName("josh", "Weekly Email Summary:\n" + eventsText(180));
   });
 
   robot.router.get("/eventSummary", (req, res) => {
