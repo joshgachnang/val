@@ -205,8 +205,8 @@ export default class Config {
   IMGUR_PASSWORD = "";
   IMGUR_EMAIL = "";
   // API Token from Slack custom bot integration
-  SLACK_TOKEN = "";
-  BOT_NAME: string = "R2-D2";
+  SLACK_TOKEN = process.env.SLACK_TOKEN;
+  BOT_NAME = process.env.BOT_NAME;
   PLUGINS = {
     DEPLOY: {
       DEPLOY_COMMAND: "cd /var/deploy && make deploy",

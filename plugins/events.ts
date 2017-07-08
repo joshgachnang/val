@@ -55,6 +55,39 @@ export default function(robot: Robot) {
     return res.send(html);
   });
 
+  function eventsText(hours: number): string {
+    let eventList = getEvents();
+    if (!eventList || eventList.length === 0) {
+      return `No events in the past ${hours} hours`;
+    }
+    let events = "";
+    for (let e of getEvents()) {
+      let time = moment(e.created);
+      if (moment().diff(time, "hours") < hours) {
+        events += `${time.format("ddd, HH:mm")}: ${e.label} - ${e.description}\n\n`;
+      }
+    }
+    return events;
+  }
+
+  robot.respond(/standup/i, {}, (res: Response) => {
+    res.reply("\n" + eventsText(27));
+  });
+
+  robot.respond(/weekly email/i, {}, (res: Response) => {
+    res.reply("\n" + eventsText(180));
+  });
+
+  robot.cron("standup", "0 20 18 * * ", () => {
+    robot.logger.info("[events] Sending standup info");
+    robot.adapters["Slack"].sendToName("josh", "Standup Summary:\n" + eventsText(27));
+  });
+
+  robot.cron("weekly email", "0 45 16 * * fri", () => {
+    robot.logger.info("[events] Sending standup info");
+    robot.adapters["Slack"].sendToName("josh", "Weekly Email Summary:\n" + eventsText(180));
+  });
+
   robot.router.get("/eventSummary", (req, res) => {
     let html = "<h1>This weeks events</h1>";
     for (let e of getEvents()) {

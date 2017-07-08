@@ -40,6 +40,10 @@ export interface ResponseCallback {
   (response: Response): void;
 }
 
+export interface EmptyCallback {
+  (): void;
+}
+
 export default class Robot extends EventEmitter {
   name: string;
   config: Config;
@@ -134,13 +138,13 @@ export default class Robot extends EventEmitter {
   }
 
   hear(regex: RegExp, options: any, callback: ResponseCallback) {
-    this.logger.info("creating hear listener for regex", regex);
+    this.logger.info("[Robot] creating hear listener for regex", regex);
     let listener = new TextListener(this, regex, options, callback);
     this.pluginListeners.push(listener);
   }
 
   respond(regex: RegExp, options: any, callback: ResponseCallback) {
-    this.logger.info("creating respond listener for regex", regex);
+    this.logger.info("[Robot] creating respond listener for regex", regex);
     let listener = new TextListener(this, this.respondPattern(regex), options, callback);
     this.pluginListeners.push(listener);
   }
@@ -254,7 +258,7 @@ export default class Robot extends EventEmitter {
     this.errorHandlers.push(callback);
   }
 
-  cron(name: string, schedule: string, callback: any) {
+  cron(name: string, schedule: string, callback: EmptyCallback) {
     this.logger.info(`Adding cronjob ${name}, running at: ${schedule}`);
     let job: any;
     try {
