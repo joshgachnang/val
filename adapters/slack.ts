@@ -7,6 +7,7 @@ import * as winston from "winston";
 import * as WebSocket from "ws";
 
 import Adapter from "../adapter";
+import Envelope from "../envelope";
 import { APIError } from "../errors";
 import { TextMessage } from "../message";
 import Robot from "../robot";
@@ -103,12 +104,26 @@ export default class SlackAdapter extends Adapter {
 
   private async slackRequest(method: string, body: any = {}) {
     body.token = this.robot.config.SLACK_TOKEN;
-    return this.robot.request({
-      method: "POST",
-      uri: `https://slack.com/api/${method}`,
-      form: body,
-      json: true,
-    });
+    let response: any;
+    try {
+      response = await this.robot.request({
+        method: "POST",
+        uri: `https://slack.com/api/${method}`,
+        form: body,
+        json: true,
+      });
+    } catch (e) {
+      this.robot.logger.error(`[slack] request error: ${e}`, e);
+      throw e;
+    }
+    if (response.ok === "false") {
+      this.robot.logger.error(`[slack] request not ok: ${response.error}`);
+      throw new Error(`Slack Request Error: ${response.error}`);
+    }
+    if (response.warning) {
+      this.robot.logger.warn(`[slack] request warning: ${response.warning}`);
+    }
+    return response;
   }
 
   private async updateUsers() {
@@ -132,18 +147,26 @@ export default class SlackAdapter extends Adapter {
   }
 
   private async updateChannels() {
-    let channels = await this.slackRequest("channels.list") as any;
-    for (let channel of channels.channels) {
-      let room = new Room(channel.name, channel.id, !channel.is_channel);
+    let publicChannels = await this.slackRequest("channels.list") as any;
+    let ims = await this.slackRequest("im.list") as any;
+    let channels = publicChannels.channels.concat(ims.ims);
+    for (let channel of channels) {
+      let room: Room;
+      if (channel.is_channel) {
+        room = new Room(channel.name, channel.id, false);
+      } else {
+        room = new Room(channel.user, channel.id, true);
+      }
       this.channels[room.id] = room;
     }
     this.logger.debug(`Found ${Object.keys(this.channels).length} channels`);
   }
 
+  // TODO: we can't hit this currently because room cannot be undefined
   private async sendMessageToUser(slackId: string, message: string, options: any) {
     let user = this.users[slackId];
     // find dm channel
-    let channel = "";
+    let channel = `@` + user.slack.name;
     this.sendMessageToChannel(channel, message, options);
   }
 
@@ -165,6 +188,47 @@ export default class SlackAdapter extends Adapter {
     }
     for (let str of strings) {
       this.sendMessageToChannel(envelope.room.name, str, { link_names: 1 });
+    }
+  }
+
+  private findUserByName(name: string): User {
+    let user: User;
+    for (let u of Object.values(this.users)) {
+      if (u.slack.name === name) {
+        user = u as User;
+        break;
+      }
+    }
+    return user;
+  }
+
+  private findChannelByUserId(id: string): Room {
+    let room: Room;
+    for (let c of Object.values(this.channels)) {
+      if (c.name === id) {
+        room = c as Room;
+        break;
+      }
+    }
+    return room;
+  }
+
+  // Send to a user by name, usually outside the normal requeset/response cycle (e.g. cronjob, etc)
+  sendToName(name: string, ...strings) {
+    let user = this.findUserByName(name);
+
+    if (!user) {
+      this.robot.logger.error(`Could not find user to send message to by name: ${name}. msg: ${strings}`);
+      throw new Error(`Slack sendToName, name not found: ${name}`);
+    }
+
+    let room = this.findChannelByUserId(user.slack.id);
+    let message = new TextMessage(user, strings.join("\n"), room, undefined, this, undefined);
+    let envelope = new Envelope(room, user, message, this.adapterName);
+
+    this.robot.logger.debug(`[slack] Sending message to name ${name}: ${strings}`);
+    for (let str of strings) {
+      this.sendMessageToChannel(envelope.room.id, str, { link_names: 1 });
     }
   }
 
