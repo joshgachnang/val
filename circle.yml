@@ -16,6 +16,9 @@ test:
   post:
     - docker run -d -p 8080:8080 --name veronica servercobra/veronica; sleep 10
     - curl --retry 10 --retry-delay 5 localhost:8080/healthcheck | grep "ok"
+    # Check deployed alexa apps
+    - curl --retry 10 --retry-delay 5 localhost:8080/productivity/flashbriefing | grep "titleText"
+    - curl --retry 10 --retry-delay 5 localhost:8080/dogecoin/flashbriefing | grep "titleText"
 
 deployment:
   prod:
