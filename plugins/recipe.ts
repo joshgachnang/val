@@ -16,6 +16,7 @@ export class Recipe {
     public cost: number,
     public servings: number,
     public ingredientMatches: any,
+    public sourceUrl: string,
     id?: string,
   ) {
     if (!id) {
@@ -45,6 +46,7 @@ export default function(robot: Robot) {
           rd.cost,
           rd.servings,
           rd.ingredientMatches,
+          rd.sourceUrl,
           rd.id,
         );
       } catch (e) {
@@ -117,6 +119,7 @@ export default function(robot: Robot) {
         req.body.cost,
         req.body.servings,
         req.body.ingredientMatches,
+        req.body.sourceUrl,
       );
     } catch (e) {
       robot.logger.warn(`Failed to construct recipe from ${req.body}: ${e}`);
