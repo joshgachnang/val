@@ -37,7 +37,7 @@ export default class Config {
     "./plugins/jiffy",
     // './plugins/frontendQuote/index',
     "./plugins/goodmorning",
-    "./plugins/pluginStarter",
+    // ./plugins/pluginStarter",
     // './plugins/weather',
     // '../node_modules/hubot-scripts/src/scripts/ackbar.coffee',
     // '../node_modules/hubot-scripts/src/scripts/coin.coffee',

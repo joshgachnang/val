@@ -98,6 +98,8 @@ export default class SlackAdapter extends Adapter {
     let raw = _.extend({}, body);
 
     let text = this.formatMessage(body);
+    if (!text) return;
+
     let message = new TextMessage(user, text, room, body.id, this, raw);
     this.receive(message);
   }
@@ -284,6 +286,11 @@ export default class SlackAdapter extends Adapter {
   // Take a slack message and replace the <ID>'s with users, save original
   // message
   private formatMessage(data: any): string {
+    if (!data || !data.text) {
+      // TODO: happens with Giphy messages and probably a lot of others. Should handle better
+      this.robot.logger.warn(`[slack] cannot format message without text: ${data}`);
+      return undefined;
+    }
     for (let match of data.text.match(/<@(\w+)>/gi) || []) {
       let userString = match.slice(2, -1);
       // console.log('format user for id', match, userString);
