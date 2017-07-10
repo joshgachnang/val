@@ -25,4 +25,4 @@ deployment:
     branch: master
     commands:
       - ./ecs-deploy.sh
-      - curl -X POST -H 'Content-type: application/json' --data '{"text":"Successfully deployed bot to ECS."}' $SLACK_WEBHOOK_URL
+      - "curl -X POST -H 'Content-type: application/json' --data '{\"text\":\"Successfully deployed bot to ECS.\"}' $SLACK_WEBHOOK_URL"
