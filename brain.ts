@@ -47,12 +47,10 @@ export default class Brain extends EventEmitter {
       throw new Error('userId cannot be undefined')
     }
     let data = this.get(key);
-    console.log("SET FOR USER", key, data);
     if (!data) {
       data = {};
     }
     data[userId] = value;
-    console.log("SETTING", key, data)
     this.set(key, data);
   }
 
@@ -63,7 +61,6 @@ export default class Brain extends EventEmitter {
       throw new Error('userId cannot be undefined')
     }
     let data = this.get(key);
-    console.log("GET FOR USER", key, data);
     if (!data) {
       return null;
     }
