@@ -7,8 +7,6 @@ export class SlackUser {
   // Profile data
   public realName: string;
 
-  public rawData: any;
-
   constructor(userObj: any) {
     this.id = userObj.id;
     this.name = userObj.name;
@@ -17,7 +15,6 @@ export class SlackUser {
     if (userObj.profile) {
       this.realName = userObj.profile.real_name;
     }
-    this.rawData = userObj;
   }
 }
 
