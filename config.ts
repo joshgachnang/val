@@ -4,10 +4,6 @@ export default class Config {
   id: string;
   name = process.env.VERONICA_NAME || "veronica";
   baseUrl = process.env.BASE_URL || "http://localhost:8080";
-  MODULES = [
-    // './modules/googleCalendar',
-    // './modules/uber'
-  ];
   DEV = process.env.DEV || "false";
 
   adapters = ["./adapters/slack", "./adapters/twilio", "./adapters/alexa", "./adapters/ionic"];
@@ -16,6 +12,7 @@ export default class Config {
     "./plugins/users",
     "./plugins/mongo-brain",
     // './plugins/log',
+    // './plugins/echo',
     "./plugins/forecastio",
     "./plugins/inspirationalQuote",
     "./plugins/cta",
@@ -31,17 +28,15 @@ export default class Config {
     "./plugins/healthcheck",
     "./plugins/tableflip",
     // './plugins/remember',
-    // './plugins/echo',
     // './plugins/deploy',
     "./plugins/help",
     "./plugins/jiffy",
-    // './plugins/frontendQuote/index',
     "./plugins/goodmorning",
-    // ./plugins/pluginStarter",
+    "hubot-shipit",
     // './plugins/weather',
     // '../node_modules/hubot-scripts/src/scripts/ackbar.coffee',
     // '../node_modules/hubot-scripts/src/scripts/coin.coffee',
-    // './node_modules/hubot-scripts/src/scripts/dealwithit.coffee',
+    "../node_modules/hubot-scripts/src/scripts/dealwithit",
     // '../node_modules/hubot-scripts/src/scripts/go-for-it.coffee',
     // '../node_modules/hubot-scripts/src/scripts/xkcd.coffee',
   ];
@@ -75,7 +70,6 @@ export default class Config {
     "You are having a great hair day",
     "I'm jealous of that shirt",
     "Go kick some ass today!",
-    "Who's world is that? Josh Gachnang's world.",
   ];
   INSPIRATIONAL_QUOTES = [
     `"It's not knowing what to do, it's doing what you know." -Tony Robbins`,
@@ -207,6 +201,7 @@ export default class Config {
   // API Token from Slack custom bot integration
   SLACK_TOKEN = process.env.SLACK_TOKEN;
   BOT_NAME = process.env.BOT_NAME;
+  CRON_TIMEZONE = process.env.CRON_TIMEZONE || "America/Chicago";
   PLUGINS = {
     DEPLOY: {
       DEPLOY_COMMAND: "cd /var/deploy && make deploy",
