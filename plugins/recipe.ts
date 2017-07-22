@@ -1,4 +1,8 @@
-import * as csv from "fast-csv";
+// Description:
+//   Host recipe, nutritional, and cost data.
+//
+// Author:
+//   pcsforeducation
 import * as fs from "fs";
 
 import AlexaAdapter from "../adapters/alexa";
