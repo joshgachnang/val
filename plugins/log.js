@@ -6,7 +6,7 @@ module.exports = function (bot) {
     let room = message.envelope.room;
     //console.log("USER AND ROOM?", user, room);
     if (user && room) {
-      console.log(`Logging message in channel #${room.name}: ${user.name}: ${message.text}`)
+      console.log(`Logging message in channel #${room.name}: ${user.name}: ${message.text}`);
     }
   }
 
