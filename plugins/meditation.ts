@@ -1,3 +1,8 @@
+// Description:
+//   Play meditation audio via Alexa
+//
+// Author:
+//   pcsforeducation
 import { AlexaMessage, default as AlexaAdapter } from "../adapters/alexa";
 import Response from "../response";
 import Robot from "../robot";

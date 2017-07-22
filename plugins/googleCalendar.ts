@@ -1,3 +1,12 @@
+// Description:
+//   Access your Google calendar
+//
+// Commands:
+//   @bot what is on my agenda - get the list of your events for the day
+//   @bot authorize google calendar - connect your Google calendar
+//
+// Author:
+//   pcsforeducation
 import * as fs from "fs";
 const google = require("googleapis");
 const googleAuth = require("google-auth-library");
@@ -59,29 +68,16 @@ export default function(robot: Robot) {
 
   robot.router.get("/alexa/flashBreifing", (req, res) => {
     getAgenda(agenda => {
-      let quote = `Today's quote of the day is: ${getRandomQuote()}`;
       return res.json([
         {
           uid: `id1${moment().utcOffset(0).startOf("hour").unix()}`,
           updateDate: moment().utcOffset(0).format("YYYY-MM-DD[T]HH:00:00.[0Z]"),
           titleText: "Veronica agenda",
           mainText: agenda,
-        },
-        {
-          uid: `id2${moment().utcOffset(0).startOf("hour").unix()}`,
-          updateDate: moment().utcOffset(0).format("YYYY-MM-DD[T]HH:00:00.[0Z]"),
-          titleText: "Veronica quote of the day",
-          mainText: quote,
-        },
+        }
       ]);
     });
   });
-
-  function getRandomQuote() {
-    let config = new Config();
-    let quotes = config.INSPIRATIONAL_QUOTES;
-    return quotes[Math.floor(Math.random() * quotes.length)];
-  }
 
   function getAgenda(callback: any) {
     let today = moment();

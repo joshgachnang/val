@@ -1,3 +1,13 @@
+// Description:
+//   Exposes an endpoint to fetch a cached ForecastIO forecast. Mostly used for smart mirrors
+//
+// Configuration:
+//   LATITUDE - latitude to fetch forecast for by default
+//   LONGITUDE - longitude to fetch forecast for by default
+//   DARKSKY_KEY - Darksky key to fetch forecast with
+//
+// Author:
+//   pcsforeducation
 import * as request from "request";
 
 export default function(robot) {
