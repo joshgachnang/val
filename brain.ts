@@ -44,7 +44,7 @@ export default class Brain extends EventEmitter {
   // instead of set()
   public setForUser(key: string, value: any, userId: string): any {
     if (!userId) {
-      throw new Error('userId cannot be undefined')
+      throw new Error("userId cannot be undefined");
     }
     let data = this.get(key);
     if (!data) {
@@ -58,7 +58,7 @@ export default class Brain extends EventEmitter {
   // instead of get()
   public getForUser(key: string, userId: string): any {
     if (!userId) {
-      throw new Error('userId cannot be undefined')
+      throw new Error("userId cannot be undefined");
     }
     let data = this.get(key);
     if (!data) {
@@ -145,12 +145,12 @@ export default class Brain extends EventEmitter {
       this.robot.logger.warn(`[brain] Cannot update undefined user: ${user}`);
       return;
     }
-    let users = this.get('users');
+    let users = this.get("users");
     if (!users) {
       users = {};
     }
     // Should merge the user here rather than just setting it. This just clobbers them.
     users[user.id] = user;
-    this.set('users', users);
+    this.set("users", users);
   }
 }
