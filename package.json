@@ -48,6 +48,7 @@
     "google-auth-library": "^0.9.10",
     "googleapis": "^2.1.7",
     "hubot-scripts": "^2.16.2",
+    "hubot-shipit": "^0.2.1",
     "js-combinatorics": "^0.5.0",
     "jsonwebtoken": "^7.1.9",
     "lodash": "^4.17.0",
@@ -101,6 +102,7 @@
     "concurrently": "^2.2.0",
     "csscomb": "^3.1.7",
     "debowerify": "^1.5.0",
+    "eslint": "^4.2.0",
     "mocha": "^2.5.3",
     "mocha-typescript": "^1.0.21",
     "nodemon": "^1.9.2",
@@ -109,6 +111,7 @@
     "ts-node": "^2.1.0",
     "tslint": "^4.4.2",
     "typescript": "^2.1.6",
+    "typescript-eslint-parser": "^4.0.0",
     "watchify": "^3.7.0"
   },
   "babel": {

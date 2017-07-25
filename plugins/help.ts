@@ -1,7 +1,7 @@
 // Description:
 //   Find a list of commands
 // Commands:
-//   hubot help - displays all command help
+//   hubot help - displays help for all commands
 
 import Response from "../response";
 import Robot from "../robot";

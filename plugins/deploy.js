@@ -1,15 +1,15 @@
 "use strict";
 
-const exec = require('child_process').exec;
+const exec = require("child_process").exec;
 
 module.exports = function (bot) {
-  
+
   function deploy(response) {
     console.log(response);
     let logger = response.bot.logger;
 
     let DEPLOY = bot.config.plugins.DEPLOY_COMMANDS;
-    console.log("DEPLOY", DEPLOY)
+    console.log("DEPLOY", DEPLOY);
     let deployCommand;
     let commandName;
     let extraArgs = "";
@@ -35,8 +35,8 @@ module.exports = function (bot) {
     }
 
     let commandOptions = {
-      encoding: 'utf8',
-      shell: '/bin/bash',
+      encoding: "utf8",
+      shell: "/bin/bash",
       timeout: 0,
       maxBuffer: 20000*1024,
       cwd: null,
@@ -55,7 +55,7 @@ module.exports = function (bot) {
       if (stderr) {
         bot.send(message.envelope, `stderr: ${stderr}`);
       }
-      bot.send(message.envelope, `deploy finished`);
+      bot.send(message.envelope, "deploy finished");
     });
   }
 

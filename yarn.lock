@@ -2705,6 +2705,10 @@ hubot-scripts@^2.16.2:
   dependencies:
     redis "0.8.4"
 
+hubot-shipit@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/hubot-shipit/-/hubot-shipit-0.2.1.tgz#4fbc9e161953bf7901fdc36e2a702c13103f16b2"
+
 iconv-lite@0.4.13:
   version "0.4.13"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.13.tgz#1f88aba4ab0b1508e8312acc39345f36e992e2f2"

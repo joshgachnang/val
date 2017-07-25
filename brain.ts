@@ -40,6 +40,33 @@ export default class Brain extends EventEmitter {
     return this.data._private[key] != null ? this.data._private[key] : null;
   }
 
+  // If the plugin supports data per user rather than all users having the same data, use this
+  // instead of set()
+  public setForUser(key: string, value: any, userId: string): any {
+    if (!userId) {
+      throw new Error("userId cannot be undefined");
+    }
+    let data = this.get(key);
+    if (!data) {
+      data = {};
+    }
+    data[userId] = value;
+    this.set(key, data);
+  }
+
+  // If the plugin supports data per user rather than all users having the same data, use this
+  // instead of get()
+  public getForUser(key: string, userId: string): any {
+    if (!userId) {
+      throw new Error("userId cannot be undefined");
+    }
+    let data = this.get(key);
+    if (!data) {
+      return null;
+    }
+    return data[userId];
+  }
+
   public remove(key) {
     if (this.data._private[key] != null) {
       return delete this.data._private[key];
@@ -81,6 +108,15 @@ export default class Brain extends EventEmitter {
     }, seconds * 1000));
   }
 
+  private getUsers(): User[] {
+    let users = this.get("users");
+    if (!users) {
+      return [];
+    }
+
+    return Object.values(users).map((u) => new User(u));
+  }
+
   public userForId(id, options = {}): User {
     if (!id) {
       this.robot.logger.warn("[brain] userForId cannot search for undefined id");
@@ -88,8 +124,9 @@ export default class Brain extends EventEmitter {
     }
     // Ask each user object if the id is contained in thir user object
     let user: User;
+    let users = this.getUsers();
     // this.robot.logger.debug(`searching for user by id: ${id}`);
-    for (let u of Object.values(this.data.users)) {
+    for (let u of users) {
       if (u.containsId(id)) {
         user = u;
         break;
@@ -108,6 +145,12 @@ export default class Brain extends EventEmitter {
       this.robot.logger.warn(`[brain] Cannot update undefined user: ${user}`);
       return;
     }
-    this.data.users[user.id] = user;
+    let users = this.get("users");
+    if (!users) {
+      users = {};
+    }
+    // Should merge the user here rather than just setting it. This just clobbers them.
+    users[user.id] = user;
+    this.set("users", users);
   }
 }

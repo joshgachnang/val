@@ -1,3 +1,16 @@
+// Description:
+//   Allow posting arbitrary events and querying them
+//
+// Commands:
+//   hubot standup - get the past day's worth of events
+//   hubot week summary - get the past week's worth of events
+//
+// Notes:
+//   Events can be posted by sending a POST request to /events. In the future this will required
+//   an API key.
+//
+// Author:
+//   pcsforeducation
 import * as moment from "moment-timezone";
 
 import Response from "../response";
@@ -44,17 +57,6 @@ export default function(robot: Robot) {
     return res.json({ events: getEvents() });
   });
 
-  robot.router.get("/standup", (req, res) => {
-    let html = "<h1>Since yesterday</h1>";
-    for (let e of getEvents()) {
-      let time = moment(e.created);
-      if (moment().diff(time, "hours") < 27) {
-        html += `<p>${time.format("ddd, HH:mm")}: ${e.label} - ${e.description}</p>`;
-      }
-    }
-    return res.send(html);
-  });
-
   function eventsText(hours: number): string {
     let eventList = getEvents();
     if (!eventList || eventList.length === 0) {
@@ -78,24 +80,14 @@ export default function(robot: Robot) {
     res.reply("\n" + eventsText(180));
   });
 
-  robot.cron("standup", "0 20 18 * * ", () => {
+  robot.cron("standup", "0 28 10 * * ", () => {
     robot.logger.info("[events] Sending standup info");
     robot.adapters["Slack"].sendToName("josh", "Standup Summary:\n" + eventsText(27));
   });
 
+  // TODO: this was at 11:45am, figure out why
   robot.cron("weekly email", "0 45 16 * * fri", () => {
     robot.logger.info("[events] Sending standup info");
     robot.adapters["Slack"].sendToName("josh", "Weekly Email Summary:\n" + eventsText(180));
-  });
-
-  robot.router.get("/eventSummary", (req, res) => {
-    let html = "<h1>This weeks events</h1>";
-    for (let e of getEvents()) {
-      let time = moment(e.created);
-      if (moment().diff(time, "days") < 7) {
-        html += `<p>${time.format("ddd, HH:mm")}: ${e.label} - ${e.description}</p>`;
-      }
-    }
-    return res.send(html);
   });
 }

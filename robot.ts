@@ -1,3 +1,4 @@
+require("coffee-script/register");
 import { EventEmitter } from "events";
 let httpClient = require("scoped-http-client");
 import * as bodyParser from "body-parser";
@@ -7,6 +8,7 @@ import * as express from "express";
 import { existsSync, readFileSync } from "fs";
 import * as fs from "fs";
 import * as https from "https";
+import * as path from "path";
 import { env, exit } from "process";
 import * as request from "request";
 import * as winston from "winston";
@@ -117,7 +119,11 @@ export default class Robot extends EventEmitter {
       }
       try {
         // Use default here to get the default exported function
-        pluginModule.default(this);
+        if (pluginModule.default) {
+          pluginModule.default(this);
+        } else {
+          pluginModule(this);
+        }
       } catch (e) {
         throw new Error(`Failed to initialize plugin ${plugin}: ${e}`);
       }
@@ -203,7 +209,10 @@ export default class Robot extends EventEmitter {
         if (currentSection) {
           scriptDocumentation[currentSection].push(cleanedLine.trim());
           if (currentSection === "commands") {
+            // Support old hubot plugins
             let command = cleanedLine.replace("hubot", this.name).trim();
+            // New version going forward
+            command = cleanedLine.replace("bot", this.name).trim();
             this.commands.push(command);
           }
         }
@@ -258,6 +267,39 @@ export default class Robot extends EventEmitter {
     this.errorHandlers.push(callback);
   }
 
+  // Deprecated, for loading hubot plugins. Use normal requires() and import for new plugins
+  public loadFile (filepath: string, filename: string) {
+    const ext = path.extname(filename);
+    const full = path.join(filepath, path.basename(filename, ext));
+
+    if (!require.extensions[ext]) { // eslint-disable-line
+      return;
+    }
+
+    try {
+      const script = require(full);
+
+      if (typeof script === "function") {
+        script(this);
+        this.parseHelp(path.join(filepath, filename));
+      } else {
+        this.logger.warning(`Expected ${full} to assign a function to module.exports, got ${typeof script}`);
+      }
+    } catch (error) {
+      this.logger.error(`Unable to load ${full}: ${error.stack}`);
+      process.exit(1);
+    }
+  }
+
+  // Deprecated, for loading hubot plugins. Use normal requires() and import for new plugins
+  load (path) {
+    this.logger.debug(`Loading scripts from ${path}`);
+
+    if (fs.existsSync(path)) {
+      fs.readdirSync(path).sort().map(file => this.loadFile(path, file));
+    }
+  }
+
   cron(name: string, schedule: string, callback: EmptyCallback) {
     this.logger.info(`Adding cronjob ${name}, running at: ${schedule}`);
     let job: any;
@@ -266,6 +308,7 @@ export default class Robot extends EventEmitter {
         cronTime: schedule,
         onTick: callback,
         start: true,
+        timeZone: this.config.CRON_TIMEZONE,
       });
     } catch (e) {
       throw new Error(`Failed to create cronjob: ${e}`);

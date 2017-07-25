@@ -13,10 +13,14 @@
 //   Sho Hashimoto <hashimoto@shokai.org>
 //   Josh Gachnang <josh@servercobra.com>
 
-import * as _ from "lodash";
 import { MongoClient } from "mongodb";
 
 let deepClone = obj => JSON.parse(JSON.stringify(obj));
+
+function isEqual(obj1, obj2): Boolean {
+  // TODO: OH GOD THIS IS A BAD IDEA
+  return JSON.stringify(obj1) === JSON.stringify(obj2);
+}
 
 export default function(robot) {
   let mongoUrl = process.env.MONGODB_URL || "mongodb://localhost/hubot-brain";
@@ -58,10 +62,7 @@ export default function(robot) {
         let result = [];
         for (let k in data._private) {
           let v = data._private[k];
-          //              robot.logger.debug(`cache same? ${cache[k]},  ${v}`);
-          if (_.isEqual(cache[k], v)) {
-            // skip unmodified keys
-            // robot.logger.debug(`[mongo-brain] cache is equal, not saving`);
+          if (isEqual(cache[k], v)) {
             continue;
           }
           robot.logger.debug(`[mongo-brain] save \"${k}\" into mongodb-brain`);
