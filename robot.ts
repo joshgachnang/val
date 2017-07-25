@@ -381,7 +381,11 @@ export default class Robot extends EventEmitter {
     app.use(cors());
 
     app.use((req, res, next) => {
+      // Let everyone know who powers this API
       res.setHeader("X-Powered-By", `hubot/${this.name}/1.0`);
+      // No more CORS
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Headers", "X-Requested-With");
       next();
     });
 
