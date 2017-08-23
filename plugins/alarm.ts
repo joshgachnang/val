@@ -5,7 +5,7 @@ import Response from "../response";
 import Robot from "../robot";
 
 type AlarmRepeat =
-  | "never"
+  "never"
   | "hour"
   | "day"
   | "week"

@@ -30,7 +30,7 @@ export default function(robot: Robot) {
 
   robot.router.get(
     "/hello",
-    robot.expressWrap(async req => {
+    robot.expressWrap(async (req) => {
       return await hello();
     }),
   );

@@ -51,17 +51,28 @@ export default function(robot: Robot) {
     return tempString;
   }
 
+  robot.respond(/good morning/i, {}, async (res: Response) => {
+    let text = await getGoodMorning();
+    res.reply(text);
+  });
+
   robot.router.get(
     "/goodmorning",
-    robot.expressWrap(async req => {
+    robot.expressWrap(async (req) => {
       return await getGoodMorning();
     }),
   );
 
   robot.router.post(
     "/goodmorning",
-    robot.expressWrap(async req => {
+    robot.expressWrap(async (req) => {
       return "ok";
     }),
   );
+
+  robot.cron("standup", "0 28 10 * * ", async () => {
+    robot.logger.info("[events] Sending good morning");
+    let text = await getGoodMorning();
+    robot.adapters["Slack"].sendToName("josh", `Good morning! ${text}`);
+  });
 }

@@ -47,7 +47,7 @@ export default class SlackAdapter extends Adapter {
   private setupHttp() {
     this.robot.router.post(
       "/adapter/slack",
-      this.robot.expressWrap(async req => {
+      this.robot.expressWrap(async (req) => {
         if (!req.body.type) {
           this.logger.debug(`[slack] No type present in slack request: `, req.body);
           throw new APIError("No type present in slack request", 400);
