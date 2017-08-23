@@ -2,7 +2,7 @@ import * as process from "process";
 
 export default class Config {
   id: string;
-  name = process.env.VERONICA_NAME || "veronica";
+  name = process.env.BOT_NAME || "val";
   baseUrl = process.env.BASE_URL || "http://localhost:8080";
   DEV = process.env.DEV || "false";
 
