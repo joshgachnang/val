@@ -24,8 +24,12 @@
         "room.ts",
         "server.ts",
         "user.ts",
-				"adapters/*",
-				"plugins/*",
+        "adapters/*",
+        "plugins/*",
         "test/*"
+    ],
+    "exclude": [
+        "built/**/*",
+        "node_modules/**/*"
     ]
 }

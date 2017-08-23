@@ -21,6 +21,7 @@ export class Recipe {
     public servings: number,
     public ingredientMatches: any,
     public sourceUrl: string,
+    public imageUrl: string,
     id?: string,
   ) {
     if (!id) {
@@ -50,6 +51,7 @@ export default function(robot: Robot) {
           rd.cost,
           rd.servings,
           rd.ingredientMatches,
+          rd.imageUrl,
           rd.sourceUrl,
           rd.id,
         );
@@ -123,6 +125,7 @@ export default function(robot: Robot) {
         req.body.cost,
         req.body.servings,
         req.body.ingredientMatches,
+        req.body.imageUrl,
         req.body.sourceUrl,
       );
     } catch (e) {
@@ -160,5 +163,16 @@ export default function(robot: Robot) {
       return res.json({});
     }
     res.status(400).send();
+  });
+
+  // TODO: don't require the x calories portion
+  robot.respond(/log (.+) for (\d+) calories/i, {}, (res: Response) => {
+    let event = {
+      kind: "meal",
+      // label: '',  // TODO: support meals
+      description: `${res.match[2]} cals - ${res.match[1]}`,
+    };
+    robot.emit("event", event);
+    res.reply("Ok! Logged it!");
   });
 }
