@@ -5,9 +5,10 @@
   "main": "server.js",
   "scripts": {
     "app:serve": "cd app/ && npm run ionic:serve",
-    "build": "npm run build:clean && npm run build:copy && npm run compile",
+    "build": "npm run build:clean && npm run build:copy && npm run build:compile",
     "build:clean": "rm -rf dist/*",
-    "build:copy": "mkdir -p dist/config/  && cp -a thirdParty dist/ && cp envfile dist/ | true",
+    "build:compile": "tsc",
+    "build:copy": "mkdir -p dist/config/ && cp -a thirdParty dist/ && if [ -f envfile ]; then cp envfile dist/; fi",
     "docker": "npm run build && docker build -t servercobra/val . && docker push servercobra/val",
     "precommit": "npm run precommit:lintfix && npm run precommit:pretty",
     "precommit:lintfix": "tslint --fix adapters/*.ts plugins/*.ts test/*.ts *.ts",
@@ -15,7 +16,7 @@
     "start": "node dist/server.js",
     "test": "npm run test:lint && npm run build && npm run test:mocha",
     "test:lint": "tslint adapters/*.ts plugins/*.ts test/*.ts *.ts",
-    "test:mocha": "mocha dist/test/*.js && mocha build/plugins/*.spec.js",
+    "test:mocha": "mocha dist/test/*.js",
     "watch": "concurrently --kill-others 'npm run watch:typescript' 'npm run watch:node'",
     "watch:node": "nodemon dist/server.js",
     "watch:typescript": "mocha-typescript-watch dist/test/testPlugins.js"

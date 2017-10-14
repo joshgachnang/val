@@ -111,5 +111,5 @@ export function extensionSetup() {
     return this.reduce(
       (a, b) => a.concat(Array.isArray(b) ? this.flatten(b) : b)
     );
-  }
+  };
 }
