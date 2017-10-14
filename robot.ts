@@ -425,7 +425,7 @@ export default class Robot extends EventEmitter {
   }
 
   shutdown() {
-    this.emit('shutdown');
+    this.emit("shutdown");
     this.expressServer.close();
   }
 
