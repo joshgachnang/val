@@ -72,7 +72,7 @@ export default function(robot: Robot) {
         {
           uid: `id1${moment().utcOffset(0).startOf("hour").unix()}`,
           updateDate: moment().utcOffset(0).format("YYYY-MM-DD[T]HH:00:00.[0Z]"),
-          titleText: "Veronica agenda",
+          titleText: "Val agenda",
           mainText: agenda,
         }
       ]);

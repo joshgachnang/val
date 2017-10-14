@@ -7,11 +7,11 @@ import { TextMessage } from "../message"; // tslint:disable-line
 import Robot from "../robot";
 import User from "../user";
 
-class PluginTestSuite {
+export class PluginTestSuite {
   robot: Robot;
   robotName = "k2so";
 
-  getFakeRobot(plugins) {
+  static getFakeRobot(plugins) {
     let config = new Config();
     config.name = "k2so";
     config.plugins = plugins;
@@ -26,6 +26,10 @@ class PluginTestSuite {
       this.robot.shutdown();
     }
   }
+
+  before() {
+  }
+
   getUser(): User {
     return new User({ id: "id", slack: { id: "someId", name: "fakeUser" } });
   }
@@ -38,7 +42,7 @@ class PluginTestSuite {
 @suite
 class EchoTest extends PluginTestSuite {
   before() {
-    this.robot = this.getFakeRobot(["./plugins/echo"]);
+    this.robot = EchoTest.getFakeRobot(["./plugins/echo"]);
   }
 
   @test

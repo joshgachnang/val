@@ -5,6 +5,7 @@ export default class Config {
   name = process.env.BOT_NAME || "val";
   baseUrl = process.env.BASE_URL || "http://localhost:8080";
   DEV = process.env.DEV || "false";
+  MONGODB_URL = process.env.MONGODB_URL || "mongodb://localhost/hubot-brain";
 
   adapters = ["./adapters/slack", "./adapters/twilio", "./adapters/alexa", "./adapters/ionic"];
 
@@ -17,7 +18,7 @@ export default class Config {
     "./plugins/inspirationalQuote",
     "./plugins/cta",
     "./plugins/googleCalendar",
-    "./plugins/recipe",
+    "./plugins/food",
     "./plugins/meditation",
     "./plugins/alarm",
     "./plugins/dogecoin",
