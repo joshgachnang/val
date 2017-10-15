@@ -1,4 +1,6 @@
 require("coffee-script/register");
+import * as extensions from "./extensions";
+
 import { EventEmitter } from "events";
 let httpClient = require("scoped-http-client");
 import * as bodyParser from "body-parser";
@@ -423,6 +425,7 @@ export default class Robot extends EventEmitter {
   }
 
   shutdown() {
+    this.emit("shutdown");
     this.expressServer.close();
   }
 

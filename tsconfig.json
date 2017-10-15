@@ -1,16 +1,12 @@
 {
     "compilerOptions": {
-        "allowJs": true,
-        "experimentalDecorators": true,
-        "moduleResolution": "node",
-        "noImplicitReturns": true,
-        "noFallthroughCasesInSwitch": true,
-        "outDir": "./built",
-        "removeComments": false,
-        "sourceMap":  true,
-        "target": "es5"
+        "target": "es6",
+        "module": "commonjs",
+        "outDir": "dist",
+        "skipLibCheck": true,
+        "sourceMap": true,
+        "experimentalDecorators": true
     },
-    "typeRoots": [ "node_modules/@types" ],
     "include": [
         "adapter.ts",
         "brain.ts",
@@ -29,7 +25,9 @@
         "test/*"
     ],
     "exclude": [
-        "built/**/*",
-        "node_modules/**/*"
+        "dist/**/*",
+        "node_modules/**/*",
+        "app/**/*",
+        "app/*"
     ]
 }

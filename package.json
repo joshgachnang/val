@@ -1,27 +1,25 @@
 {
-  "name": "veronica",
+  "name": "val",
   "version": "0.1.0",
   "description": "A chat bot based on Hubot to automate your life",
   "main": "server.js",
   "scripts": {
-    "build": "npm run build:clean && npm run compile",
-    "build:clean": "rm -rf built/*",
-    "compile": "mkdir -p built/config/  && cp -a thirdParty built/ && cp envfile built/ | true && tsc",
-    "docker": "npm run compile && docker build -t servercobra/veronica . && docker push servercobra/veronica",
-    "dev": "npm run watch",
-    "deploy": "npm run docker && npm run hyper",
-    "hyper": "hyper stop veronica; hyper rm veronica; hyper pull servercobra/veronica; hyper run -d --name veronica -p 8080:8080 --env-file prodenvfile servercobra/veronica && hyper fip attach 199.245.57.103 veronica",
-    "lint": "tslint adapters/*.ts plugins/*.ts test/*.ts *.ts",
-    "lintfix": "tslint --fix adapters/*.ts plugins/*.ts test/*.ts *.ts",
-    "mocha": "mocha built/test/*.js",
-    "prebuild": "npm run build:clean",
-    "pretty": "prettier --print-width 100 --trailing-comma 'all'  --write '**/*.ts'",
-    "serve": "npm run watch:node",
-    "start": "node built/server.js",
-    "test": "npm run lint && npm run build && npm run mocha",
-    "watch": "concurrently --kill-others 'npm run watch:typescript' 'npm run serve'",
-    "watch:node": "nodemon built/server.js",
-    "watch:typescript": "mocha-typescript-watch built/test/testPlugins.js"
+    "app:serve": "cd app/ && npm run ionic:serve",
+    "build": "npm run build:clean && npm run build:copy && npm run build:compile",
+    "build:clean": "rm -rf dist/*",
+    "build:compile": "tsc",
+    "build:copy": "mkdir -p dist/config/ && cp -a thirdParty dist/ && if [ -f envfile ]; then cp envfile dist/; fi",
+    "docker": "npm run build && docker build -t servercobra/val . && docker push servercobra/val",
+    "precommit": "npm run precommit:lintfix && npm run precommit:pretty",
+    "precommit:lintfix": "tslint --fix adapters/*.ts plugins/*.ts test/*.ts *.ts",
+    "precommit:pretty": "prettier --print-width 100 --trailing-comma 'all'  --write '**/*.ts'",
+    "start": "node dist/server.js",
+    "test": "npm run test:lint && npm run build && npm run test:mocha",
+    "test:lint": "tslint adapters/*.ts plugins/*.ts test/*.ts *.ts",
+    "test:mocha": "mocha dist/test/*.js",
+    "watch": "concurrently --kill-others 'npm run watch:typescript' 'npm run watch:node'",
+    "watch:node": "nodemon dist/server.js",
+    "watch:typescript": "mocha-typescript-watch dist/test/testPlugins.js"
   },
   "author": "Josh Gachnang",
   "license": "GPL-3.0",
@@ -57,7 +55,7 @@
     "method-override": "^2.3.6",
     "moment-timezone": "^0.5.13",
     "mongodb": "^2.2.12",
-    "mongoose": "^4.4.14",
+    "mongoose": "^4.11.7",
     "morgan": "^1.7.0",
     "multer": "^1.2.0",
     "node-gyp": "^3.4.0",
@@ -88,12 +86,14 @@
   "devDependencies": {
     "@types/body-parser": "0.0.33",
     "@types/browserify": "^12.0.30",
-    "@types/es6-promise": "0.0.32",
     "@types/express": "^4.0.34",
     "@types/lodash": "ts2.0",
     "@types/moment": "^2.13.0",
     "@types/moment-timezone": "^0.2.34",
+    "@types/mongodb": "^2.2.10",
+    "@types/mongoose": "^4.7.21",
     "@types/node": "^6.0.63",
+    "@types/supertest": "^2.0.3",
     "@types/winston": "0.0.32",
     "babel-cli": "^6.14.0",
     "babel-polyfill": "^6.13.0",
@@ -109,15 +109,16 @@
     "nodemon": "^1.9.2",
     "prettier": "^1.4.4",
     "rimraf": "^2.5.4",
+    "supertest": "^3.0.0",
     "ts-node": "^2.1.0",
     "tslint": "^4.4.2",
-    "typescript": "^2.1.6",
+    "typescript": "^2.5.2",
     "typescript-eslint-parser": "^4.0.0",
     "watchify": "^3.7.0"
   },
   "babel": {
     "presets": [
-      "es2015"
+      "es2016"
     ]
   }
 }

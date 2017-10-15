@@ -23,11 +23,9 @@ function isEqual(obj1, obj2): Boolean {
 }
 
 export default function(robot) {
-  let mongoUrl = process.env.MONGODB_URL || "mongodb://localhost/hubot-brain";
+  robot.logger.debug(`[mongo-brain] connecting to mongo url: ${robot.config.MONGODB_URL}`);
 
-  robot.logger.debug(`[mongo-brain] connecting to mongo url: ${mongoUrl}`);
-
-  return MongoClient.connect(mongoUrl, function(err, db) {
+  return MongoClient.connect(robot.config.MONGODB_URL, function(err, db) {
     if (err) {
       throw err;
     }

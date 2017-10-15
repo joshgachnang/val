@@ -1,5 +1,5 @@
 const alexa = require("../thirdParty/alexa-app/");
-const app = new alexa.app("veronica");
+const app = new alexa.app("val");
 
 import Adapter from "../adapter";
 import Envelope from "../envelope";
@@ -79,7 +79,7 @@ export default class AlexaAdapter extends Adapter {
     app.express(this.robot.router, "/alexa/api/", true);
 
     app.launch((req, res) => {
-      res.say("hello, my name is veronica.");
+      res.say("hello, my name is val.");
     });
 
     let utterances = ["say the number {1-2|number}"];

@@ -32,7 +32,7 @@ export default function(robot: Robot) {
     let forecast: any = await getForecast();
     let tempString = `It is currently ${Math.floor(
       forecast.currently.temperature,
-    )} and ${forecast.currently.summary.toLowerCase()}.`;
+    )} with ${forecast.currently.summary.toLowerCase()}.`;
     let now = moment();
     for (let hour of forecast.hourly.data) {
       let time = moment.unix(hour.time);
@@ -40,12 +40,12 @@ export default function(robot: Robot) {
       if (time.format("H") === "11" && now.format("E") === time.format("E")) {
         tempString += ` At 11am, it will be ${Math.floor(
           hour.temperature,
-        )} and ${hour.summary.toLowerCase()}.`;
+        )} with ${hour.summary.toLowerCase()}.`;
         // Or 7pm on the same day as today
       } else if (time.format("H") === "18" && now.format("E") === time.format("E")) {
         tempString += ` At 7pm, it will be ${Math.floor(
           hour.temperature,
-        )} and ${hour.summary.toLowerCase()}.`;
+        )} with ${hour.summary.toLowerCase()}.`;
       }
     }
     return tempString;
@@ -70,7 +70,7 @@ export default function(robot: Robot) {
     }),
   );
 
-  robot.cron("standup", "0 28 10 * * ", async () => {
+  robot.cron("good morning", "0 28 10 * * ", async () => {
     robot.logger.info("[events] Sending good morning");
     let text = await getGoodMorning();
     robot.adapters["Slack"].sendToName("josh", `Good morning! ${text}`);

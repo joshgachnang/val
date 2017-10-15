@@ -10,7 +10,7 @@
         "spec": ">=2.3.4 <3.0.0",
         "type": "range"
       },
-      "/home/josh/src/veronica"
+      "/home/josh/src/val"
     ]
   ],
   "_from": "alexa-app@>=2.3.4 <3.0.0",
@@ -46,7 +46,7 @@
   "_shasum": "78ef8eb8730111af529c69f16f0b5bbfca9f2c98",
   "_shrinkwrap": null,
   "_spec": "alexa-app@^2.3.4",
-  "_where": "/home/josh/src/veronica",
+  "_where": "/home/josh/src/val",
   "author": {
     "name": "Matt Kruse",
     "email": "github@mattkruse.com",
