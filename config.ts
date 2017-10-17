@@ -7,7 +7,7 @@ export default class Config {
   DEV = process.env.DEV || "false";
   MONGODB_URL = process.env.MONGODB_URL || "mongodb://localhost/hubot-brain";
 
-  adapters = ["./adapters/slack", "./adapters/twilio", "./adapters/alexa", "./adapters/ionic"];
+  adapters = ["./adapters/slack", "./adapters/twilio", "./adapters/alexa"];
 
   plugins = [
     "./plugins/users",
