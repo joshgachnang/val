@@ -214,7 +214,7 @@ export default class Robot extends EventEmitter {
             // Support old hubot plugins
             let command = cleanedLine.replace("hubot", this.name).trim();
             // New version going forward
-            command = cleanedLine.replace("bot", this.name).trim();
+            command = command.replace("bot", this.name).trim();
             this.commands.push(command);
           }
         }
