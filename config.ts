@@ -7,13 +7,13 @@ export default class Config {
   DEV = process.env.DEV || "false";
   MONGODB_URL = process.env.MONGODB_URL || "mongodb://localhost/hubot-brain";
 
-  adapters = ["./adapters/slack", "./adapters/twilio", "./adapters/alexa", "./adapters/ionic"];
+  adapters = ["./adapters/slack", "./adapters/twilio", "./adapters/alexa"];
 
   plugins = [
     "./plugins/users",
     "./plugins/mongo-brain",
-    // './plugins/log',
-    // './plugins/echo',
+    // "./plugins/log",
+    // "./plugins/echo",
     "./plugins/forecastio",
     "./plugins/inspirationalQuote",
     "./plugins/cta",
@@ -25,21 +25,17 @@ export default class Config {
     "./plugins/productivityQuote",
     "./plugins/events",
     "./plugins/todo",
-    // './plugins/triviastats',
     "./plugins/healthcheck",
-    "./plugins/tableflip",
-    // './plugins/remember',
-    // './plugins/deploy',
+    "./plugins/emoticons",
     "./plugins/help",
     "./plugins/jiffy",
     "./plugins/goodmorning",
     "hubot-shipit",
-    // './plugins/weather',
-    // '../node_modules/hubot-scripts/src/scripts/ackbar.coffee',
-    // '../node_modules/hubot-scripts/src/scripts/coin.coffee',
+    "../node_modules/hubot-scripts/src/scripts/ackbar.coffee",
+    "../node_modules/hubot-scripts/src/scripts/coin.coffee",
     "../node_modules/hubot-scripts/src/scripts/dealwithit",
-    // '../node_modules/hubot-scripts/src/scripts/go-for-it.coffee',
-    // '../node_modules/hubot-scripts/src/scripts/xkcd.coffee',
+    "../node_modules/hubot-scripts/src/scripts/go-for-it.coffee",
+    "../node_modules/hubot-scripts/src/scripts/xkcd.coffee",
   ];
   UBER_CLIENT_ID = "";
   UBER_CLIENT_SECRET = "";
