@@ -14,4 +14,3 @@ envfile
 prodenvfile
 dist/
 *.js
-app
