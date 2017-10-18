@@ -181,9 +181,7 @@ export default class Robot extends EventEmitter {
 
   parseHelp(path) {
     let scriptDocumentation = {};
-
     let body = readFileSync(path, "utf-8");
-
     let currentSection = null;
 
     for (let line of body.split("\n")) {

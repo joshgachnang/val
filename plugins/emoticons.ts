@@ -1,3 +1,4 @@
+"use strict";
 // Description:
 //   Flip the tables
 //

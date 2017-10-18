@@ -1,3 +1,4 @@
+"use strict";
 // Description:
 //   Find a list of commands
 // Commands:

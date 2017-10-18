@@ -1,3 +1,4 @@
+"use strict";
 // Description:
 //   Play meditation audio via Alexa
 //

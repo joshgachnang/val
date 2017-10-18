@@ -1,3 +1,4 @@
+"use strict";
 // Description:
 //   hubot-mongodb-brain
 //   support MongoLab and MongoHQ on heroku.

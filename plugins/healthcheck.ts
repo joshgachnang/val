@@ -1,3 +1,4 @@
+"use strict";
 // Description:
 //   Provide a healthcheck for load balancing when deployed
 //

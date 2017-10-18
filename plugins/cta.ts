@@ -1,3 +1,4 @@
+"use strict";
 // Description:
 //   Fetch CTA train arrival times
 //
@@ -5,10 +6,6 @@
 //   CTA_TRAIN_API_KEY - the CTA developer key to fetch with
 //   CTA_TRAIN_MAP_ID - the stop to monitor. A full list can be found at
 //     https://data.cityofchicago.org/Transportation/CTA-System-Information-List-of-L-Stops/8pix-ypme/data
-//
-// Commands:
-//   hubot <trigger> - <what the respond trigger does>
-//   <trigger> - <what the hear trigger does>
 //
 // Notes:
 //   Apply for a CTA key at http://www.transitchicago.com/developers/traintrackerapply.aspx
