@@ -1,3 +1,4 @@
+"use strict";
 // Description:
 //   Access your Google calendar
 //

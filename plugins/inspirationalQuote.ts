@@ -1,3 +1,4 @@
+"use strict";
 // Description:
 //   Inspirational quote for smart mirror
 //

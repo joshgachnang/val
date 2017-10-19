@@ -1,3 +1,4 @@
+"use strict";
 // Description:
 //   <description of the scripts functionality>
 //

@@ -181,9 +181,7 @@ export default class Robot extends EventEmitter {
 
   parseHelp(path) {
     let scriptDocumentation = {};
-
     let body = readFileSync(path, "utf-8");
-
     let currentSection = null;
 
     for (let line of body.split("\n")) {
@@ -191,6 +189,10 @@ export default class Robot extends EventEmitter {
       if (line === '"use strict";') {
         // tslint:enable
         // Typescript -> JS compilation adds 'use strict'
+        continue;
+      }
+      // Check for TS outputting a module
+      if (line.trim() === `Object.defineProperty(exports, "__esModule", { value: true });`) {
         continue;
       }
       if (!(line[0] === "#" || line.substr(0, 2) === "//")) {
@@ -212,9 +214,11 @@ export default class Robot extends EventEmitter {
           scriptDocumentation[currentSection].push(cleanedLine.trim());
           if (currentSection === "commands") {
             // Support old hubot plugins
-            let command = cleanedLine.replace("hubot", this.name).trim();
+            let command = cleanedLine.replace("@hubot", "@" + this.name).trim();
+            command = command.replace("hubot", "@" + this.name);
             // New version going forward
-            command = command.replace("bot", this.name).trim();
+            command = command.replace("@bot", "@" + this.name);
+            command = command.replace("bot", "@" + this.name);
             this.commands.push(command);
           }
         }

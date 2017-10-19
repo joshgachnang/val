@@ -21,7 +21,7 @@ export default class Config {
     "./plugins/food",
     "./plugins/meditation",
     "./plugins/alarm",
-    "./plugins/dogecoin",
+    "./plugins/cryptocurrency",
     "./plugins/productivityQuote",
     "./plugins/events",
     "./plugins/todo",

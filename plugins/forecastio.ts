@@ -1,3 +1,4 @@
+"use strict";
 // Description:
 //   Exposes an endpoint to fetch a cached ForecastIO forecast. Mostly used for smart mirrors
 //
