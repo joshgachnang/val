@@ -1,7 +1,7 @@
 "use strict";
 // Description:
-//   hubot-mongodb-brain
-//   support MongoLab and MongoHQ on heroku.
+//   val-mongodb-brain
+//   support for MongoDB
 //
 // Dependencies:
 //   "mongodb": "*"
@@ -26,37 +26,35 @@ function isEqual(obj1, obj2): Boolean {
 export default function(robot) {
   robot.logger.debug(`[mongo-brain] connecting to mongo url: ${robot.config.MONGODB_URL}`);
 
-  return MongoClient.connect(robot.config.MONGODB_URL, function(err, db) {
-    if (err) {
-      throw err;
-    }
+  let db;
+  let cache = {};
 
+  return MongoClient.connect(robot.config.MONGODB_URL).then((mongoDb) => {
+    db = mongoDb;
     robot.brain.on("close", () => db.close());
 
-    robot.logger.info("MongoDB connected");
+    robot.logger.info("[mongo-brain] MongoDB connected");
     robot.brain.setAutoSave(false);
 
-    let cache = {};
-
     // restore data from mongodb
-    db.createCollection("brain", (err, collection) =>
-      collection.find({ type: "_private" }).toArray(function(err, docs) {
-        if (err) {
-          return robot.logger.error(err);
-        }
-        let priv = {};
-        for (let doc of docs) {
-          priv[doc.key] = doc.value;
-        }
-        cache = deepClone(priv);
-        robot.brain.mergeData({ _private: priv });
-        robot.brain.resetSaveInterval(10);
-        return robot.brain.setAutoSave(true);
-      }),
-    );
+    return db.createCollection("brain");
+   }).then((collection) => {
+    return collection.find({ type: "_private" }).toArray();
+   }).then((docs) => {
+    let priv = {};
+    for (let doc of docs) {
+      priv[doc.key] = doc.value;
+    }
+    cache = deepClone(priv);
 
-    // save data into mongodb
-    return robot.brain.on("save", data => {
+    robot.brain.mergeData({ _private: priv });
+    robot.brain.resetSaveInterval(10);
+    robot.brain.setAutoSave(true);
+
+    robot.logger.info("[mongo-brain] db data loaded");
+
+    robot.brain.on("save", data => {
+      let cache = {};
       db.collection("brain", (err, collection) => {
         let result = [];
         for (let k in data._private) {
@@ -76,13 +74,11 @@ export default function(robot) {
             },
             {
               upsert: true,
-            },
-            function(err, res) {
-              if (err) {
-                robot.logger.error(`[mongo-brain] ${err}`);
-              }
-            },
-          );
+            })
+            .then(() => {})
+            .catch((err) => {
+              robot.logger.error(`[mongo-brain] ${err}`);
+            });
         }
       });
     });
