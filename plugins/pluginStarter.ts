@@ -24,6 +24,9 @@ import Robot from "../robot";
 // Plugins need to export a default function that takes a robot. This function will be called
 // when the plugin is first loaded by the Robot and should do any setup necessary, such as setting
 // up HTTP endpoints or listening for phrases.
+// If the plugin returns a promise, the Robot will wait for the promise to resolve before moving to
+// load the next plugin. You should only do this when absolutely necessary (see mongo-brain), as it
+// can massively increase startup time.
 export default function(robot: Robot) {
   async function hello() {
     return "hello world!";

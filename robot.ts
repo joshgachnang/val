@@ -141,6 +141,9 @@ export default class Robot extends EventEmitter {
 
       let filename = require.resolve(plugin);
       this.parseHelp(filename);
+      // Track installed plugins
+      // TODO: this could be more useful... (currently just used in tests)
+      this.plugins[filename] = true;
     }
     this.logger.debug("[Robot] Finished loading plugins");
     this.emit("pluginsInitialized");

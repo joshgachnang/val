@@ -1,14 +1,22 @@
 machine:
   node:
     version: 8
+  environment:
+    PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
 #  services:
 #    - docker
 
 dependencies:
   override:
-    - npm install -g yarn
+    - yarn
     - yarn global add typescript
-    - yarn install
+  cache_directories:
+    - ~/.cache/yarn
+
+test:
+  override:
+    - yarn test
+
 #  post:
 #    - docker build -t servercobra/val .
 
