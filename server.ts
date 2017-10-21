@@ -10,6 +10,7 @@ import Robot from "./robot";
 // create a bot
 let config = new Config();
 let robot = new Robot(config);
+robot.init();
 
 process.on("uncaughtException", err => {
   console.log(`uncaught exception: ${err}: ${err.stack}`); // tslint:disable-line

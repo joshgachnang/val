@@ -10,10 +10,17 @@ export default class Config {
   adapters = ["./adapters/slack", "./adapters/twilio", "./adapters/alexa"];
 
   plugins = [
+    // Core plugins
     "./plugins/users",
     "./plugins/mongo-brain",
+    "./plugins/admin",
+
+    // Demo plugins
     // "./plugins/log",
     // "./plugins/echo",
+
+    // Extra plugins (should be moved to an external config file)
+    "./plugins/emotionChip",
     "./plugins/forecastio",
     "./plugins/inspirationalQuote",
     "./plugins/cta",
@@ -37,6 +44,7 @@ export default class Config {
     "../node_modules/hubot-scripts/src/scripts/go-for-it.coffee",
     "../node_modules/hubot-scripts/src/scripts/xkcd.coffee",
   ];
+  ADMIN_USERNAMES = ["josh"];
   UBER_CLIENT_ID = "";
   UBER_CLIENT_SECRET = "";
   UBER_SERVER_TOKEN = "";

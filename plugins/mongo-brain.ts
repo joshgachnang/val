@@ -62,7 +62,7 @@ export default function(robot) {
           if (isEqual(cache[k], v)) {
             continue;
           }
-          robot.logger.debug(`[mongo-brain] save \"${k}\" into mongodb-brain`);
+          // robot.logger.debug(`[mongo-brain] save \"${k}\" into mongodb-brain`);
           cache[k] = deepClone(v);
           collection.update(
             {

@@ -153,4 +153,57 @@ export default class Brain extends EventEmitter {
     users[user.id] = user;
     this.set("users", users);
   }
+
+  // Categories
+  //
+  // This is a simple way to manage a series of grouped items for the bot, dynamically.
+  // A good example is a bot that replies to a certain phrase with a random gif. If the list of gifs
+  // is hard coded in the plugin, it will get boring eventually. This lets the plugin register a
+  // list of default gifs, then a user can add more gifs to the category, and when a phrase triggers
+  // the plugin, it fetchs a random item. The items are stored as strings, but could be response
+  // phrases, image links, or serialized objects.
+  CATEGORY_KEY = "categories";
+  public listCategories(): string[] {
+    let allItems = this.get(this.CATEGORY_KEY) || {};
+    return Object.keys(allItems);
+  }
+
+  public addItemToCategory(category: string, item: string) {
+    let allItems = this.get(this.CATEGORY_KEY) || {};
+    if (!allItems[category]) {
+      allItems[category] = [];
+    }
+    allItems[category].push(item);
+    this.set(this.CATEGORY_KEY, allItems);
+  }
+
+  public removeItemAtIndexInCategory(category: string, index: number) {
+    let allItems = this.get(this.CATEGORY_KEY) || {};
+    let items = allItems[category] || [];
+    items.splice(index, 1);
+    allItems[category] = items;
+    this.set(this.CATEGORY_KEY, allItems);
+  }
+
+  public getRandomItemFromCategory(category: string): string {
+    let combined = this.listItemsInCategory(category);
+    return combined[Math.floor(Math.random() * combined.length)];
+  }
+
+  public listItemsInCategory(category: string): string[] {
+    let allItems = this.get(this.CATEGORY_KEY) || {};
+    let items = allItems[category] || [];
+    return items;
+  }
+
+  public registerDefaultsForCateogry(category: string, items: string[]) {
+    let allItems = this.get(this.CATEGORY_KEY) || {};
+    let existingItems = allItems[category] || [];
+    if (existingItems.length > 0) {
+      return;
+    }
+    this.robot.logger.debug(`[brain] Loading defaults for category ${category}`);
+    allItems[category] = items;
+    this.set(this.CATEGORY_KEY, allItems);
+  }
 }
