@@ -95,12 +95,14 @@ export default class Robot extends EventEmitter {
     this.setupExpress();
 
     this.frontend = new frontend(this);
-
-    this.logger.debug("[Robot] Starting Robot");
-
     this.adapters = {};
     this.plugins = {};
-    for (let adapter of config.adapters) {
+  }
+
+  async init() {
+    this.logger.debug("[Robot] Starting Robot");
+
+    for (let adapter of this.config.adapters) {
       this.logger.info("[Robot] loading adapter:", adapter);
       let adapterModule = require(adapter);
       // Use default here to get the default exported class
@@ -110,7 +112,7 @@ export default class Robot extends EventEmitter {
     }
     this.emit("adapterInitialized");
 
-    for (let plugin of config.plugins) {
+    for (let plugin of this.config.plugins) {
       this.logger.info("[Robot] loading plugin:", plugin);
       let pluginModule;
       try {
@@ -119,18 +121,29 @@ export default class Robot extends EventEmitter {
         this.logger.warn(`Could not find plugin ${plugin}: ${e}`);
         continue;
       }
+      let ret;
       try {
         // Use default here to get the default exported function
         if (pluginModule.default) {
-          pluginModule.default(this);
+          ret = pluginModule.default(this);
         } else {
-          pluginModule(this);
+          // Backwards compatability with Hubot
+          ret = pluginModule(this);
         }
       } catch (e) {
         throw new Error(`Failed to initialize plugin ${plugin}: ${e}`);
       }
+      // Check if the plugin returns a promise. If so, await it.
+      if (ret && ret.then && typeof ret.then === "function") {
+        this.logger.debug(`Plugin returned promise, awaiting on: ${plugin}`);
+        await ret;
+      }
+
       let filename = require.resolve(plugin);
       this.parseHelp(filename);
+      // Track installed plugins
+      // TODO: this could be more useful... (currently just used in tests)
+      this.plugins[filename] = true;
     }
     this.logger.debug("[Robot] Finished loading plugins");
     this.emit("pluginsInitialized");

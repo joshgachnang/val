@@ -14,20 +14,21 @@ class RobotTestSuite {
   robotName = "k2so";
 
   before() {
-    this.robot = this.getFakeRobot([]);
+    return this.getFakeRobot([]).then((robot) => this.robot = robot);
   }
 
   after() {
     this.robot.shutdown();
   }
 
-  getFakeRobot(plugins) {
+  async getFakeRobot(plugins) {
     let config = new Config();
     config.name = "k2so";
     config.plugins = plugins;
     config.adapters = ["./test/fakeAdapter"];
 
     let robot = new Robot(config);
+    await robot.init();
     return robot;
   }
 

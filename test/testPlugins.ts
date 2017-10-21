@@ -11,13 +11,14 @@ export class PluginTestSuite {
   robot: Robot;
   robotName = "k2so";
 
-  static getFakeRobot(plugins) {
+  static async getFakeRobot(plugins) {
     let config = new Config();
     config.name = "k2so";
     config.plugins = plugins;
     config.adapters = ["./test/fakeAdapter"];
 
     let robot = new Robot(config);
+    await robot.init();
     return robot;
   }
 
@@ -42,7 +43,7 @@ export class PluginTestSuite {
 @suite
 class EchoTest extends PluginTestSuite {
   before() {
-    this.robot = EchoTest.getFakeRobot(["./plugins/echo"]);
+    return EchoTest.getFakeRobot(["./plugins/echo"]).then((robot) => this.robot = robot);
   }
 
   @test
@@ -69,16 +70,34 @@ class EchoTest extends PluginTestSuite {
 }
 
 @suite
+class AsyncPluginInitTest extends PluginTestSuite {
+  @test
+  asynchPlugin(done) {
+    let config = new Config();
+    config.name = "k2so";
+    config.adapters = ["./test/fakeAdapter"];
+    config.plugins = ["./test/asyncPlugin"];
+    this.robot = new Robot(config);
+    assert.equal(Object.keys(this.robot.plugins).length, 0);
+    let promise = this.robot.init();
+    assert.equal(Object.keys(this.robot.plugins).length, 0);
+    return promise.then(() => {
+      assert.equal(Object.keys(this.robot.plugins).length, 1);
+      done();
+    });
+  }
+}
+
+@suite
 class FailedPluginInitTest extends PluginTestSuite {
   @test
   fail(done) {
     let config = new Config();
     config.name = "k2so";
     config.plugins = ["./test/failPlugin"];
-    try {
-      let robot = new Robot(config);
-    } catch (e) {
-      done();
-    }
+    let robot = new Robot(config);
+    robot.init()
+      .then(() => {})
+      .catch((e) => done());
   }
 }
