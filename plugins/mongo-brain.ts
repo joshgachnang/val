@@ -24,12 +24,12 @@ function isEqual(obj1, obj2): Boolean {
 }
 
 export default function(robot) {
-  robot.logger.debug(`[mongo-brain] connecting to mongo url: ${robot.config.MONGODB_URL}`);
+  robot.logger.debug(`[mongo-brain] connecting to mongo url: ${robot.config.get("MONGODB_URL")}`);
 
   let db;
   let cache = {};
 
-  return MongoClient.connect(robot.config.MONGODB_URL).then((mongoDb) => {
+  return MongoClient.connect(robot.config.get("MONGODB_URL")).then((mongoDb) => {
     db = mongoDb;
     robot.brain.on("close", () => db.close());
 
@@ -69,12 +69,8 @@ export default function(robot) {
               type: "_private",
               key: k,
             },
-            {
-              $set: { value: v },
-            },
-            {
-              upsert: true,
-            })
+            {$set: { value: v }},
+            {upsert: true})
             .then(() => {})
             .catch((err) => {
               robot.logger.error(`[mongo-brain] ${err}`);

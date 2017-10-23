@@ -223,7 +223,7 @@ export default function(robot: Robot) {
 
     let calendars = robot.brain.get("calendarList");
 
-    for (let calendarName of config.CALENDAR_NAMES) {
+    for (let calendarName of config.get("CALENDAR_NAMES")) {
       let calendarIds = calendars.filter(c => {
         return c.summary === calendarName;
       });
@@ -257,7 +257,7 @@ was ${calendarIds.length}. Not fetching.`);
 
           // Eww. Promise.all this..
           counter += 1;
-          if (counter === config.CALENDAR_NAMES.length) {
+          if (counter === config.get("CALENDAR_NAMES").length) {
             // flatten
             events = [].concat.apply([], events);
             callback(events);

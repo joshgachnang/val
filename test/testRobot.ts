@@ -23,9 +23,9 @@ class RobotTestSuite {
 
   async getFakeRobot(plugins) {
     let config = new Config();
-    config.name = "k2so";
-    config.plugins = plugins;
-    config.adapters = ["./test/fakeAdapter"];
+    config.set("BOT_NAME", "k2so");
+    config.set("PLUGINS", plugins);
+    config.set("ADAPTERS", ["./test/fakeAdapter"]);
 
     let robot = new Robot(config);
     await robot.init();

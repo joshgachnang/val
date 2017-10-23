@@ -1,3 +1,4 @@
+require("source-map-support").install();
 require("coffee-script/register");
 import * as extensions from "./extensions";
 
@@ -12,6 +13,7 @@ import * as fs from "fs";
 import * as https from "https";
 import * as path from "path";
 import { env, exit } from "process";
+import * as raven from "raven";
 import * as request from "request";
 import * as winston from "winston";
 
@@ -61,6 +63,7 @@ export default class Robot extends EventEmitter {
   frontend: any;
   adapters: any;
   plugins: any;
+  raven: any;
   server: any;
   cronjobs: any[] = [];
   private expressServer: any;
@@ -69,14 +72,25 @@ export default class Robot extends EventEmitter {
     super();
     this.config = config;
 
-    if (!config.name) {
+    if (this.config.get("SENTRY_URL", false)) {
+      this.raven = raven.config(this.config.get("SENTRY_URL")).install();
+      process.on("uncaughtException", (err) => {
+        this.raven.captureException(err);
+      });
+
+      process.on("unhandledRejection", (err) => {
+        this.raven.captureException(err);
+      });
+    }
+
+    if (!config.get("BOT_NAME")) {
       winston.error("`name` is importd to start robot");
       throw new Error("`name` is importd to start robot");
     } else {
-      this.name = config.name;
+      this.name = config.get("BOT_NAME");
     }
 
-    if (!config.adapters) {
+    if (!config.get("ADAPTERS")) {
       throw new Error("A list of `adapters` is required to start robot.");
     }
 
@@ -102,17 +116,16 @@ export default class Robot extends EventEmitter {
   async init() {
     this.logger.debug("[Robot] Starting Robot");
 
-    for (let adapter of this.config.adapters) {
+    for (let adapter of this.config.get("ADAPTERS")) {
       this.logger.info("[Robot] loading adapter:", adapter);
       let adapterModule = require(adapter);
       // Use default here to get the default exported class
       let adapterClass = new adapterModule.default(this);
       this.adapters[adapterClass.adapterName] = adapterClass;
-      adapterClass.run();
     }
     this.emit("adapterInitialized");
 
-    for (let plugin of this.config.plugins) {
+    for (let plugin of this.config.get("PLUGINS")) {
       this.logger.info("[Robot] loading plugin:", plugin);
       let pluginModule;
       try {
@@ -147,6 +160,13 @@ export default class Robot extends EventEmitter {
     }
     this.logger.debug("[Robot] Finished loading plugins");
     this.emit("pluginsInitialized");
+
+    for (let adapterName in this.adapters) {
+      let adapterClass = this.adapters[adapterName];
+      adapterClass.run();
+    }
+    this.logger.debug("[Robot] Finished running adapters");
+    this.emit("adaptersRunning");
 
     // TODO: can't register for an on('pluginsInitialized'..) in adapters for some reason.
     if (this.adapters.AlexaAdapter) {
@@ -327,7 +347,7 @@ export default class Robot extends EventEmitter {
         cronTime: schedule,
         onTick: callback,
         start: true,
-        timeZone: this.config.CRON_TIMEZONE,
+        timeZone: this.config.get("CRON_TIMEZONE"),
       });
     } catch (e) {
       throw new Error(`Failed to create cronjob: ${e}`);
@@ -396,6 +416,11 @@ export default class Robot extends EventEmitter {
 
   setupExpress() {
     let app = express();
+
+    if (this.raven) {
+      app.use(this.raven.requestHandler());
+      app.use(this.raven.errorHandler());
+    }
 
     app.use(cors());
 

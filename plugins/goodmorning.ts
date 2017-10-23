@@ -15,15 +15,15 @@ async function fetchForecast(robot: Robot, lat: string, lng: string, key: string
 
 export default function(robot: Robot) {
   async function getForecast() {
-    if (!robot.config.LATITUDE || !robot.config.LONGITUDE || !robot.config.DARKSKY_KEY) {
+    if (!robot.config.get("LATITUDE") || !robot.config.get("LONGITUDE") || !robot.config.get("DARKSKY_KEY")) {
       robot.logger.warn(`[ForecastIO] LATITUDE, LONGITUDE, and DARKSKY_KEY config keys
           required, not configuring`);
       return {};
     }
 
-    let lat = robot.config.LATITUDE;
-    let lng = robot.config.LONGITUDE;
-    let key = robot.config.DARKSKY_KEY;
+    let lat = robot.config.get("LATITUDE");
+    let lng = robot.config.get("LONGITUDE");
+    let key = robot.config.get("DARKSKY_KEY");
     let forecast = await fetchForecast(robot, lat, lng, key);
     return forecast;
   }

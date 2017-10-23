@@ -2,6 +2,9 @@
 // Description:
 //   Play meditation audio via Alexa
 //
+// Configuration:
+//   GUIDED_MEDITATION_URL - the URL to a meditation music file playable by Alexa
+//
 // Author:
 //   pcsforeducation
 import { AlexaMessage, default as AlexaAdapter } from "../adapters/alexa";
@@ -22,7 +25,7 @@ export default function(robot: Robot) {
       let msg = response.message as AlexaMessage;
       robot.logger.debug(msg);
       let stream = {
-        url: robot.config.GUIDED_MEDITATION_URL,
+        url: robot.config.get("GUIDED_MEDITATION_URL"),
         token: "sometoken",
         offsetInMilliseconds: 0,
       };
@@ -30,7 +33,7 @@ export default function(robot: Robot) {
       msg.alexaResponse.send();
       robot.logger.debug("sent meditation");
     } else {
-      response.reply(robot.config.GUIDED_MEDITATION_URL);
+      response.reply(robot.config.get("GUIDED_MEDITATION_URL"));
     }
   });
 }
