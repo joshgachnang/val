@@ -16,7 +16,7 @@ import User from "../user";
 // Only support sending admin commands via Slack right now
 // TODO this should just wrap the response callback
 function checkAdmin(config: Config, user: User) {
-  return config.ADMIN_USERNAMES.indexOf(user.slack.name) > -1;
+  return config.get("ADMIN_USERNAMES", []).indexOf(user.slack.name) > -1;
 }
 
 function listItems(items) {

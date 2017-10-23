@@ -105,7 +105,7 @@ export default class Ionic extends Adapter {
     this.robot.logger.debug(
       `Sending push to token ${token.token}: ${message.title}, ${message.message}`,
     );
-    if (this.robot.config.DEV === "true") {
+    if (this.robot.config.get("DEV") === "true") {
       this.robot.logger.debug(`Not actually sending push in dev`);
       return Promise.resolve();
     }

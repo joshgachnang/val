@@ -105,7 +105,7 @@ export default class SlackAdapter extends Adapter {
   }
 
   private async slackRequest(method: string, body: any = {}) {
-    body.token = this.robot.config.SLACK_TOKEN;
+    body.token = this.robot.config.get("SLACK_TOKEN");
     let response: any;
     try {
       response = await this.robot.request({
@@ -139,8 +139,8 @@ export default class SlackAdapter extends Adapter {
 
       this.users[slackUser.id] = user;
 
-      if (slackUser.name.toLowerCase() === this.robot.config.name.toLowerCase()) {
-        this.logger.debug(`[slack] found myself! id: ${slackUser.id}`);
+      if (slackUser.name.toLowerCase() === this.robot.config.get("BOT_NAME").toLowerCase()) {
+        this.logger.debug(`[slack] found myself! id: ${slackUser.id}, name: ${slackUser.name}`);
         this.me = user.slack;
       }
       this.robot.brain.updateUser(user);

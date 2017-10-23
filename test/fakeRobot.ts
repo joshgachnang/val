@@ -13,7 +13,7 @@ export default class FakeRobot extends Robot {
   constructor(config: Config) {
     super(config);
     this.config = config;
-    this.name = config.name;
+    this.name = config.get("BOT_NAME");
   }
 
   hear(regex: RegExp, options, callback: ResponseCallback) {}

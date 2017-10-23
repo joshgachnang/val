@@ -8,7 +8,7 @@ export default function(robot: Robot) {
 
   function getQuote() {
     let dayOfYear = moment().format("DDD");
-    let quotes = robot.config.INSPIRATIONAL_QUOTES;
+    let quotes = robot.config.get("PRODUCTIVITY_QUOTES");
     // This ensures a stable selection all day.
     // Loop around if we get more than 365 quotes.
     quote = quotes[Number(moment().format("DDD")) % 365 % quotes.length];

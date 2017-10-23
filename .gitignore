@@ -8,9 +8,8 @@ public/css/
 public/js/
 uploads/
 npm-debug.log*
-config/config.js
-config/config.prd
-envfile
 prodenvfile
 dist/
 *.js
+configuration.json
+configuration.prd.json

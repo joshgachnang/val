@@ -13,9 +13,9 @@ export class PluginTestSuite {
 
   static async getFakeRobot(plugins) {
     let config = new Config();
-    config.name = "k2so";
-    config.plugins = plugins;
-    config.adapters = ["./test/fakeAdapter"];
+    config.set("BOT_NAME", "k2so");
+    config.set("PLUGINS", plugins);
+    config.set("ADAPTERS", ["./test/fakeAdapter"]);
 
     let robot = new Robot(config);
     await robot.init();
@@ -74,9 +74,9 @@ class AsyncPluginInitTest extends PluginTestSuite {
   @test
   asynchPlugin(done) {
     let config = new Config();
-    config.name = "k2so";
-    config.adapters = ["./test/fakeAdapter"];
-    config.plugins = ["./test/asyncPlugin"];
+    config.set("BOT_NAME", "k2so");
+    config.set("PLUGINS", ["./test/asyncPlugin"]);
+    config.set("ADAPTERS", ["./test/fakeAdapter"]);
     this.robot = new Robot(config);
     assert.equal(Object.keys(this.robot.plugins).length, 0);
     let promise = this.robot.init();
@@ -93,8 +93,9 @@ class FailedPluginInitTest extends PluginTestSuite {
   @test
   fail(done) {
     let config = new Config();
-    config.name = "k2so";
-    config.plugins = ["./test/failPlugin"];
+    config.set("BOT_NAME", "k2so");
+    config.set("PLUGINS", ["./test/failPlugin"]);
+    config.set("ADAPTERS", ["./test/fakeAdapter"]);
     let robot = new Robot(config);
     robot.init()
       .then(() => {})
