@@ -1,3 +1,4 @@
+"use strict";
 // Description:
 //   Allow posting arbitrary events and querying them
 //
@@ -101,13 +102,13 @@ export default function(robot: Robot) {
     res.reply("\n" + eventsText(180, "gitcommit"));
   });
 
-  robot.cron("standup", "0 28 10 * * ", () => {
+  robot.cron("standup", "00 20 12 * * 1-5", () => {
     robot.logger.info("[events] Sending standup info");
     robot.adapters["Slack"].sendToName("josh", "Standup Summary:\n" + eventsText(27, "gitcommit"));
   });
 
   // TODO: this was at 11:45am, figure out why
-  robot.cron("weekly email", "0 45 16 * * fri", () => {
+  robot.cron("weekly email", "00 45 16 * * fri", () => {
     robot.logger.info("[events] Sending standup info");
     robot.adapters["Slack"].sendToName("josh", "Weekly Email Summary:\n" + eventsText(180, "gitcommit"));
   });
