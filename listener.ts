@@ -76,21 +76,122 @@ export class Listener {
   }
 }
 
-export class TextListener extends Listener {
-  constructor(robot, regex, options, callback) {
-    let matcher = function(message) {
-      if (message instanceof TextMessage) {
-        return message.match(regex);
+class SlotMatcher {
+  // TODO compile all the regexes into one
+  private regex: RegExp;
+  private robot: Robot;
+
+  DEFAULT_SLOTS = {
+    WORD: "(\\w+)",
+    MULTIWORD: "([\\w\\s]+)",
+    NUMBER: "(\\d+)",
+    BOT_NAME: (text: string) => `${this.robot.config.get("BOT_NAME")}:?`
+    // URL: (text: string) => {return false;},
+  };
+
+  constructor(robot: Robot, text: string) {
+    this.robot = robot;
+    this.buildRegexes(text);
+  }
+
+  private stringPaddedRegex(text: string) {
+    return `\\s*${text}\\s*`;
+  }
+
+  // Match strings of the type "{opt1|opt2|opt3...}" and replace the slot with each option
+  private orMatches(text: string): string {
+    let orRegex = new RegExp("{([\\w\\d\\s\\|]+)}", "g");
+
+    let matches = [];
+    let orMatch = orRegex.exec(text);
+    while (orMatch !== null) {
+      matches.push(orMatch);
+      orMatch = orRegex.exec(text);
+    }
+
+    for (let match of matches) {
+      let split = match[1].split("|");
+      // Check for empty matches
+      if (split[split.length - 1] === "") {
+        // Match empty string, and filter out the excess spaces around the slot
+        let restOfMatch = match[1].slice(0, -1);
+        let sub = `{${match[1]}}`;
+        if (match.index > 0) {
+          sub = " " + sub;
+        }
+        if (match.index + match[0].length < text.length) {
+          sub = sub + " ";
+        }
+
+        text = text.replace(sub, `[${restOfMatch}|\\s*]`);
       } else {
-        return undefined;
+        text = text.replace(`{${match[1]}}`, `[${match[1]}]`);
       }
-    };
+    }
+    return text;
+  }
+
+  private typeMatches(text: string): string {
+    let orRegex = new RegExp("{([\\w\\d\\s\\:]+)}", "g");
+
+    let matches = [];
+    let orMatch = orRegex.exec(text);
+    while (orMatch !== null) {
+      matches.push(orMatch);
+      orMatch = orRegex.exec(text);
+    }
+
+    for (let match of matches) {
+      let parts = match[1].split(":");
+      if (parts.length === 0 || parts.length > 2) {
+        throw new Error(`[listener] Cannot parse invalid slot syntax: ${match}`);
+      }
+
+      let slotRegex = this.DEFAULT_SLOTS[parts[1]];
+      if (!slotRegex) {
+        throw new Error(`[listener] Cannot find slot ${parts[1]} for match: ${match}`);
+      }
+
+      text = text.replace(`{${match[1]}}`, slotRegex);
+    }
+
+    return text;
+  }
+
+  private buildRegexes(text: string) {
+    let regexString = "";
+    regexString = this.orMatches(text);
+    regexString = this.typeMatches(regexString);
+    this.regex = new RegExp(regexString);
+  }
+
+  public match(text: string) {
+    return this.regex.exec(text);
+  }
+}
+
+export class TextListener extends Listener {
+  constructor(robot: Robot, regex, options, callback) {
+    let matcher;
+    if (typeof regex === "string") {
+      let slotMatcher = new SlotMatcher(robot, regex);
+      matcher = (message) => {
+        if (message instanceof TextMessage) {
+          return slotMatcher.match(message.text);
+        } else {
+          return undefined;
+        }
+      };
+    } else {
+      matcher = function(message) {
+        if (message instanceof TextMessage) {
+          return message.match(regex);
+        } else {
+          return undefined;
+        }
+      };
+    }
 
     super(robot, matcher, options, callback);
-
-    // this.robot = robot;
-    // this.regex = regex;
-    // this.options = options;
-    // this.callback = callback;
   }
 }

@@ -13,14 +13,58 @@ Hosts the backend for a magic mirror and a recipe app currently. More to come so
 # Dev
 
     npm install -g watchify browserify
-    
+
     npm start
 
 # Docs
 
-## Plugin start
+## Plugin
 
 A simple boilerplate plugin is available at `plugins/pluginStarter.ts`.
+
+### `hear()/respond()` patterns
+
+When registering a callback for your plugin, you can specifiy the trigger as any time the bot sees the phrase (`hear()`) or only when the phrase is directed to the bot (`respond()`).
+Both take one of three types of triggers: a regex, an exact string match, or a string with slots.
+
+#### regex:
+
+    robot.hear(/hello/, {}, (res: Response) => {
+      res.send(res.envelope, "Hello there!");
+    });
+
+#### exact string:
+
+    robot.hear("Hello", {}, (res: Response) => {
+      res.send(res.envelope, "Hello there!");
+    });
+
+#### Choice slots
+You can present a list of possible strings to match by separating them with a "|" inside the slot syntax. If you add a "|" as the last character, the match will be optional.
+
+    // This will match "hello there", "hi there", "hello", and "hi"
+    robot.hear("{hello|hi} {there|}", {}, (res: Response) => {
+      res.send(res.envelope, "Hello there!");
+    });
+
+#### Typed slots
+You can also match a few provided slot types:
+
+    // This will match "what is the price of dogecoin" or "what is the price of BTC"
+    robot.hear("what is the price of {:WORD}", {}, (res: Response) => {
+      res.send(res.envelope, "Wow. Much sent! Such spend!");
+    });
+
+    // This will match "send 948 dogecoins"
+    robot.hear("send {:NUMBER} dogecoins", {}, (res: Response) => {
+      res.send(res.envelope, "Wow. Much sent! Such spend!");
+    });
+
+    // This will match "simon says Do A Barrel Roll"
+    // Be careful, because this will likely match to the end of the string
+    robot.hear("simon says {:MULTIWORD}", {}, (res: Response) => {
+      res.send(res.envelope, "Wow. Much sent! Such spend!");
+    });
 
 ## Async/Await Express
 
@@ -38,7 +82,3 @@ async/await as you'd expect.
       return await hello();
     }));
 ```
-
-Icon
-----
-cook-male* are downloaded from https://icons8.com/web-app/6112/cook-male. I have a paid license.
