@@ -40,7 +40,7 @@ class RobotTestSuite {
     return new TextMessage(this.getUser(), text, "#general", "id", this.robot.adapters.fake, {});
   }
 
-  hearRespondtest(respond: boolean, filter: any, text: string, callback: () => void) {
+  hearRespondTest(respond: boolean, filter: any, text: string, callback: () => void) {
     if (respond) {
       this.robot.respond(filter, {}, (response: Response) => {
         assert.equal(response.message, text);
@@ -61,7 +61,7 @@ class RobotTestSuite {
   }
 
   failHearRespond(respond: boolean, filter: any, text: string, callback: () => void) {
-    this.hearRespondtest(respond, filter, text, () => {
+    this.hearRespondTest(respond, filter, text, () => {
       throw new Error("Should not be called");
     });
     setTimeout(() => {
@@ -71,17 +71,17 @@ class RobotTestSuite {
 
   @test
   basicHear(done) {
-    this.hearRespondtest(false, /can anyone hear me/, "can anyone hear me out there", done);
+    this.hearRespondTest(false, /can anyone hear me/, "can anyone hear me out there", done);
   }
 
   @test
   caseInsensitiveHear(done) {
-    this.hearRespondtest(false, /can anyone hear me/i, "Can Anyone Hear me Out there", done);
+    this.hearRespondTest(false, /can anyone hear me/i, "Can Anyone Hear me Out there", done);
   }
 
   @test
   notCalledHear(done) {
-    this.hearRespondtest(false, /can anyone hear me/i, "No.", () => {
+    this.hearRespondTest(false, /can anyone hear me/i, "No.", () => {
       throw new Error("Should not be called");
     });
     setTimeout(() => {
@@ -91,43 +91,67 @@ class RobotTestSuite {
 
   @test
   hearString(done) {
-    this.hearRespondtest(false, "did you know that wasn't me?", "did you know that wasn't me?",
+    this.hearRespondTest(false, "did you know that wasn't me?", "did you know that wasn't me?",
       done);
   }
 
   @test
   hearThreeOptions(done) {
-    this.hearRespondtest(false, "i want {coke|pepsi|mr pibb}", "hello, i want pepsi, please",
+    this.hearRespondTest(false, "i want {coke|pepsi|mr pibb}", "hello, i want pepsi, please",
+      done);
+  }
+
+  @test
+  hearEmptyOptionMatch(done) {
+    this.hearRespondTest(false, "i want {a|} pepsi", "hello, i want pepsi, please",
+      done);
+  }
+
+  @test
+  hearEmptyOptionBeginning(done) {
+    this.hearRespondTest(false, "i want {a|}", "hello, i want pepsi, please",
+      done);
+  }
+
+  @test
+  hearEmptyOptionEnd(done) {
+    this.hearRespondTest(false, "{a|} pepsi", "hello, i want pepsi, please",
+      done);
+  }
+
+  @test
+  hearEmptyOptionNoMatch(done) {
+    this.failHearRespond(false, "i want {the|} pepsi", "hello, i want a pepsi, please",
       done);
   }
 
   @test
   hearMultipleOptions(done) {
-    this.hearRespondtest(false, "i want {a|the} {coke|pepsi}", "hello, i want a pepsi, please",
+    this.hearRespondTest(false, "i want {a|the} {coke|pepsi}", "hello, i want a pepsi, please",
       done);
   }
 
   @test
   hearNumberSlot(done) {
-    this.hearRespondtest(false, "i want {:NUMBER} kamikaze shots",
+    this.hearRespondTest(false, "i want {:NUMBER} kamikaze shots",
       "i want 12 kamikaze shots, please", done);
   }
 
   @test
   hearWordSlot(done) {
-    this.hearRespondtest(false, "i want 12 {:WORD} shots",
+    this.hearRespondTest(false, "i want 12 {:WORD} shots",
       "i want 12 kamikaze shots, please", done);
   }
 
   @test
   hearMultiWordSlot(done) {
-    this.hearRespondtest(false, "i want 12 {:MULTIWORD}",
+    this.hearRespondTest(false, "i want 12 {:MULTIWORD}",
       "i want 12 kamikaze shots, please", done);
   }
 
   @test
   hearMultiTypeSlot(done) {
-    this.hearRespondtest(false, "i want {:NUMBER} {:WORD} shots",
+    this.hearRespondTest(false, "i want {:NUMBER} {:WORD} shots",
       "i want 12 kamikaze shots, please", done);
   }
 
@@ -138,8 +162,20 @@ class RobotTestSuite {
   }
 
   @test
+  respondBotNameSlot(done) {
+    this.hearRespondTest(true, "{hello|hi}",
+      "@k2so: hello", done);
+  }
+
+  @test
+  respondBotNameSlotNoReply(done) {
+    this.failHearRespond(true, "{hello|hi}",
+      "@otherperson hi", done);
+  }
+
+  @test
   basicRespond(done) {
-    this.hearRespondtest(true, /can you hear me/, "@k2so can you hear me?", done);
+    this.hearRespondTest(true, /can you hear me/, "@k2so can you hear me?", done);
   }
 
   @test

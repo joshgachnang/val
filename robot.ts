@@ -178,19 +178,24 @@ export default class Robot extends EventEmitter {
     this.emit("running");
   }
 
-  hear(regex: RegExp, options: any, callback: ResponseCallback) {
+  hear(regex: RegExp | string, options: any, callback: ResponseCallback) {
     this.logger.info("[Robot] creating hear listener for regex", regex);
     let listener = new TextListener(this, regex, options, callback);
     this.pluginListeners.push(listener);
   }
 
-  respond(regex: RegExp, options: any, callback: ResponseCallback) {
+  respond(regex: RegExp | string, options: any, callback: ResponseCallback) {
     this.logger.info("[Robot] creating respond listener for regex", regex);
     let listener = new TextListener(this, this.respondPattern(regex), options, callback);
     this.pluginListeners.push(listener);
   }
 
-  respondPattern(regex: RegExp) {
+  respondPattern(regex: RegExp | string) {
+    let name = this.name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+
+    if (typeof regex === "string") {
+      return `{:BOT_NAME} ${regex}`;
+    }
     let re = regex.toString().split("/");
     re.shift();
     let modifiers = re.pop();
@@ -206,7 +211,6 @@ export default class Robot extends EventEmitter {
       this.logger.warn(`The regex in question was ${regex.toString()}`);
     }
 
-    let name = this.name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
     let pattern = re.join("/");
 
     return new RegExp("^\\s*[@]*" + name.toLowerCase() + "[:,]?\\s*(?:" + pattern + ")", modifiers);
