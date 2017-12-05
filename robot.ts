@@ -138,10 +138,10 @@ export default class Robot extends EventEmitter {
       try {
         // Use default here to get the default exported function
         if (pluginModule.default) {
-          ret = this.pluginRunnerWrapper(pluginModule.default, plugin);
+          ret = pluginModule.default(this);
         } else {
           // Backwards compatability with Hubot
-          ret = this.pluginRunnerWrapper(pluginModule, plugin);
+          ret = pluginModule(this);
         }
       } catch (e) {
         throw new Error(`Failed to initialize plugin ${plugin}: ${e}`);
