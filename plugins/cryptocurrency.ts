@@ -91,7 +91,11 @@ export default function(robot: Robot) {
   });
 
   robot.respond(/bitcoin price/i, {}, (res: Response) => {
-    res.reply(`The current bitcoin price is $${price["btc"].toFixed(2)}. To the moooooooon!`);
+    if (price["btc"] > 9000) {
+      res.reply(`The current bitcoin price is $${price["btc"].toFixed(2)}. It's over 9000!!!!!!!!!!!!!!1!!!!`);
+    } else {
+      res.reply(`The current bitcoin price is $${price["btc"].toFixed(2)}. To the moooooooon!`);
+    }
   });
 
   robot.respond(/litecoin price/i, {}, (res: Response) => {
