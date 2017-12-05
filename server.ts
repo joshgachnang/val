@@ -21,9 +21,9 @@ let robot = new Robot(config);
 robot.init();
 
 process.on("uncaughtException", (err) => {
-  console.log(`uncaught exception: ${err}: ${err.stack}`); // tslint:disable-line
+  console.log(`uncaught exception: ${err.stack}`); // tslint:disable-line
 });
 
 process.on("unhandledRejection", (err) => {
-  console.log(`unhandled rejection: ${err}: ${err.stack}`); // tslint:disable-line
+  console.log(`unhandled rejection: ${err.stack}`); // tslint:disable-line
 });

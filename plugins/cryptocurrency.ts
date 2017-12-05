@@ -19,42 +19,58 @@ export default function(robot: Robot) {
   };
   let updateTime = moment();
 
-  function getDogecoinPrice() {
-    robot.http("https://api.cryptonator.com/api/ticker/doge-usd").get()((err, resp, body) => {
-      let res = JSON.parse(body);
+  async function fetchPrices() {
+    let [doge, eth, ltc, btc] = await Promise.all([
+      robot.request("https://api.cryptonator.com/api/ticker/doge-usd"),
+      robot.request("https://api.cryptonator.com/api/ticker/eth-usd"),
+      robot.request("https://api.cryptonator.com/api/ticker/btc-usd"),
+      robot.request("https://api.cryptonator.com/api/ticker/ltc-usd"),
+    ]);
+    try {
+      let res = JSON.parse(doge);
       price["doge"] = Number(res.ticker.price);
-      updateTime = moment();
-      robot.logger.debug(`[dogecoin] current price: ${price}`);
-    });
-    robot.http("https://api.cryptonator.com/api/ticker/eth-usd").get()((err, resp, body) => {
-      let res = JSON.parse(body);
-      price["eth"] = Number(res.ticker.price);
-      updateTime = moment();
-      robot.logger.debug(`[eth] current price: ${price}`);
-    });
-    robot.http("https://api.cryptonator.com/api/ticker/btc-usd").get()((err, resp, body) => {
-      let res = JSON.parse(body);
-      price["btc"] = Number(res.ticker.price);
-      updateTime = moment();
-      robot.logger.debug(`[btc] current price: ${price}`);
-    });
-    robot.http("https://api.cryptonator.com/api/ticker/ltc-usd").get()((err, resp, body) => {
-      let res = JSON.parse(body);
-      price["ltc"] = Number(res.ticker.price);
-      updateTime = moment();
-      robot.logger.debug(`[ltc] current price: ${price}`);
-    });
-}
+    } catch (e) {
+      robot.logger.warn(`[cryptocurrency] couldn't fetch DOGE price: ${e}`);
+      return;
+    }
+    robot.logger.debug(`[dogecoin] current price: ${price["doge"]}`);
 
-  setInterval(getDogecoinPrice, 5 * 60 * 1000);
-  getDogecoinPrice();
+    try {
+      let res = JSON.parse(eth);
+      price["eth"] = Number(res.ticker.price);
+    } catch (e) {
+      robot.logger.warn(`[cryptocurrency] couldn't fetch ETH price: ${e}`);
+      return;
+    }
+    robot.logger.debug(`[cryptocurrency] ETH current price: ${price["eth"]}`);
+    try {
+      let res = JSON.parse(btc);
+      price["btc"] = Number(res.ticker.price);
+    } catch (e) {
+      robot.logger.warn(`[cryptocurrency] couldn't fetch BTC price: ${e}`);
+      return;
+    }
+    robot.logger.debug(`[cryptocurrency] BTC current price: ${price["btc"]}`);
+    try {
+      let res = JSON.parse(ltc);
+      price["ltc"] = Number(res.ticker.price);
+    } catch (e) {
+      robot.logger.warn(`[cryptocurrency] couldn't fetch LTC price: ${e}`);
+      return;
+    }
+    robot.logger.debug(`[cryptocurrency] LTC current price: ${price["ltc"]}`);
+    updateTime = moment();
+  }
+
+  setInterval(fetchPrices, 5 * 60 * 1000);
+  fetchPrices();
 
   function flashBriefing(url: string, getMainText) {
     robot.router.get(url, (req, res) => {
       let text = getMainText();
       return res.json({
         uid: `id1${moment().utcOffset(0).startOf("hour").unix()}`,
-        updateDate: moment().utcOffset(0).format("YYYY-MM-DD[T]HH:00:00.[0Z]"),
+        updateDate: updateTime.utcOffset(0).format("YYYY-MM-DD[T]HH:00:00.[0Z]"),
         titleText: text,
         mainText: text,
       });

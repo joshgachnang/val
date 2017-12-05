@@ -40,6 +40,24 @@ function howAreYou(robot: Robot) {
   });
 }
 
+function thanks(robot: Robot) {
+  const THANKS_CATEGORY = "emotionChipThanks";
+  robot.brain.registerDefaultsForCateogry(THANKS_CATEGORY, [
+    "you're welcome!",
+    "no problemo",
+    "https://media.giphy.com/media/3o85xwxr06YNoFdSbm/giphy.gif",
+  ]);
+
+  robot.respond("{thanks|thank you}", {}, (res: Response) => {
+    let item = robot.brain.getRandomItemFromCategory(THANKS_CATEGORY);
+    res.reply(item);
+  });
+  robot.hear("{thanks|thank you} @{:BOT_NAME}", {}, (res: Response) => {
+    let item = robot.brain.getRandomItemFromCategory(THANKS_CATEGORY);
+    res.reply(item);
+  });
+}
+
 // People love swearing at bots for some reason
 function fuckyou(robot: Robot) {
   const HELLO_CATEGORY = "emotionChipFuckYou";
@@ -58,5 +76,6 @@ function fuckyou(robot: Robot) {
 export default function(robot: Robot) {
   hello(robot);
   howAreYou(robot);
+  thanks(robot);
   fuckyou(robot);
 }

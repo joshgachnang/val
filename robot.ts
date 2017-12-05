@@ -383,12 +383,14 @@ export default class Robot extends EventEmitter {
   }
 
   // Await wrapper around request. The preferred way to make HTTP requests from a plugin
-  async request(body: any) {
+  request(body: any): any {
     return new Promise((resolve, reject) => {
       request(body, (error, response, body) => {
         if (error) reject(error);
         else resolve(body);
       });
+    }).catch((e) => {
+      this.logger.warn(`[Robot] Uncaught request error: ${e.stack}`);
     });
   }
 
@@ -486,5 +488,13 @@ export default class Robot extends EventEmitter {
       this.logger.debug(`[Robot] Serving ${req.path}: ${filesystemPath}`);
       res.sendFile(filesystemPath);
     });
+  }
+
+  pluginRunnerWrapper(func, name) {
+    try {
+      return func(this);
+    } catch (e) {
+      this.logger.warn(`[Robot] plugin '${name}' had an uncaught exception: ${e.stack}`);
+    }
   }
 }

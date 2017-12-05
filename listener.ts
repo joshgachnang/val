@@ -125,7 +125,7 @@ class SlotMatcher {
 
         text = text.replace(sub, `[${restOfMatch}|\\s*]`);
       } else {
-        text = text.replace(`{${match[1]}}`, `[${match[1]}]`);
+        text = text.replace(`{${match[1]}}`, `(${match[1]})`);
       }
     }
     return text;
