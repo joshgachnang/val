@@ -73,7 +73,6 @@ function fuckyou(robot: Robot) {
   });
 }
 
-
 export default function(robot: Robot) {
   hello(robot);
   howAreYou(robot);
