@@ -1,10 +1,7 @@
-"use strict";
 // Description:
-//   Find a list of commands
+//   List cryptocurrency prices
 // Commands:
-//   hubot bitcoin price - displays the current price for bitcoin
-//   hubot dogecoin price - displays the such wow price for dogecoin
-//   hubot ethereum price - displays the current price for ethereum
+//   hubot CRYPTO_TICKER_SYMBOL price - displays the current price for the crypto ticker (e.g. BTC, LTC, bitcoin, etc)
 //
 import * as moment from "moment-timezone";
 import { setInterval } from "timers";
