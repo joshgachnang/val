@@ -39,7 +39,9 @@ export class Todo {
   }
 
   generateTodoId() {
-    return Math.random().toString(36).slice(2);
+    return Math.random()
+      .toString(36)
+      .slice(2);
   }
 }
 
@@ -69,7 +71,7 @@ export default function(robot: Robot) {
   }
 
   function filterTodos(todos: Todo[], key: string, value: any): Todo[] {
-    return todos.filter(t => t[key] === value);
+    return todos.filter((t) => t[key] === value);
   }
 
   robot.router.get("/todos", (req, res) => {
@@ -80,7 +82,7 @@ export default function(robot: Robot) {
     } else {
       todos = Object.values(todos);
     }
-    res.json({ todo: todos });
+    res.json({todo: todos});
   });
 
   robot.router.post("/todos", (req, res) => {
@@ -92,14 +94,14 @@ export default function(robot: Robot) {
         todo = new Todo(todoData);
       } catch (e) {
         robot.logger.warn(`[todo] error in post: ${e.message}`);
-        res.status(400).send({ error: (<Error>e).message });
+        res.status(400).send({error: (<Error>e).message});
         return;
       }
       todos[todo.todoId] = todo;
     }
     robot.logger.debug(`saving todos: ${todos}`);
     saveTodos(todos);
-    res.json({ data: robot.brain.get("todo") });
+    res.json({data: robot.brain.get("todo")});
   });
 
   robot.respond(/todos/i, {}, (response: Response) => {

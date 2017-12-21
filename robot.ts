@@ -2,17 +2,17 @@ require("source-map-support").install();
 require("coffee-script/register");
 import * as extensions from "./extensions";
 
-import { EventEmitter } from "events";
+import {EventEmitter} from "events";
 let httpClient = require("scoped-http-client");
 import * as bodyParser from "body-parser";
 import * as cors from "cors";
 import * as cron from "cron";
 import * as express from "express";
-import { existsSync, readFileSync } from "fs";
+import {existsSync, readFileSync} from "fs";
 import * as fs from "fs";
 import * as https from "https";
 import * as path from "path";
-import { env, exit } from "process";
+import {env, exit} from "process";
 import * as raven from "raven";
 import * as request from "request";
 import * as winston from "winston";
@@ -21,10 +21,10 @@ import Adapter from "./adapter";
 import Brain from "./brain";
 import Config from "./config";
 import Envelope from "./envelope";
-import { APIError } from "./errors";
+import {APIError} from "./errors";
 import frontend from "./frontend";
-import { Listener, TextListener } from "./listener";
-import { Message, TextMessage } from "./message";
+import {Listener, TextListener} from "./listener";
+import {Message, TextMessage} from "./message";
 import "./polyfill";
 import Response from "./response";
 import User from "./user";
@@ -101,8 +101,8 @@ export default class Robot extends EventEmitter {
     this.router = undefined;
     this.logger = new winston.Logger({
       transports: [
-        new winston.transports.Console({ level: "debug" }),
-        new winston.transports.File({ filename: "bot.log", level: "debug" }),
+        new winston.transports.Console({level: "debug"}),
+        new winston.transports.File({filename: "bot.log", level: "debug"}),
       ],
     });
     this.brain = new Brain(this);
@@ -241,7 +241,10 @@ export default class Robot extends EventEmitter {
       if (cleanedLine.toLowerCase() === "none") {
         continue;
       }
-      let nextSection = cleanedLine.toLowerCase().replace(":", "").trim();
+      let nextSection = cleanedLine
+        .toLowerCase()
+        .replace(":", "")
+        .trim();
       if (HUBOT_DOCUMENTATION_SECTIONS.indexOf(nextSection) >= 0) {
         currentSection = nextSection;
         scriptDocumentation[currentSection] = [];
@@ -264,7 +267,7 @@ export default class Robot extends EventEmitter {
 
   reply(envelope: Envelope, user: User, messages: string[] | string) {
     this.logger.debug(
-      `[Robot] Attempting to reply to ${user} in #${envelope.room.name}, message: ${messages}`,
+      `[Robot] Attempting to reply to ${user} in #${envelope.room.name}, message: ${messages}`
     );
 
     if (!Array.isArray(messages)) {
@@ -276,7 +279,7 @@ export default class Robot extends EventEmitter {
 
   send(envelope: Envelope, messages: string[] | string) {
     this.logger.debug(
-      `[Robot] Sending in ${envelope.room} via ${envelope.adapterName}: ${messages}`,
+      `[Robot] Sending in ${envelope.room} via ${envelope.adapterName}: ${messages}`
     );
 
     if (!Array.isArray(messages)) {
@@ -310,11 +313,12 @@ export default class Robot extends EventEmitter {
   }
 
   // Deprecated, for loading hubot plugins. Use normal requires() and import for new plugins
-  public loadFile (filepath: string, filename: string) {
+  public loadFile(filepath: string, filename: string) {
     const ext = path.extname(filename);
     const full = path.join(filepath, path.basename(filename, ext));
 
-    if (!require.extensions[ext]) { // eslint-disable-line
+    if (!require.extensions[ext]) {
+      // eslint-disable-line
       return;
     }
 
@@ -325,7 +329,9 @@ export default class Robot extends EventEmitter {
         script(this);
         this.parseHelp(path.join(filepath, filename));
       } else {
-        this.logger.warning(`Expected ${full} to assign a function to module.exports, got ${typeof script}`);
+        this.logger.warning(
+          `Expected ${full} to assign a function to module.exports, got ${typeof script}`
+        );
       }
     } catch (error) {
       this.logger.error(`Unable to load ${full}: ${error.stack}`);
@@ -334,11 +340,14 @@ export default class Robot extends EventEmitter {
   }
 
   // Deprecated, for loading hubot plugins. Use normal requires() and import for new plugins
-  load (path) {
+  load(path) {
     this.logger.debug(`Loading scripts from ${path}`);
 
     if (fs.existsSync(path)) {
-      fs.readdirSync(path).sort().map(file => this.loadFile(path, file));
+      fs
+        .readdirSync(path)
+        .sort()
+        .map((file) => this.loadFile(path, file));
     }
   }
 
@@ -409,13 +418,15 @@ export default class Robot extends EventEmitter {
     return function(req, res, next) {
       // Make sure to `.catch()` any errors and pass them along to the `next()`
       // middleware in the chain, in this case the error handler.
-      fn(req).then(returnVal => res.json(returnVal)).catch(err => {
-        if (err.message && err.status) {
-          res.sendStatus(err.status).send({ error: err.message });
-        } else {
-          next(err);
-        }
-      });
+      fn(req)
+        .then((returnVal) => res.json(returnVal))
+        .catch((err) => {
+          if (err.message && err.status) {
+            res.sendStatus(err.status).send({error: err.message});
+          } else {
+            next(err);
+          }
+        });
     };
   }
 
@@ -438,7 +449,7 @@ export default class Robot extends EventEmitter {
       next();
     });
 
-    app.use(bodyParser.urlencoded({ extended: false }));
+    app.use(bodyParser.urlencoded({extended: false}));
     app.use(bodyParser.json());
     app.use("/static", express.static("static"));
     app.use("/bower_components", express.static("bower_components"));
@@ -450,7 +461,7 @@ export default class Robot extends EventEmitter {
     let address = process.env.EXPRESS_BIND_ADDRESS || "0.0.0.0";
     this.logger.debug("[Robot] All routes:");
     //    this.logger.debug(this.router.stack);
-    this.router._router.stack.forEach(r => {
+    this.router._router.stack.forEach((r) => {
       if (r.route && r.route.path) {
         this.logger.debug("[Robot] " + r.route.path);
       }

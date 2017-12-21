@@ -1,7 +1,7 @@
 "use strict";
 
 import Envelope from "./envelope";
-import { Message } from "./message";
+import {Message} from "./message";
 import Robot from "./robot";
 import User from "./user";
 

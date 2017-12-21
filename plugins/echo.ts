@@ -1,4 +1,4 @@
-import { TextMessage } from "../message";
+import {TextMessage} from "../message";
 import Response from "../response";
 import Robot from "../robot";
 

@@ -1,7 +1,7 @@
 const request = require("request-promise-native");
 import Adapter from "../adapter";
 import Envelope from "../envelope";
-import { Message } from "../message";
+import {Message} from "../message";
 import Response from "../response";
 import Robot from "../robot";
 import User from "../user";
@@ -76,43 +76,43 @@ export default class Ionic extends Adapter {
   }
 
   public fetchUsers() {
-    return request(this.getOptions("users")).then(res => {
-      let users = res.data.map(d => new IonicAPIUser(d));
+    return request(this.getOptions("users")).then((res) => {
+      let users = res.data.map((d) => new IonicAPIUser(d));
       this.users = users;
       return users;
     });
   }
 
   public fetchTokens(user: IonicAPIUser) {
-    return request(this.getOptions(`push/tokens?user_id=${user.uuid}`)).then(res => {
+    return request(this.getOptions(`push/tokens?user_id=${user.uuid}`)).then((res) => {
       return res.data
-        .map(d => {
+        .map((d) => {
           if (d.invalidated !== true && d.valid === true) {
             return new IonicPushToken(d);
           }
           return null;
         })
-        .filter(d => d !== null);
+        .filter((d) => d !== null);
     });
   }
 
   public sendPushNotification(token: IonicPushToken, message: PushMessage) {
     let body = {
       tokens: [token.token],
-      notification: { title: message.title, message: message.message },
+      notification: {title: message.title, message: message.message},
       profile: "prod",
     };
     this.robot.logger.debug(
-      `Sending push to token ${token.token}: ${message.title}, ${message.message}`,
+      `Sending push to token ${token.token}: ${message.title}, ${message.message}`
     );
     if (this.robot.config.get("DEV") === "true") {
       this.robot.logger.debug(`Not actually sending push in dev`);
       return Promise.resolve();
     }
-    return request(this.getOptions("push/notifications", "POST", body)).then(pushRes => {
+    return request(this.getOptions("push/notifications", "POST", body)).then((pushRes) => {
       if (pushRes.data.state === "failed") {
         this.robot.logger.warn(
-          `Failed to send push to ${token.token}. push uuid: ${pushRes.data.uuid}`,
+          `Failed to send push to ${token.token}. push uuid: ${pushRes.data.uuid}`
         );
       } else {
         this.robot.logger.debug(`Push to ${token.token} state: ${pushRes.data.state}`);
@@ -122,23 +122,23 @@ export default class Ionic extends Adapter {
 
   public sendPush(emails: string[], message: PushMessage) {
     return this.fetchUsers()
-      .then(users => {
-        let matchingUsers = users.filter(u => {
+      .then((users) => {
+        let matchingUsers = users.filter((u) => {
           return emails.indexOf(u.email) > -1;
         });
         if (matchingUsers.length !== emails.length) {
           this.robot.logger.warn(
             `Could not find Ionic users for all emails: ${emails}, found: ` +
-              `${matchingUsers.map(u => u.email)}`,
+              `${matchingUsers.map((u) => u.email)}`
           );
         }
         return matchingUsers;
       })
-      .then(users => {
+      .then((users) => {
         let promises = [];
         for (let user of users) {
           promises.push(
-            this.fetchTokens(user).then(tokens => {
+            this.fetchTokens(user).then((tokens) => {
               if (tokens.length === 0) {
                 this.robot.logger.warn(`Found no tokens for user: ${user.email}`);
                 return Promise.resolve();
@@ -148,12 +148,12 @@ export default class Ionic extends Adapter {
                 pushPromises.push(this.sendPushNotification(tokens[0], message));
               }
               return Promise.all(pushPromises);
-            }),
+            })
           );
         }
         return Promise.all(promises);
       })
-      .catch(e => {
+      .catch((e) => {
         this.robot.logger.error(`Error sending push ${message} to email ${emails}; ${e}`);
       });
   }

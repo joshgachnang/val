@@ -16,27 +16,27 @@ export default class FakeAdapter extends Adapter {
   }
 
   private sendEvent(name: string, data?: any) {
-    this.events.push({ name: name, data: data });
+    this.events.push({name: name, data: data});
   }
 
   send(envelope, ...strings) {
-    this.sendEvent("send", { envelope: envelope, strings: strings });
+    this.sendEvent("send", {envelope: envelope, strings: strings});
   }
 
   emote(envelope, ...strings) {
-    this.sendEvent("emote", { envelope: envelope, strings: strings });
+    this.sendEvent("emote", {envelope: envelope, strings: strings});
   }
 
   reply(envelope, ...strings) {
-    this.sendEvent("reply", { envelope: envelope, strings: strings });
+    this.sendEvent("reply", {envelope: envelope, strings: strings});
   }
 
   topic(envelope, ...strings) {
-    this.sendEvent("topic", { envelope: envelope, strings: strings });
+    this.sendEvent("topic", {envelope: envelope, strings: strings});
   }
 
   play(envelope, ...strings) {
-    this.sendEvent("play", { envelope: envelope, strings: strings });
+    this.sendEvent("play", {envelope: envelope, strings: strings});
   }
 
   run() {
@@ -48,6 +48,6 @@ export default class FakeAdapter extends Adapter {
   }
 
   receive(message) {
-    this.sendEvent("receive", { message: message });
+    this.sendEvent("receive", {message: message});
   }
 }

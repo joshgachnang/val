@@ -46,7 +46,7 @@ export default class SetManipulator {
     a.forEach((value) => {
       ukey = this.uid(value);
       if (!hist[ukey]) {
-        hist[ukey] = { value: value, freq: 1 };
+        hist[ukey] = {value: value, freq: 1};
       }
     });
     // Merge 'b' into the histogram.
@@ -54,7 +54,7 @@ export default class SetManipulator {
       ukey = this.uid(value);
       if (hist[ukey]) {
         if (hist[ukey].freq === 1) hist[ukey].freq = 3;
-      } else hist[ukey] = { value: value, freq: 2 };
+      } else hist[ukey] = {value: value, freq: 2};
     });
     // Pop any new identity extractor
     if (identityExtractor) this.popIdentityExtractor();

@@ -1,5 +1,5 @@
 // Forked from Slackbots to throw out vow, use TS
-import { EventEmitter } from "events";
+import {EventEmitter} from "events";
 
 import * as _ from "lodash";
 import * as request from "request";
@@ -8,11 +8,11 @@ import * as WebSocket from "ws";
 
 import Adapter from "../adapter";
 import Envelope from "../envelope";
-import { APIError } from "../errors";
-import { TextMessage } from "../message";
+import {APIError} from "../errors";
+import {TextMessage} from "../message";
 import Robot from "../robot";
 import Room from "../room";
-import { default as User, SlackUser } from "../user";
+import {default as User, SlackUser} from "../user";
 
 interface UserIdMap {
   [id: string]: User;
@@ -66,7 +66,7 @@ export default class SlackAdapter extends Adapter {
             return await fn.bind(this)(req.body.event);
           } catch (e) {
             this.logger.debug(
-              `[slack] error handling event type ${req.body.type}: ${e.message} ${e.stack}`,
+              `[slack] error handling event type ${req.body.type}: ${e.message} ${e.stack}`
             );
             throw new APIError(`Error handling event type: ${e.message}`, 500);
           }
@@ -74,7 +74,7 @@ export default class SlackAdapter extends Adapter {
           this.logger.debug(`[slack] unknown message type: ${req.body.type}`);
           throw new APIError(`Unknown message type`, 400);
         }
-      }),
+      })
     );
   }
 
@@ -129,12 +129,12 @@ export default class SlackAdapter extends Adapter {
   }
 
   private async updateUsers() {
-    let users = await this.slackRequest("users.list") as any;
+    let users = (await this.slackRequest("users.list")) as any;
     for (let slackUser of users.members) {
       // See if we have a matching user in brain already
       let user = this.robot.brain.userForId(slackUser.id);
       if (!user) {
-        user = new User({ slack: slackUser });
+        user = new User({slack: slackUser});
       }
 
       this.users[slackUser.id] = user;
@@ -149,8 +149,8 @@ export default class SlackAdapter extends Adapter {
   }
 
   private async updateChannels() {
-    let publicChannels = await this.slackRequest("channels.list") as any;
-    let ims = await this.slackRequest("im.list") as any;
+    let publicChannels = (await this.slackRequest("channels.list")) as any;
+    let ims = (await this.slackRequest("im.list")) as any;
     let channels = publicChannels.channels.concat(ims.ims);
     for (let channel of channels) {
       let room: Room;
@@ -184,12 +184,12 @@ export default class SlackAdapter extends Adapter {
   send(envelope, strings) {
     if (envelope.room === undefined) {
       for (let str of strings) {
-        this.sendMessageToUser(envelope.user.slack.id, str, { link_names: 1 });
+        this.sendMessageToUser(envelope.user.slack.id, str, {link_names: 1});
       }
       return;
     }
     for (let str of strings) {
-      this.sendMessageToChannel(envelope.room.name, str, { link_names: 1 });
+      this.sendMessageToChannel(envelope.room.name, str, {link_names: 1});
     }
   }
 
@@ -220,7 +220,9 @@ export default class SlackAdapter extends Adapter {
     let user = this.findUserByName(name);
 
     if (!user) {
-      this.robot.logger.error(`Could not find user to send message to by name: ${name}. msg: ${strings}`);
+      this.robot.logger.error(
+        `Could not find user to send message to by name: ${name}. msg: ${strings}`
+      );
       throw new Error(`Slack sendToName, name not found: ${name}`);
     }
 
@@ -230,7 +232,7 @@ export default class SlackAdapter extends Adapter {
 
     this.robot.logger.debug(`[slack] Sending message to name ${name}: ${strings}`);
     for (let str of strings) {
-      this.sendMessageToChannel(envelope.room.id, str, { link_names: 1 });
+      this.sendMessageToChannel(envelope.room.id, str, {link_names: 1});
     }
   }
 
@@ -242,7 +244,7 @@ export default class SlackAdapter extends Adapter {
       } else {
         text = `@${user.slack.name}: ${str}`;
       }
-      this.sendMessageToChannel(envelope.room.id, text, { link_names: 1 });
+      this.sendMessageToChannel(envelope.room.id, text, {link_names: 1});
     }
   }
 

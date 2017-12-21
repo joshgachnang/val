@@ -1,6 +1,6 @@
 import * as browserify from "browserify";
 import * as express from "express";
-import { existsSync } from "fs";
+import {existsSync} from "fs";
 import * as _ from "lodash";
 import Robot from "./robot";
 

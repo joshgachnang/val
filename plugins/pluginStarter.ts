@@ -36,7 +36,7 @@ export default function(robot: Robot) {
     "/hello",
     robot.expressWrap(async (req) => {
       return await hello();
-    }),
+    })
   );
 
   // `hear` will trigger any time says the phrase. The trigger can be a regex, string, or a string

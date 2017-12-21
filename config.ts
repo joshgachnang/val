@@ -3,19 +3,12 @@ import * as process from "process";
 export default class Config {
   defaultValues = {
     BOT_NAME: "val",
-    PLUGINS: [
-      "./plugins/users",
-      "./plugins/mongo-brain",
-      "./plugins/admin",
-    ],
+    PLUGINS: ["./plugins/users", "./plugins/mongo-brain", "./plugins/admin"],
     BASE_URL: "http://localhost:8080",
     DEV: "false",
     MONGODB_URL: "mongodb://localhost/hubot-brain",
     CRON_TIMEZONE: "America/Chicago",
-    ADAPTERS: [
-      "./adapters/slack",
-      "./adapters/alexa",
-    ],
+    ADAPTERS: ["./adapters/slack", "./adapters/alexa"],
   };
 
   // Loaded values from config file

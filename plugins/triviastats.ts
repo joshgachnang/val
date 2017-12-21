@@ -1,7 +1,7 @@
 // Notification system for TriviaStats.com and app
 const request = require("request-promise-native");
 
-import { PushMessage } from "../adapters/ionic";
+import {PushMessage} from "../adapters/ionic";
 import Response from "../response";
 import Robot from "../robot";
 import User from "../user";
@@ -31,12 +31,12 @@ export default function(robot: Robot) {
       json: true,
     };
     request(options)
-      .then(res => {
+      .then((res) => {
         let scores = res.results;
         let hour = res.results[0].hour;
         let year = res.results[0].year;
 
-        let thisHourScores = scores.filter(s => s.hour === hour && s.year === year);
+        let thisHourScores = scores.filter((s) => s.hour === hour && s.year === year);
         robot.logger.debug(`Found ${thisHourScores.length} scores for hour ${hour}, ${year}`);
 
         let brainData = robot.brain.get(BRAIN_KEY);
@@ -51,7 +51,7 @@ export default function(robot: Robot) {
 
         let adapter = robot.adapters["Ionic"];
         let teamNameMap = {};
-        thisHourScores.map(hs => (teamNameMap[hs.team_name] = hs));
+        thisHourScores.map((hs) => (teamNameMap[hs.team_name] = hs));
 
         // Three types of users: users with team in scores, no team, and team that doesn't match
         let teamUsers = [];
@@ -62,7 +62,7 @@ export default function(robot: Robot) {
           // Temporary hack for our early sign up..
           if (
             ["adamslu@charter.net", "anuheik1@gmail.com", "mmmbarkley@gmail.com"].indexOf(
-              user.email,
+              user.email
             ) > -1
           ) {
             continue;
@@ -98,18 +98,18 @@ export default function(robot: Robot) {
           new User({}),
           pushTitle,
           "Set a team name to track your score!",
-          adapter,
+          adapter
         );
         let badTeamMessage = new PushMessage(
           new User({}),
           pushTitle,
           "Your team name didn't match any scores. Please check it!",
-          adapter,
+          adapter
         );
 
         let promises = [
-          adapter.sendPush(noTeamUsers.map(u => u.email), noTeamMessage),
-          adapter.sendPush(badTeamUsers.map(u => u.email), badTeamMessage),
+          adapter.sendPush(noTeamUsers.map((u) => u.email), noTeamMessage),
+          adapter.sendPush(badTeamUsers.map((u) => u.email), badTeamMessage),
         ];
         for (let teamUser of teamUsers) {
           let score = teamNameMap[teamUser.custom.team_name.toUpperCase()];
@@ -118,7 +118,7 @@ export default function(robot: Robot) {
             new User({}),
             pushTitle,
             `${teamUser.custom.team_name} is in ${place} with ${score.score} points!`,
-            adapter,
+            adapter
           );
           promises.push(adapter.sendPush([teamUser.email], msg));
         }
@@ -130,7 +130,7 @@ export default function(robot: Robot) {
           /* tslint:enable */
         });
       })
-      .catch(e => {
+      .catch((e) => {
         robot.logger.warn(`[triviastats] error updating scores: ${e} ${e.stack}`);
       });
   }
@@ -141,7 +141,7 @@ export default function(robot: Robot) {
   // Admin commands
   robot.hear(/resetts/i, {}, (res: Response) => {
     robot.logger.debug("Resetting triviastats database");
-    robot.brain.set(BRAIN_KEY, { latestHour: 54, latestYear: 2016 });
+    robot.brain.set(BRAIN_KEY, {latestHour: 54, latestYear: 2016});
     robot.reply(res.envelope, res.envelope.user, "reset the triviastats database");
     updateScores();
   });

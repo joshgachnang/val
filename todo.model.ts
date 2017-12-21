@@ -27,6 +27,8 @@ export default class Todo {
   }
 
   generateTodoId() {
-    return Math.random().toString(36).slice(2);
+    return Math.random()
+      .toString(36)
+      .slice(2);
   }
 }

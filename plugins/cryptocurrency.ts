@@ -4,27 +4,23 @@
 //   hubot CRYPTO_TICKER_SYMBOL price - displays the current price for the crypto ticker (e.g. BTC, LTC, bitcoin, etc)
 //
 import * as moment from "moment-timezone";
-import { setInterval } from "timers";
+import {setInterval} from "timers";
 import Response from "../response";
 import Robot from "../robot";
 
 // Standalone alexa app for dogecoin
 export default function(robot: Robot) {
   // Currencies we will cache every few minutes
-  let cacheCurrencies = [
-    "DOGE",
-    "ETH",
-    "BTC",
-    "LTC",
-  ];
+  let cacheCurrencies = ["DOGE", "ETH", "BTC", "LTC"];
   let supported = {};
   let supportedAliases = {};
   let prices = {};
   let updateTime = moment();
 
   function fetchTicker(symbol) {
-    return robot.request(`https://api.cryptonator.com/api/ticker/` +
-      `${symbol.toLocaleLowerCase()}-usd`);
+    return robot.request(
+      `https://api.cryptonator.com/api/ticker/` + `${symbol.toLocaleLowerCase()}-usd`
+    );
   }
 
   async function fetchSupported() {
@@ -53,7 +49,9 @@ export default function(robot: Robot) {
       try {
         let res = JSON.parse(result);
         prices[res.ticker.base] = res.ticker.price;
-        robot.logger.debug(`[cryptocurrency] current ${res.ticker.base} price: ${res.ticker.price}`);
+        robot.logger.debug(
+          `[cryptocurrency] current ${res.ticker.base} price: ${res.ticker.price}`
+        );
       } catch (e) {
         robot.logger.warn(`[cryptocurrency] couldn't fetch DOGE price: ${e}`);
         return;
@@ -72,7 +70,10 @@ export default function(robot: Robot) {
     robot.router.get(url, (req, res) => {
       let text = getMainText();
       return res.json({
-        uid: `id1${moment().utcOffset(0).startOf("hour").unix()}`,
+        uid: `id1${moment()
+          .utcOffset(0)
+          .startOf("hour")
+          .unix()}`,
         updateDate: updateTime.utcOffset(0).format("YYYY-MM-DD[T]HH:00:00.[0Z]"),
         titleText: text,
         mainText: text,
@@ -134,7 +135,9 @@ export default function(robot: Robot) {
     let btc = Number(prices["BTC"]).toFixed(2);
     let ltc = Number(prices["LTC"]).toFixed(2);
     let eth = Number(prices["ETH"]).toFixed(2);
-    return `The current bitcoin price is $${btc}. Ethereum is $${eth}. And Litecoin is priced ` +
-      `at $${ltc}`;
+    return (
+      `The current bitcoin price is $${btc}. Ethereum is $${eth}. And Litecoin is priced ` +
+      `at $${ltc}`
+    );
   });
 }

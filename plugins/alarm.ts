@@ -5,7 +5,7 @@ import Response from "../response";
 import Robot from "../robot";
 
 type AlarmRepeat =
-  "never"
+  | "never"
   | "hour"
   | "day"
   | "week"
@@ -32,7 +32,7 @@ export class Alarm {
 
   /* represent the alarm in a way that can be stored in the brain */
   toDB(): string {
-    return JSON.stringify({ time: this.time, repeats: this.repeats });
+    return JSON.stringify({time: this.time, repeats: this.repeats});
   }
 }
 
@@ -43,7 +43,7 @@ export default function(robot) {
     if (!alarms) {
       return [];
     }
-    alarms = alarms.map(a => JSON.parse(a));
+    alarms = alarms.map((a) => JSON.parse(a));
     return alarms;
   }
 
@@ -71,7 +71,7 @@ export default function(robot) {
 
     let existingAlarms = getAlarms();
     if (
-      existingAlarms.find(a => {
+      existingAlarms.find((a) => {
         return a.time === alarm.time && a.repeats === alarm.repeats;
       })
     ) {
@@ -92,6 +92,6 @@ export default function(robot) {
 
   robot.router.get("/alarms", (req, res) => {
     let alarms = getAlarms();
-    res.json({ alarms });
+    res.json({alarms});
   });
 }

@@ -7,7 +7,7 @@
 //
 // Author:
 //   pcsforeducation
-import { AlexaMessage, default as AlexaAdapter } from "../adapters/alexa";
+import {AlexaMessage, default as AlexaAdapter} from "../adapters/alexa";
 import Response from "../response";
 import Robot from "../robot";
 
@@ -16,7 +16,7 @@ export default function(robot: Robot) {
   if (robot.adapters.AlexaAdapter) {
     let alexaAdapter = robot.adapters.AlexaAdapter as AlexaAdapter;
     let utterances = ["Start meditation"];
-    alexaAdapter.registerIntent("StartMeditation", utterances, slots => "Start meditation");
+    alexaAdapter.registerIntent("StartMeditation", utterances, (slots) => "Start meditation");
   }
 
   robot.hear(/start meditation/i, {}, (response: Response) => {

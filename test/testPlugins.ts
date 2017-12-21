@@ -1,9 +1,9 @@
-import { assert } from "chai";
-import { only, skip, slow, suite, test, timeout } from "mocha-typescript";
+import {assert} from "chai";
+import {only, skip, slow, suite, test, timeout} from "mocha-typescript";
 
 import Config from "../config";
 import FakeRobot from "./fakeRobot";
-import { TextMessage } from "../message"; // tslint:disable-line
+import {TextMessage} from "../message"; // tslint:disable-line
 import Robot from "../robot";
 import User from "../user";
 
@@ -28,11 +28,10 @@ export class PluginTestSuite {
     }
   }
 
-  before() {
-  }
+  before() {}
 
   getUser(): User {
-    return new User({ id: "id", slack: { id: "someId", name: "fakeUser" } });
+    return new User({id: "id", slack: {id: "someId", name: "fakeUser"}});
   }
 
   getTextMessage(text: string): TextMessage {
@@ -43,7 +42,7 @@ export class PluginTestSuite {
 @suite
 class EchoTest extends PluginTestSuite {
   before() {
-    return EchoTest.getFakeRobot(["./plugins/echo"]).then((robot) => this.robot = robot);
+    return EchoTest.getFakeRobot(["./plugins/echo"]).then((robot) => (this.robot = robot));
   }
 
   @test
@@ -59,7 +58,7 @@ class EchoTest extends PluginTestSuite {
     this.robot.receive(
       this.getTextMessage(`@${this.robotName}: hello`),
       this.robot.adapters.fake,
-      undefined,
+      undefined
     );
     // TODO: gross.
     setTimeout(() => {
@@ -97,7 +96,8 @@ class FailedPluginInitTest extends PluginTestSuite {
     config.set("PLUGINS", ["./test/failPlugin"]);
     config.set("ADAPTERS", ["./test/fakeAdapter"]);
     let robot = new Robot(config);
-    robot.init()
+    robot
+      .init()
       .then(() => {})
       .catch((e) => done());
   }

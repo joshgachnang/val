@@ -37,7 +37,7 @@ export class TextMessage extends Message {
     if (!user || !text) {
       throw new Error(
         `Cannot create text message without user or text. user:
-        ${user} text: ${text}`,
+        ${user} text: ${text}`
       );
     }
     super(user, adapter, false);

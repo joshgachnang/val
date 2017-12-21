@@ -35,12 +35,12 @@ export default function(robot: Robot) {
   robot.router.get("/calendars", (req, res) => {
     try {
       authorize(() => {
-        listEvents(events => {
-          res.json({ events: events });
+        listEvents((events) => {
+          res.json({events: events});
         });
       });
     } catch (e) {
-      res.status(400).send({ error: "No calendars configured" });
+      res.status(400).send({error: "No calendars configured"});
     }
   });
 
@@ -58,7 +58,7 @@ export default function(robot: Robot) {
   });
 
   robot.hear(/What is on my agenda/i, {}, (response: Response) => {
-    getAgenda(agenda => {
+    getAgenda((agenda) => {
       if (!response) {
         // TODO: What the fuck.
         return;
@@ -68,14 +68,19 @@ export default function(robot: Robot) {
   });
 
   robot.router.get("/alexa/flashBreifing", (req, res) => {
-    getAgenda(agenda => {
+    getAgenda((agenda) => {
       return res.json([
         {
-          uid: `id1${moment().utcOffset(0).startOf("hour").unix()}`,
-          updateDate: moment().utcOffset(0).format("YYYY-MM-DD[T]HH:00:00.[0Z]"),
+          uid: `id1${moment()
+            .utcOffset(0)
+            .startOf("hour")
+            .unix()}`,
+          updateDate: moment()
+            .utcOffset(0)
+            .format("YYYY-MM-DD[T]HH:00:00.[0Z]"),
           titleText: "Val agenda",
           mainText: agenda,
-        }
+        },
       ]);
     });
   });
@@ -84,7 +89,7 @@ export default function(robot: Robot) {
     let today = moment();
     try {
       authorize(() => {
-        listEvents(events => {
+        listEvents((events) => {
           let dayEvents = "";
           let timeEvents = "";
           let res = "";
@@ -135,7 +140,7 @@ export default function(robot: Robot) {
   if (robot.adapters.AlexaAdapter) {
     let alexaAdapter = robot.adapters.AlexaAdapter as AlexaAdapter;
     let utterances = ["What is on my agenda"];
-    alexaAdapter.registerIntent("GetAgenda", utterances, slots => "What is on my agenda");
+    alexaAdapter.registerIntent("GetAgenda", utterances, (slots) => "What is on my agenda");
   }
 
   /**
@@ -157,7 +162,7 @@ export default function(robot: Robot) {
     } else {
       robot.logger.warn(
         "[googleCalendar] No calendars configured. Chat with the bot to authorize Google " +
-          "Calendar",
+          "Calendar"
       );
       throw new Error("No calendars configured");
     }
@@ -224,7 +229,7 @@ export default function(robot: Robot) {
     let calendars = robot.brain.get("calendarList");
 
     for (let calendarName of config.get("CALENDAR_NAMES")) {
-      let calendarIds = calendars.filter(c => {
+      let calendarIds = calendars.filter((c) => {
         return c.summary === calendarName;
       });
 
@@ -235,7 +240,10 @@ was ${calendarIds.length}. Not fetching.`);
         continue;
       }
       let min = moment.tz("America/Chicago").toISOString();
-      let max = moment.tz("America/Chicago").endOf("day").toISOString();
+      let max = moment
+        .tz("America/Chicago")
+        .endOf("day")
+        .toISOString();
       robot.logger.debug(`[googleCalendar] Getting calendar events from ${min} to ${max}`);
       calendar.events.list(
         {
@@ -262,7 +270,7 @@ was ${calendarIds.length}. Not fetching.`);
             events = [].concat.apply([], events);
             callback(events);
           }
-        },
+        }
       );
     }
   }
@@ -279,13 +287,13 @@ was ${calendarIds.length}. Not fetching.`);
           return;
         }
         callback(response);
-      },
+      }
     );
   }
 
   function cacheCalendars() {
     // TODO move this to a scheduled background worker rather than startup
-    listCalendars(calendars => {
+    listCalendars((calendars) => {
       if (calendars) {
         // TODO could use calendars.etag to not fetch more often than necessary
         robot.brain.set("calendarList", calendars.items);
