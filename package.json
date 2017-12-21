@@ -108,7 +108,7 @@
     "mocha": "^2.5.3",
     "mocha-typescript": "^1.0.21",
     "nodemon": "^1.9.2",
-    "prettier": "^1.4.4",
+    "prettier": "^1.9.2",
     "rimraf": "^2.5.4",
     "source-map-support": "^0.5.0",
     "supertest": "^3.0.0",
@@ -122,5 +122,14 @@
     "presets": [
       "es2016"
     ]
+  },
+  "prettier": {
+    "arrowParens": "always",
+    "bracketSpacing": false,
+    "printWidth": 100,
+    "semi": true,
+    "singleQuote": false,
+    "trailingComma": "es5",
+    "useTabs": false
   }
 }
