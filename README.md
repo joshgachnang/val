@@ -73,7 +73,6 @@ them handle async/await correctly called `expressWrap()`. Simply wrap the
 callback function you give to the router in this wrapper and you can use
 async/await as you'd expect.
 
-```
     async function hello() {
       return 'hello world~';
     }
@@ -81,4 +80,3 @@ async/await as you'd expect.
     robot.router.get('/hello', robot.expressWrap(async (req) => {
       return await hello();
     }));
-```
