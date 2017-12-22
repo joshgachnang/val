@@ -8,14 +8,13 @@
     "build": "npm run build:clean && npm run build:copy && npm run build:compile",
     "build:clean": "rm -rf dist/*",
     "build:compile": "tsc",
-    "build:copy": "mkdir -p dist/config/ && cp -a thirdParty dist/ && if [ -f configuration.json  ]; then cp configuration.json  dist/; fi",
+    "build:copy":
+      "mkdir -p dist/config/ && cp -a thirdParty dist/ && if [ -f configuration.json  ]; then cp configuration.json  dist/; fi",
     "docker": "npm run build && docker build -t servercobra/val . && docker push servercobra/val",
-    "precommit": "npm run precommit:lintfix && npm run precommit:pretty",
-    "precommit:lintfix": "tslint --fix adapters/*.ts plugins/*.ts test/*.ts *.ts",
-    "precommit:pretty": "prettier --print-width 100 --trailing-comma 'all'  --write '**/*.ts'",
+    "precommit": "prettier --print-width 100 --trailing-comma 'all'  --write '**/*.ts'",
     "start": "node dist/server.js",
     "test": "npm run test:lint && npm run build && npm run test:mocha",
-    "test:lint": "tslint adapters/*.ts plugins/*.ts test/*.ts *.ts",
+    "test:lint": "node node_modules/prettier/bin/prettier.js --list-different \"**/*.ts\"",
     "test:mocha": "mocha --timeout 200 dist/test/*.js",
     "watch": "concurrently --kill-others 'npm run watch:typescript' 'npm run watch:node'",
     "watch:node": "nodemon dist/server.js",
@@ -113,15 +112,12 @@
     "source-map-support": "^0.5.0",
     "supertest": "^3.0.0",
     "ts-node": "^2.1.0",
-    "tslint": "^4.4.2",
     "typescript": "^2.5.2",
     "typescript-eslint-parser": "^4.0.0",
     "watchify": "^3.7.0"
   },
   "babel": {
-    "presets": [
-      "es2016"
-    ]
+    "presets": ["es2016"]
   },
   "prettier": {
     "arrowParens": "always",
