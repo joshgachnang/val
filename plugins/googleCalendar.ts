@@ -21,16 +21,23 @@ import Robot from "../robot";
 const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
 const AUTH_TOKEN_KEY = "googleAuthToken";
 const CALENDAR_KEY = "googleCalendar";
+const CLIENT_SECRET_KEY = "googleCalendarClientSecret";
 
 export default function(robot: Robot) {
+  let oauth2Client;
   let redirectResponse: Response;
-  let credentials = getClientSecret();
-  let clientSecret = credentials.installed.client_secret;
-  let clientId = credentials.installed.client_id;
-  // let redirectUrl = robot.config.baseUrl + '/calendars/oauth_redirect';
-  let redirectUrl = credentials.installed.redirect_uris[0];
-  let auth = new googleAuth();
-  let oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+  let credentials = robot.brain.get(CLIENT_SECRET_KEY);
+  if (credentials) {
+    setupCredentials(credentials);
+  }
+
+  function setupCredentials(credentials) {
+    let clientSecret = credentials.installed.client_secret;
+    let clientId = credentials.installed.client_id;
+    let redirectUrl = credentials.installed.redirect_uris[0];
+    let auth = new googleAuth();
+    oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+  }
 
   robot.router.get("/calendars", (req, res) => {
     try {
@@ -44,11 +51,26 @@ export default function(robot: Robot) {
     }
   });
 
-  robot.hear(/authorize google calendar/i, {}, (response: Response) => {
+  robot.respond(/add google calendar client secret (.*)/i, {}, (response: Response) => {
+    let match = response.match[1];
+    // Remove linkifying
+    match = match
+      .replace(/\<.*\|/g, "")
+      .replace(/</g, "")
+      .replace(/>/g, "");
+    let clientSecret = JSON.parse(match);
+    robot.brain.set(CLIENT_SECRET_KEY, clientSecret);
+    setupCredentials(clientSecret);
+    requestAuthorize(response);
+  });
+
+  function requestAuthorize(response) {
     redirectResponse = response;
     getNewToken(response);
     response.reply("Please type the 'authkey' then the provided auth key");
-  });
+  }
+
+  robot.hear(/authorize google calendar/i, {}, requestAuthorize);
 
   // TODO: add these as part of a conversation
   robot.hear(/authkey\s+([A-Za-z0-9/_-]+)/i, {}, (response: Response) => {
@@ -157,8 +179,8 @@ export default function(robot: Robot) {
       // Authorize all the tokens
       tokens.forEach(function(token) {
         oauth2Client.credentials = token;
-        callback();
       });
+      callback();
     } else {
       robot.logger.warn(
         "[googleCalendar] No calendars configured. Chat with the bot to authorize Google " +
@@ -208,10 +230,6 @@ export default function(robot: Robot) {
     }
     existingTokens.push(token);
     robot.brain.set(AUTH_TOKEN_KEY, existingTokens);
-  }
-
-  function getClientSecret() {
-    return JSON.parse(fs.readFileSync("client_secret.json", "utf-8"));
   }
 
   /**
