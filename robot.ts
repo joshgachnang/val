@@ -22,7 +22,6 @@ import Brain from "./brain";
 import Config from "./config";
 import Envelope from "./envelope";
 import {APIError} from "./errors";
-import frontend from "./frontend";
 import {Listener, TextListener} from "./listener";
 import {Message, TextMessage} from "./message";
 import "./polyfill";
@@ -60,7 +59,6 @@ export default class Robot extends EventEmitter {
   router: any;
   logger: any;
   brain: Brain;
-  frontend: any;
   adapters: any;
   plugins: any;
   raven: any;
@@ -108,7 +106,6 @@ export default class Robot extends EventEmitter {
     this.brain = new Brain(this);
     this.setupExpress();
 
-    this.frontend = new frontend(this);
     this.adapters = {};
     this.plugins = {};
   }
@@ -172,7 +169,6 @@ export default class Robot extends EventEmitter {
       this.logger.debug("initing alexa plugins");
       this.adapters.AlexaAdapter.postPluginInit();
     }
-    // this.frontend.setup();
     this.listen();
     this.emit("running");
   }
@@ -457,8 +453,8 @@ export default class Robot extends EventEmitter {
   }
 
   listen() {
-    let port = process.env.EXPRESS_BIND_PORT || 8080;
-    let address = process.env.EXPRESS_BIND_ADDRESS || "0.0.0.0";
+    let port = this.config.get("EXPRESS_BIND_PORT") || 8080;
+    let address = this.config.get("EXPRESS_BIND_ADDRESS") || "0.0.0.0";
     this.logger.debug("[Robot] All routes:");
     //    this.logger.debug(this.router.stack);
     this.router._router.stack.forEach((r) => {
