@@ -30,15 +30,15 @@ export default function(robot) {
   let cache = {};
 
   return MongoClient.connect(robot.config.get("MONGODB_URL"))
-    .then((mongoDb) => {
-      db = mongoDb;
-      robot.brain.on("close", () => db.close());
+    .then((client) => {
+      db = client.db(robot.config.get("MONGODB_DATABASE"));
+      robot.brain.on("close", () => client.close());
 
       robot.logger.info("[mongo-brain] MongoDB connected");
       robot.brain.setAutoSave(false);
 
       // restore data from mongodb
-      return db.createCollection("brain");
+      return db.collection("brain");
     })
     .then((collection) => {
       return collection.find({type: "_private"}).toArray();
