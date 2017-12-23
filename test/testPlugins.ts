@@ -13,6 +13,7 @@ export class PluginTestSuite {
 
   static async getFakeRobot(plugins) {
     let config = new Config();
+    config.set("EXPRESS_BIND_PORT", "8081");
     config.set("BOT_NAME", "k2so");
     config.set("PLUGINS", plugins);
     config.set("ADAPTERS", ["./test/fakeAdapter"]);
@@ -73,6 +74,7 @@ class AsyncPluginInitTest extends PluginTestSuite {
   @test
   asynchPlugin(done) {
     let config = new Config();
+    config.set("EXPRESS_BIND_PORT", "8081");
     config.set("BOT_NAME", "k2so");
     config.set("PLUGINS", ["./test/asyncPlugin"]);
     config.set("ADAPTERS", ["./test/fakeAdapter"]);
@@ -92,6 +94,7 @@ class FailedPluginInitTest extends PluginTestSuite {
   @test
   fail(done) {
     let config = new Config();
+    config.set("EXPRESS_BIND_PORT", "8081");
     config.set("BOT_NAME", "k2so");
     config.set("PLUGINS", ["./test/failPlugin"]);
     config.set("ADAPTERS", ["./test/fakeAdapter"]);

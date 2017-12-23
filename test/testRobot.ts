@@ -23,6 +23,7 @@ class RobotTestSuite {
 
   async getFakeRobot(plugins) {
     let config = new Config();
+    config.set("EXPRESS_BIND_PORT", "8081");
     config.set("BOT_NAME", "k2so");
     config.set("PLUGINS", plugins);
     config.set("ADAPTERS", ["./test/fakeAdapter"]);
@@ -98,6 +99,31 @@ class RobotTestSuite {
   @test
   hearThreeOptions(done) {
     this.hearRespondTest(false, "i want {coke|pepsi|mr pibb}", "hello, i want pepsi, please", done);
+  }
+
+  @test
+  hearComplexOr(done) {
+    this.hearRespondTest(
+      false,
+      "i want {a|} {coke|pepsi|mr pibb}",
+      "hello, i want mr pibb, please",
+      done
+    );
+  }
+
+  @test
+  hearComplexOr2(done) {
+    this.hearRespondTest(
+      false,
+      "i want {a|} {coke|pepsi|mr pibb}",
+      "hello, i want a coke, please",
+      done
+    );
+  }
+
+  @test
+  hearOrWithApostrophe(done) {
+    this.hearRespondTest(false, "{whats|what's} up", "hey what's up?", done);
   }
 
   @test
