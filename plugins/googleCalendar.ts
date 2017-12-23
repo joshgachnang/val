@@ -67,7 +67,9 @@ export default function(robot: Robot) {
   function requestAuthorize(response) {
     redirectResponse = response;
     getNewToken(response);
-    response.reply("Please type the 'authkey' then the provided auth key");
+    setTimeout(() => {
+      response.reply("Please type the 'authkey' then the provided auth key");
+    }, 1000);
   }
 
   robot.hear(/authorize google calendar/i, {}, requestAuthorize);
@@ -79,7 +81,7 @@ export default function(robot: Robot) {
     });
   });
 
-  robot.hear(/What is on my agenda/i, {}, (response: Response) => {
+  robot.respond(`{what is|whats} {on|} my agenda`, {}, (response: Response) => {
     getAgenda((agenda) => {
       if (!response) {
         // TODO: What the fuck.
@@ -245,7 +247,6 @@ export default function(robot: Robot) {
     cacheCalendars();
 
     let calendars = robot.brain.get("calendarList");
-
     for (let calendarName of config.get("CALENDAR_NAMES")) {
       let calendarIds = calendars.filter((c) => {
         return c.summary === calendarName;
