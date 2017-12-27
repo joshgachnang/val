@@ -81,7 +81,7 @@ export default function(robot: Robot) {
     });
   });
 
-  robot.respond(`{what is|whats} {on|} my agenda`, {}, (response: Response) => {
+  robot.respond(`{what is|whats|what's} {on|} my agenda`, {}, (response: Response) => {
     getAgenda((agenda) => {
       if (!response) {
         // TODO: What the fuck.
