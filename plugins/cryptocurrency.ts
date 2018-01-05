@@ -11,7 +11,7 @@ import Robot from "../robot";
 // Standalone alexa app for dogecoin
 export default function(robot: Robot) {
   // Currencies we will cache every few minutes
-  let cacheCurrencies = ["DOGE", "ETH", "BTC", "LTC"];
+  let cacheCurrencies = ["DOGE", "ETH", "BTC", "LTC", "XRP"];
   let supported = {};
   let supportedAliases = {};
   let prices = {};
@@ -82,23 +82,28 @@ export default function(robot: Robot) {
   }
 
   flashBriefing("/dogecoin/flashbriefing", () => {
-    let pricePer = (prices["doge"] * 10000).toFixed(2);
+    let pricePer = (Number(prices["doge"]) * 10000).toFixed(2);
     return `The current dogecoin price is $${pricePer} per ten thousand. Wow. Much price.`;
   });
 
   flashBriefing("/ethereum/flashbriefing", () => {
-    let pricePer = prices["eth"].toFixed(2);
+    let pricePer = Number(prices["eth"]).toFixed(2);
     return `The current ethereum price is $${pricePer}.`;
   });
 
   flashBriefing("/bitcoin/flashbriefing", () => {
-    let pricePer = prices["btc"].toFixed(2);
+    let pricePer = Number(prices["btc"]).toFixed(2);
     return `The current bitcoin price is $${pricePer}. To the mooooon!`;
   });
 
   flashBriefing("/litecoin/flashbriefing", () => {
-    let pricePer = prices["ltc"].toFixed(2);
+    let pricePer = Number(prices["ltc"]).toFixed(2);
     return `The current litecoin price is $${pricePer}.`;
+  });
+
+  flashBriefing("/litecoin/flashbriefing", () => {
+    let pricePer = Number(prices["xrp"]).toFixed(2);
+    return `The current ripple price is $${pricePer}.`;
   });
 
   robot.respond("{:WORD} price", {}, async (res: Response) => {
@@ -107,6 +112,10 @@ export default function(robot: Robot) {
     if (!ticker) {
       let tickerSymbol = supportedAliases[symbol];
       ticker = supported[tickerSymbol];
+    }
+
+    if (!ticker) {
+      return res.reply(`sorry! ${symbol} isn't supported yet`);
     }
 
     let p = prices[ticker.code];
