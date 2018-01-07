@@ -347,6 +347,7 @@ export default class Robot extends EventEmitter {
     }
   }
 
+  // TODO: add aliases like "hourly, minutely, daily"
   cron(name: string, schedule: string, callback: EmptyCallback) {
     this.logger.info(`Adding cronjob ${name}, running at: ${schedule}`);
     let job: any;
