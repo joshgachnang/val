@@ -42,12 +42,12 @@ export default function(robot: Robot) {
   // `hear` will trigger any time says the phrase. The trigger can be a regex, string, or a string
   // with slots.
   robot.hear(/hello/, {}, (res: Response) => {
-    res.send(res.envelope, "Hello there!");
+    res.send("Hello there!");
   });
 
   // `respond` will only trigger when someone messages the bot, e.g. in a private message or by
   // saying something like "@BOTNAME hello".
   robot.respond("{hello|hi} {there|}", {}, (res: Response) => {
-    res.reply(res.envelope, res.envelope.user, "Why hello!");
+    res.reply("Why hello!");
   });
 }
