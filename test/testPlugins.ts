@@ -72,7 +72,7 @@ class EchoTest extends PluginTestSuite {
 @suite
 class AsyncPluginInitTest extends PluginTestSuite {
   @test
-  asynchPlugin(done) {
+  asyncPlugin(done) {
     let config = new Config();
     config.set("EXPRESS_BIND_PORT", "8081");
     config.set("BOT_NAME", "k2so");
@@ -82,7 +82,7 @@ class AsyncPluginInitTest extends PluginTestSuite {
     assert.equal(Object.keys(this.robot.plugins).length, 0);
     let promise = this.robot.init();
     assert.equal(Object.keys(this.robot.plugins).length, 0);
-    return promise.then(() => {
+    promise.then(() => {
       assert.equal(Object.keys(this.robot.plugins).length, 1);
       done();
     });
