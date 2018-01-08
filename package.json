@@ -14,7 +14,7 @@
     "start": "node dist/server.js",
     "test": "npm run test:lint && npm run build && npm run test:mocha",
     "test:lint": "node node_modules/prettier/bin/prettier.js --list-different \"**/*.ts\"",
-    "test:mocha": "mocha --timeout 200 dist/test/*.js",
+    "test:mocha": "mocha --timeout 200 --exit dist/test/*.js",
     "watch": "concurrently --kill-others 'npm run watch:typescript' 'npm run watch:node'",
     "watch:node": "nodemon dist/server.js",
     "watch:typescript": "tsc -w"
