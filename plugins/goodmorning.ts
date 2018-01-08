@@ -29,7 +29,7 @@ function friendlySummary(data) {
     case "rain":
     case "snow":
     case "sleet":
-      summary = `with a ${data.precipProbability * 100} chance of ${data.icon}`;
+      summary = `with a ${data.precipProbability * 100}% chance of ${data.icon}`;
       break;
     case "wind":
       summary = "and windy";
@@ -120,4 +120,6 @@ export default function(robot: Robot) {
     let text = await getGoodMorning();
     robot.adapters["Slack"].sendToName("josh", `Good morning! ${text}`);
   });
+
+  robot.briefing("weather", getGoodMorning);
 }
