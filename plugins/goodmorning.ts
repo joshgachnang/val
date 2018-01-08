@@ -120,6 +120,4 @@ export default function(robot: Robot) {
     let text = await getGoodMorning();
     robot.adapters["Slack"].sendToName("josh", `Good morning! ${text}`);
   });
-
-  robot.briefing("weather", getGoodMorning);
 }
