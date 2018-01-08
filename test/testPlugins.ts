@@ -75,7 +75,7 @@ class EchoTest extends PluginTestSuite {
 @suite
 class AsyncPluginInitTest extends PluginTestSuite {
   @test
-  asyncPlugin(done) {
+  asyncPlugin() {
     let config = new Config();
     config.set("EXPRESS_BIND_PORT", "8081");
     config.set("BOT_NAME", "k2so");
@@ -85,26 +85,25 @@ class AsyncPluginInitTest extends PluginTestSuite {
     assert.equal(Object.keys(this.robot.plugins).length, 0);
     let promise = this.robot.init();
     assert.equal(Object.keys(this.robot.plugins).length, 0);
-    promise.then(() => {
+    return promise.then(() => {
       assert.equal(Object.keys(this.robot.plugins).length, 1);
-      done();
     });
   }
 }
 
-// @suite
-// class FailedPluginInitTest extends PluginTestSuite {
-//   @test
-//   fail(done) {
-//     let config = new Config();
-//     config.set("EXPRESS_BIND_PORT", "8081");
-//     config.set("BOT_NAME", "k2so");
-//     config.set("PLUGINS", ["./test/failPlugin"]);
-//     config.set("ADAPTERS", ["./test/fakeAdapter"]);
-//     this.robot = new Robot(config);
-//     this.robot
-//       .init()
-//       .then(() => {})
-//       .catch((e) => done());
-//   }
-// }
+@suite
+class FailedPluginInitTest extends PluginTestSuite {
+  @test
+  fail(done) {
+    let config = new Config();
+    config.set("EXPRESS_BIND_PORT", "8081");
+    config.set("BOT_NAME", "k2so");
+    config.set("PLUGINS", ["./test/failPlugin"]);
+    config.set("ADAPTERS", ["./test/fakeAdapter"]);
+    this.robot = new Robot(config);
+    this.robot
+      .init()
+      .then(() => {})
+      .catch((e) => done());
+  }
+}
