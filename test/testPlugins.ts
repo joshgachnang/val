@@ -92,19 +92,19 @@ class AsyncPluginInitTest extends PluginTestSuite {
   }
 }
 
-@suite
-class FailedPluginInitTest extends PluginTestSuite {
-  @test
-  fail(done) {
-    let config = new Config();
-    config.set("EXPRESS_BIND_PORT", "8081");
-    config.set("BOT_NAME", "k2so");
-    config.set("PLUGINS", ["./test/failPlugin"]);
-    config.set("ADAPTERS", ["./test/fakeAdapter"]);
-    this.robot = new Robot(config);
-    this.robot
-      .init()
-      .then(() => {})
-      .catch((e) => done());
-  }
+// @suite
+// class FailedPluginInitTest extends PluginTestSuite {
+//   @test
+//   fail(done) {
+//     let config = new Config();
+//     config.set("EXPRESS_BIND_PORT", "8081");
+//     config.set("BOT_NAME", "k2so");
+//     config.set("PLUGINS", ["./test/failPlugin"]);
+//     config.set("ADAPTERS", ["./test/fakeAdapter"]);
+//     this.robot = new Robot(config);
+//     this.robot
+//       .init()
+//       .then(() => {})
+//       .catch((e) => done());
+//   }
 }
