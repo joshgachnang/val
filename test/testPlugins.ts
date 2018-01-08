@@ -1,5 +1,6 @@
 import {assert} from "chai";
 import {only, skip, slow, suite, test, timeout} from "mocha-typescript";
+import * as winston from "winston";
 
 import Config from "../config";
 import FakeRobot from "./fakeRobot";
@@ -20,11 +21,13 @@ export class PluginTestSuite {
 
     let robot = new Robot(config);
     await robot.init();
+    winston.debug("[test] created fake robot");
     return robot;
   }
 
   after() {
     if (this.robot) {
+      winston.debug("[test] shutting down fake robot");
       this.robot.shutdown();
     }
   }
@@ -98,8 +101,8 @@ class FailedPluginInitTest extends PluginTestSuite {
     config.set("BOT_NAME", "k2so");
     config.set("PLUGINS", ["./test/failPlugin"]);
     config.set("ADAPTERS", ["./test/fakeAdapter"]);
-    let robot = new Robot(config);
-    robot
+    this.robot = new Robot(config);
+    this.robot
       .init()
       .then(() => {})
       .catch((e) => done());
