@@ -107,4 +107,4 @@ class AsyncPluginInitTest extends PluginTestSuite {
 //       .then(() => {})
 //       .catch((e) => done());
 //   }
-}
+// }
