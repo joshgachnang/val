@@ -53,7 +53,9 @@ export default class User {
 
   constructor(data: any) {
     if (!data.id) {
-      this.id = Math.random().toString(36).slice(2);
+      this.id = Math.random()
+        .toString(36)
+        .slice(2);
     } else {
       this.id = data.id;
     }

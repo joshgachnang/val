@@ -21,34 +21,58 @@ import Robot from "../robot";
 const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
 const AUTH_TOKEN_KEY = "googleAuthToken";
 const CALENDAR_KEY = "googleCalendar";
+const CLIENT_SECRET_KEY = "googleCalendarClientSecret";
 
 export default function(robot: Robot) {
+  let oauth2Client;
   let redirectResponse: Response;
-  let credentials = getClientSecret();
-  let clientSecret = credentials.installed.client_secret;
-  let clientId = credentials.installed.client_id;
-  // let redirectUrl = robot.config.baseUrl + '/calendars/oauth_redirect';
-  let redirectUrl = credentials.installed.redirect_uris[0];
-  let auth = new googleAuth();
-  let oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+  let credentials = robot.brain.get(CLIENT_SECRET_KEY);
+  if (credentials) {
+    setupCredentials(credentials);
+  }
+
+  function setupCredentials(credentials) {
+    let clientSecret = credentials.installed.client_secret;
+    let clientId = credentials.installed.client_id;
+    let redirectUrl = credentials.installed.redirect_uris[0];
+    let auth = new googleAuth();
+    oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+  }
 
   robot.router.get("/calendars", (req, res) => {
     try {
       authorize(() => {
-        listEvents(events => {
-          res.json({ events: events });
+        listEvents((events) => {
+          res.json({events: events});
         });
       });
     } catch (e) {
-      res.status(400).send({ error: "No calendars configured" });
+      res.status(400).send({error: "No calendars configured"});
     }
   });
 
-  robot.hear(/authorize google calendar/i, {}, (response: Response) => {
+  robot.respond(/add google calendar client secret (.*)/i, {}, (response: Response) => {
+    let match = response.match[1];
+    // Remove linkifying
+    match = match
+      .replace(/\<.*\|/g, "")
+      .replace(/</g, "")
+      .replace(/>/g, "");
+    let clientSecret = JSON.parse(match);
+    robot.brain.set(CLIENT_SECRET_KEY, clientSecret);
+    setupCredentials(clientSecret);
+    requestAuthorize(response);
+  });
+
+  function requestAuthorize(response) {
     redirectResponse = response;
     getNewToken(response);
-    response.reply("Please type the 'authkey' then the provided auth key");
-  });
+    setTimeout(() => {
+      response.reply("Please type the 'authkey' then the provided auth key");
+    }, 1000);
+  }
+
+  robot.hear(/authorize google calendar/i, {}, requestAuthorize);
 
   // TODO: add these as part of a conversation
   robot.hear(/authkey\s+([A-Za-z0-9/_-]+)/i, {}, (response: Response) => {
@@ -57,8 +81,8 @@ export default function(robot: Robot) {
     });
   });
 
-  robot.hear(/What is on my agenda/i, {}, (response: Response) => {
-    getAgenda(agenda => {
+  robot.respond(`{what is|whats|what's} {on|} my agenda`, {}, (response: Response) => {
+    getAgenda((agenda) => {
       if (!response) {
         // TODO: What the fuck.
         return;
@@ -68,14 +92,19 @@ export default function(robot: Robot) {
   });
 
   robot.router.get("/alexa/flashBreifing", (req, res) => {
-    getAgenda(agenda => {
+    getAgenda((agenda) => {
       return res.json([
         {
-          uid: `id1${moment().utcOffset(0).startOf("hour").unix()}`,
-          updateDate: moment().utcOffset(0).format("YYYY-MM-DD[T]HH:00:00.[0Z]"),
+          uid: `id1${moment()
+            .utcOffset(0)
+            .startOf("hour")
+            .unix()}`,
+          updateDate: moment()
+            .utcOffset(0)
+            .format("YYYY-MM-DD[T]HH:00:00.[0Z]"),
           titleText: "Val agenda",
           mainText: agenda,
-        }
+        },
       ]);
     });
   });
@@ -84,7 +113,7 @@ export default function(robot: Robot) {
     let today = moment();
     try {
       authorize(() => {
-        listEvents(events => {
+        listEvents((events) => {
           let dayEvents = "";
           let timeEvents = "";
           let res = "";
@@ -135,7 +164,7 @@ export default function(robot: Robot) {
   if (robot.adapters.AlexaAdapter) {
     let alexaAdapter = robot.adapters.AlexaAdapter as AlexaAdapter;
     let utterances = ["What is on my agenda"];
-    alexaAdapter.registerIntent("GetAgenda", utterances, slots => "What is on my agenda");
+    alexaAdapter.registerIntent("GetAgenda", utterances, (slots) => "What is on my agenda");
   }
 
   /**
@@ -152,12 +181,12 @@ export default function(robot: Robot) {
       // Authorize all the tokens
       tokens.forEach(function(token) {
         oauth2Client.credentials = token;
-        callback();
       });
+      callback();
     } else {
       robot.logger.warn(
         "[googleCalendar] No calendars configured. Chat with the bot to authorize Google " +
-          "Calendar",
+          "Calendar"
       );
       throw new Error("No calendars configured");
     }
@@ -205,10 +234,6 @@ export default function(robot: Robot) {
     robot.brain.set(AUTH_TOKEN_KEY, existingTokens);
   }
 
-  function getClientSecret() {
-    return JSON.parse(fs.readFileSync("client_secret.json", "utf-8"));
-  }
-
   /**
    * Lists the next 10 events on the user's primary calendar.
    *
@@ -222,9 +247,8 @@ export default function(robot: Robot) {
     cacheCalendars();
 
     let calendars = robot.brain.get("calendarList");
-
     for (let calendarName of config.get("CALENDAR_NAMES")) {
-      let calendarIds = calendars.filter(c => {
+      let calendarIds = calendars.filter((c) => {
         return c.summary === calendarName;
       });
 
@@ -235,7 +259,10 @@ was ${calendarIds.length}. Not fetching.`);
         continue;
       }
       let min = moment.tz("America/Chicago").toISOString();
-      let max = moment.tz("America/Chicago").endOf("day").toISOString();
+      let max = moment
+        .tz("America/Chicago")
+        .endOf("day")
+        .toISOString();
       robot.logger.debug(`[googleCalendar] Getting calendar events from ${min} to ${max}`);
       calendar.events.list(
         {
@@ -262,7 +289,7 @@ was ${calendarIds.length}. Not fetching.`);
             events = [].concat.apply([], events);
             callback(events);
           }
-        },
+        }
       );
     }
   }
@@ -279,13 +306,13 @@ was ${calendarIds.length}. Not fetching.`);
           return;
         }
         callback(response);
-      },
+      }
     );
   }
 
   function cacheCalendars() {
     // TODO move this to a scheduled background worker rather than startup
-    listCalendars(calendars => {
+    listCalendars((calendars) => {
       if (calendars) {
         // TODO could use calendars.etag to not fetch more often than necessary
         robot.brain.set("calendarList", calendars.items);

@@ -20,7 +20,7 @@ export function extensionSetup() {
     return Math.abs(a);
   }
 
-  Number.prototype.toFraction = function (): string {
+  Number.prototype.toFraction = function(): string {
     let n = this;
     // console.log("N", n);
     let prec = 64; // smallest fraction is 1/64
@@ -37,7 +37,7 @@ export function extensionSetup() {
     let g = gcd(num, den);
 
     if (den / g === 1) {
-      return String(i + (num / g));
+      return String(i + num / g);
     }
 
     let out = "";
@@ -57,7 +57,7 @@ export function extensionSetup() {
     let num = parseInt(fraction.split("/")[0]);
     let den = parseInt(fraction.split("/")[1]);
     if (num && den) {
-      return wholeNumber + (num / den);
+      return wholeNumber + num / den;
     } else {
       return wholeNumber;
     }
@@ -108,8 +108,6 @@ export function extensionSetup() {
   };
 
   Array.prototype.flatten = function(): any[] {
-    return this.reduce(
-      (a, b) => a.concat(Array.isArray(b) ? this.flatten(b) : b)
-    );
+    return this.reduce((a, b) => a.concat(Array.isArray(b) ? this.flatten(b) : b));
   };
 }

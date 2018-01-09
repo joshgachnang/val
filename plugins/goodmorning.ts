@@ -12,7 +12,7 @@ import Robot from "../robot";
 async function fetchForecast(robot: Robot, lat: string, lng: string, key: string) {
   let DARKSKY_URL = `https://api.darksky.net/forecast/${key}/${lat},${lng}`;
   try {
-    return await robot.request({ url: DARKSKY_URL, json: true });
+    return await robot.request({url: DARKSKY_URL, json: true});
   } catch (e) {
     robot.logger.error("[goodmorning] Error fetching forecast", e);
     return {};
@@ -22,44 +22,48 @@ async function fetchForecast(robot: Robot, lat: string, lng: string, key: string
 function friendlySummary(data) {
   let summary;
   switch (data.icon) {
-  case "clear-day":
-  case "clear-night":
-    summary = "with clear skies";
-    break;
-  case "rain":
-  case "snow":
-  case "sleet":
-    summary = `with a ${data.precipProbability * 100} chance of ${data.icon}`;
-    break;
-  case "wind":
-    summary = "and windy";
-    break;
-  case "fog":
-    summary = "and foggy";
-    break;
-  case "cloudy":
-    summary = "and cloudy";
-    break;
-  case "partly-cloudy-day":
-  case "partly-cloudy-night":
-    summary = "with some clouds";
-    break;
-  case "hail":
-    summary = "and hailing";
-    break;
-  case "thunderstorm":
-    summary = "with thunderstorms";
-    break;
-  case "tornado":
-    summary = "with a tornado! Uh Oh!";
-    break;
+    case "clear-day":
+    case "clear-night":
+      summary = "with clear skies";
+      break;
+    case "rain":
+    case "snow":
+    case "sleet":
+      summary = `with a ${data.precipProbability * 100}% chance of ${data.icon}`;
+      break;
+    case "wind":
+      summary = "and windy";
+      break;
+    case "fog":
+      summary = "and foggy";
+      break;
+    case "cloudy":
+      summary = "and cloudy";
+      break;
+    case "partly-cloudy-day":
+    case "partly-cloudy-night":
+      summary = "with some clouds";
+      break;
+    case "hail":
+      summary = "and hailing";
+      break;
+    case "thunderstorm":
+      summary = "with thunderstorms";
+      break;
+    case "tornado":
+      summary = "with a tornado! Uh Oh!";
+      break;
   }
   return `${Math.floor(data.temperature)} ${summary}`;
 }
 
 export default function(robot: Robot) {
   async function getForecast() {
-    if (!robot.config.get("LATITUDE") || !robot.config.get("LONGITUDE") || !robot.config.get("DARKSKY_KEY")) {
+    if (
+      !robot.config.get("LATITUDE") ||
+      !robot.config.get("LONGITUDE") ||
+      !robot.config.get("DARKSKY_KEY")
+    ) {
       robot.logger.warn(`[ForecastIO] LATITUDE, LONGITUDE, and DARKSKY_KEY config keys
           required, not configuring`);
       return {};
@@ -100,14 +104,14 @@ export default function(robot: Robot) {
     "/goodmorning",
     robot.expressWrap(async (req) => {
       return await getGoodMorning();
-    }),
+    })
   );
 
   robot.router.post(
     "/goodmorning",
     robot.expressWrap(async (req) => {
       return "ok";
-    }),
+    })
   );
 
   // TODO let this be configurable per user

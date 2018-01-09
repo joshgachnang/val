@@ -1,4 +1,4 @@
-import { EventEmitter } from "events";
+import {EventEmitter} from "events";
 import * as _ from "lodash";
 import Robot from "./robot";
 import User from "./user";

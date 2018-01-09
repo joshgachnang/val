@@ -1,6 +1,6 @@
 "use strict";
 
-import { EventEmitter } from "events";
+import {EventEmitter} from "events";
 import Robot from "./robot";
 
 export default class Adapter extends EventEmitter {

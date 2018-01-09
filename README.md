@@ -1,5 +1,4 @@
-Val
-----
+## Val
 
 [](https://circleci.com/gh/pcsforeducation/val.svg?style=shield&circle-token=:circle-token)
 [![styled with
@@ -40,6 +39,7 @@ Both take one of three types of triggers: a regex, an exact string match, or a s
     });
 
 #### Choice slots
+
 You can present a list of possible strings to match by separating them with a "|" inside the slot syntax. If you add a "|" as the last character, the match will be optional.
 
     // This will match "hello there", "hi there", "hello", and "hi"
@@ -48,6 +48,7 @@ You can present a list of possible strings to match by separating them with a "|
     });
 
 #### Typed slots
+
 You can also match a few provided slot types:
 
     // This will match "what is the price of dogecoin" or "what is the price of BTC"
@@ -73,7 +74,6 @@ them handle async/await correctly called `expressWrap()`. Simply wrap the
 callback function you give to the router in this wrapper and you can use
 async/await as you'd expect.
 
-```
     async function hello() {
       return 'hello world~';
     }
@@ -81,4 +81,17 @@ async/await as you'd expect.
     robot.router.get('/hello', robot.expressWrap(async (req) => {
       return await hello();
     }));
-```
+
+## Cron
+
+`Robot` exposes a method `cron()` which allows you to have a function
+executed on a schedule. This is easier to use than something like
+`setTimeout`, because you can specify at which time (wall time, rather
+than in X milliseconds) you want your function executed at. For example:
+
+    // The function takes a name, a cron schedule, and callback.
+    robot.cron('6am logging', '0 6 * * *', () => {console.log("It is 6am!")});
+
+In this example, the console.log will happen at 6am every day. See [cron syntax](http://www.nncron.ru/help/EN/working/cron-format.htm) for more information on specifying a schedule.
+
+The timezone will be whatever is specified via CRON_TIMEZONE in your config file or environment variables.

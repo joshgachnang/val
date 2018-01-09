@@ -1,7 +1,7 @@
 const HTTP = require("http");
 const QS = require("querystring");
 import Adapter from "../adapter";
-import { TextMessage } from "../message";
+import {TextMessage} from "../message";
 import Robot from "../robot";
 
 export default class Twilio extends Adapter {
@@ -17,7 +17,7 @@ export default class Twilio extends Adapter {
       this.fromNumber = robot.envKey("TWILIO_NUMBER");
     } catch (e) {
       this.robot.logger.error(
-        "[twilio] one of TWILIO_SID, TWILIO_TOKEN, TWILIO_NUMBER is undefined, not running the twilio adapter.",
+        "[twilio] one of TWILIO_SID, TWILIO_TOKEN, TWILIO_NUMBER is undefined, not running the twilio adapter."
       );
     }
     this.robot = robot;
@@ -38,7 +38,7 @@ export default class Twilio extends Adapter {
   }
 
   reply(envelope, ...strings) {
-    return strings.map(str => this.send(envelope.user, str));
+    return strings.map((str) => this.send(envelope.user, str));
   }
 
   public respond(regex, callback) {
@@ -55,7 +55,7 @@ export default class Twilio extends Adapter {
         this.receive_sms(payload.Body, payload.From);
       }
 
-      response.writeHead(200, { "Content-Type": "text/plain" });
+      response.writeHead(200, {"Content-Type": "text/plain"});
       return response.end();
     });
   }
@@ -82,7 +82,7 @@ export default class Twilio extends Adapter {
   public send_sms(message, to, callback) {
     this.robot.logger.debug("SENDING SMS", this.sid, this.token, this.fromNumber);
     let auth = new Buffer(this.sid + ":" + this.token).toString("base64");
-    let data = QS.stringify({ From: this.fromNumber, To: to, Body: message });
+    let data = QS.stringify({From: this.fromNumber, To: to, Body: message});
     this.robot.logger.debug("DATA", data);
     return this.robot
       .http("https://api.twilio.com")

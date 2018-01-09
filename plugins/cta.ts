@@ -24,12 +24,12 @@ export default function(robot: Robot) {
     return;
   }
 
-  cta.init({ trainApiKey: robot.config.get("CTA_TRAIN_API_KEY") });
+  cta.init({trainApiKey: robot.config.get("CTA_TRAIN_API_KEY")});
   setInterval(updateTrainSchedule, 60 * 1000);
   updateTrainSchedule();
 
   robot.router.get("/cta", (req, res) => {
-    res.json({ trains: trainArrivals });
+    res.json({trains: trainArrivals});
   });
 
   function updateTrainSchedule() {

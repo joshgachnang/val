@@ -1,4 +1,4 @@
-import { Message } from "./message";
+import {Message} from "./message";
 import Room from "./room";
 import User from "./user";
 
@@ -12,7 +12,7 @@ export default class Envelope {
     if (!room || !user || !message || !adapterName) {
       throw new Error(
         `Envelope requires all fields: room: ${room}
-         user: ${user} message: ${message} adapterName: ${adapterName}`,
+         user: ${user} message: ${message} adapterName: ${adapterName}`
       );
     }
     this.room = room;

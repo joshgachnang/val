@@ -1,6 +1,6 @@
 "use strict";
 
-import { TextMessage } from "./message";
+import {TextMessage} from "./message";
 import Response from "./response";
 import Robot from "./robot";
 
@@ -43,7 +43,7 @@ export class Listener {
       if (this.regex) {
         this.robot.logger.debug(
           `[listener] Message '${message.text}' matched regex ${this.regex};` +
-            `listener.options = ${this.options}`,
+            `listener.options = ${this.options}`
         );
       }
 
@@ -85,22 +85,23 @@ class SlotMatcher {
     WORD: "(\\w+)",
     MULTIWORD: "([\\w\\s]+)",
     NUMBER: "(\\d+)",
-    BOT_NAME: (text: string) => `${this.robot.config.get("BOT_NAME")}:?`
+    BOT_NAME: (text: string) => `${this.robot.config.get("BOT_NAME")}:?`,
     // URL: (text: string) => {return false;},
   };
 
   constructor(robot: Robot, text: string) {
     this.robot = robot;
     this.buildRegexes(text);
+    console.log(`Adding hear listener: ${this.regex}`);
   }
 
   private stringPaddedRegex(text: string) {
-    return `\\s*${text}\\s*`;
+    return `\\b${text}\\b`;
   }
 
   // Match strings of the type "{opt1|opt2|opt3...}" and replace the slot with each option
   private orMatches(text: string): string {
-    let orRegex = new RegExp("{([\\w\\d\\s\\|]+)}", "g");
+    let orRegex = new RegExp("{(['\\w\\d\\s\\|]+)}", "g");
 
     let matches = [];
     let orMatch = orRegex.exec(text);
@@ -123,7 +124,7 @@ class SlotMatcher {
           sub = sub + " ";
         }
 
-        text = text.replace(sub, `[${restOfMatch}|\\s*]`);
+        text = text.replace(sub, `\\s*(${restOfMatch})\?\\s*`);
       } else {
         text = text.replace(`{${match[1]}}`, `(${match[1]})`);
       }

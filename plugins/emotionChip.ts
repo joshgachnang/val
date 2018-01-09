@@ -14,11 +14,7 @@ import Robot from "../robot";
 
 function hello(robot: Robot) {
   const HELLO_CATEGORY = "emotionChipHello";
-  robot.brain.registerDefaultsForCateogry(HELLO_CATEGORY, [
-    "hello!",
-    "hi :)",
-    "how's it going?",
-  ]);
+  robot.brain.registerDefaultsForCateogry(HELLO_CATEGORY, ["hello!", "hi :)", "how's it going?"]);
 
   robot.respond(/hello/i, {}, (res: Response) => {
     let item = robot.brain.getRandomItemFromCategory(HELLO_CATEGORY);

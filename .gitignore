@@ -1,15 +1,18 @@
-bower_components/
+# Package stuff
 node_modules/
-*.swp
-npm-debug.log
-.idea/
-build/
-public/css/
-public/js/
-uploads/
 npm-debug.log*
-prodenvfile
+
+# Editor cruft
+*.swp
+.idea/
+
+# Build artifacts
 dist/
+
+# We write typescript here!
 *.js
+
+# Local configs
+prodenvfile
 configuration.json
 configuration.prd.json

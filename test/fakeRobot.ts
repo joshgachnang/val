@@ -1,6 +1,6 @@
 import Config from "../config";
 import Envelope from "../envelope";
-import { default as Robot, ResponseCallback } from "../robot";
+import {default as Robot, ResponseCallback} from "../robot";
 import User from "../user";
 
 export default class FakeRobot extends Robot {

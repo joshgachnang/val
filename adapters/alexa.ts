@@ -3,7 +3,7 @@ const app = new alexa.app("val");
 
 import Adapter from "../adapter";
 import Envelope from "../envelope";
-import { TextMessage } from "../message";
+import {TextMessage} from "../message";
 import Room from "../room";
 import User from "../user";
 
@@ -83,14 +83,14 @@ export default class AlexaAdapter extends Adapter {
     });
 
     let utterances = ["say the number {1-2|number}"];
-    let slots = { number: "NUMBER" };
+    let slots = {number: "NUMBER"};
     let numberIntent = new AlexaIntent(
       "saynumber",
       utterances,
-      slots => {
+      (slots) => {
         return `you wanted the number ${slots.number}`;
       },
-      slots,
+      slots
     );
     this.intents.push(numberIntent);
 
@@ -110,7 +110,7 @@ export default class AlexaAdapter extends Adapter {
     // Register all the intents and such
 
     for (let intent of this.intents) {
-      let options = { slots: undefined, utterances: intent.utterances };
+      let options = {slots: undefined, utterances: intent.utterances};
       if (intent.slots) {
         options.slots = intent.slots;
       }
@@ -125,7 +125,7 @@ export default class AlexaAdapter extends Adapter {
 
   receivedIntent(req, res, intent) {
     // TODO: save this to the brain when we actually have login
-    let user = new User({ alexa: { id: "josh", name: "josh" } });
+    let user = new User({alexa: {id: "josh", name: "josh"}});
     this.robot.logger.debug("SLOTS", req.data.request.slots);
     let text = intent.getText(req.slots);
     let message = new AlexaMessage(user, req, res, intent, this);

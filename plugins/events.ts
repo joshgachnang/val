@@ -41,7 +41,7 @@ export class Event {
 export default function(robot: Robot) {
   function getEvents(): Event[] {
     let events = robot.brain.get("events") || [];
-    return events.map(e => {
+    return events.map((e) => {
       return new Event(e);
     });
   }
@@ -70,7 +70,7 @@ export default function(robot: Robot) {
   });
 
   robot.router.get("/events", (req, res) => {
-    return res.json({ events: getEvents() });
+    return res.json({events: getEvents()});
   });
 
   function eventsText(hours: number, kind: string): string {
@@ -110,7 +110,10 @@ export default function(robot: Robot) {
   // TODO: this was at 11:45am, figure out why
   robot.cron("weekly email", "00 45 16 * * fri", () => {
     robot.logger.info("[events] Sending standup info");
-    robot.adapters["Slack"].sendToName("josh", "Weekly Email Summary:\n" + eventsText(180, "gitcommit"));
+    robot.adapters["Slack"].sendToName(
+      "josh",
+      "Weekly Email Summary:\n" + eventsText(180, "gitcommit")
+    );
   });
 
   robot.respond(/cals/i, {}, (res: Response) => {

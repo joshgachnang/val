@@ -1,7 +1,7 @@
 import * as fs from "fs";
 
 if (fs.existsSync("./envfile")) {
-  require("dotenv").config({ path: "./envfile" });
+  require("dotenv").config({path: "./envfile"});
 }
 
 // Add source map support in dev
