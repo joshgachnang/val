@@ -125,7 +125,6 @@ export default class Brain extends EventEmitter {
     // Ask each user object if the id is contained in thir user object
     let user: User;
     let users = this.getUsers();
-    // this.robot.logger.debug(`searching for user by id: ${id}`);
     for (let u of users) {
       if (u.containsId(id)) {
         user = u;

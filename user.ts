@@ -91,7 +91,9 @@ export default class User {
 
   // See if any subusers have the same id
   public containsId(id: string) {
-    if (this.slack && this.slack.id === id) {
+    if (this.id === id) {
+      return true;
+    } else if (this.slack && this.slack.id === id) {
       return true;
     } else if (this.twilio && this.twilio.id === id) {
       return true;
