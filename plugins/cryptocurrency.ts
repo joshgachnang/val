@@ -2,11 +2,15 @@
 //   List cryptocurrency prices
 // Commands:
 //   hubot CRYPTO_TICKER_SYMBOL price - displays the current price for the crypto ticker (e.g. BTC, LTC, bitcoin, etc)
+//   hubot add NUMBER CRYPTO_TICKER_SYMBOL to portfolio - add a new currency in NUMBER amount to your portfolio (or update existing)
+//   hubot portfolio - lists portfolio and prices
 //
 import * as moment from "moment-timezone";
 import {setInterval} from "timers";
 import Response from "../response";
 import Robot from "../robot";
+
+const PORTFOLIO_KEY = "cryptocurrencyPortfolio";
 
 // Standalone alexa app for dogecoin
 export default function(robot: Robot) {
@@ -29,7 +33,7 @@ export default function(robot: Robot) {
     try {
       res = JSON.parse(body);
     } catch (e) {
-      robot.logger.warn(`[cryptocurrency] couldn't fetch supported currencies: ${e}`);
+      robot.logger.warn(`[cryptocurrency] couldn't fetch supported currencies: ${e}, ${body}`);
       return;
     }
     for (let row of res.rows) {
@@ -38,6 +42,7 @@ export default function(robot: Robot) {
     }
     robot.logger.debug(`[cryptocurrency] updated ${res.rows.length} supported currencies`);
   }
+
   async function fetchPrices() {
     let promises = [];
     for (let curr of cacheCurrencies) {
@@ -106,13 +111,18 @@ export default function(robot: Robot) {
     return `The current ripple price is $${pricePer}.`;
   });
 
-  robot.respond("{:WORD} price", {}, async (res: Response) => {
-    let symbol = res.match[1].toUpperCase();
+  function getTicker(symbol) {
     let ticker = supported[symbol];
     if (!ticker) {
       let tickerSymbol = supportedAliases[symbol];
       ticker = supported[tickerSymbol];
     }
+    return ticker;
+  }
+
+  robot.respond("{:WORD} price", {}, async (res: Response) => {
+    let symbol = res.match[1].toUpperCase();
+    let ticker = getTicker(symbol);
 
     if (!ticker) {
       return res.reply(`sorry! ${symbol} isn't supported yet`);
@@ -149,4 +159,61 @@ export default function(robot: Robot) {
       `at $${ltc}`
     );
   });
+
+  async function setPortfolio(res: Response) {
+    let userId = res.envelope.user.id;
+    let portfolio = robot.brain.getForUser(PORTFOLIO_KEY, userId) || {};
+    let number = Number(res.match[1]);
+    let symbol = res.match[2];
+    let ticker = getTicker(symbol);
+
+    if (!ticker) {
+      return res.reply(`sorry! ${symbol} isn't supported yet`);
+    }
+
+    portfolio[ticker.code] = number;
+    robot.brain.setForUser(PORTFOLIO_KEY, portfolio, res.envelope.user.id);
+    console.log("Current portfolio for ", userId, portfolio);
+    showPortolio(res);
+  }
+
+  async function updatePortfolio(userId) {}
+
+  async function getPortfolio(userId) {
+    let portfolio = robot.brain.getForUser(PORTFOLIO_KEY, userId) || {};
+    await fetchPrices();
+
+    let total = 0;
+    let output = "Current Portfolio:\n";
+    let priceOutput = [];
+    let prices = await Promise.all(
+      Object.keys(portfolio).map(async (key) => {
+        let p = await fetchTicker(key);
+        let pricePer = Number(JSON.parse(p).ticker.price);
+        total += pricePer * portfolio[key];
+        priceOutput.push(
+          `${portfolio[key].toFixed(4)} ${key}: ${pricePer.toFixed(2)} each, ${(
+            pricePer * portfolio[key]
+          ).toFixed(2)} total`
+        );
+      })
+    );
+    output += priceOutput.sort().join("\n");
+
+    for (let key of Object.keys(portfolio)) {
+    }
+    output += `\nTotal value: ${total.toFixed(2)}`;
+    return output;
+  }
+
+  async function showPortolio(res: Response) {
+    let output = await getPortfolio(res.envelope.user.id);
+    res.send(output);
+  }
+
+  robot.respond("add {:NUMBER} {:WORD} to portfolio", {}, setPortfolio);
+
+  robot.respond("portfolio", {}, async (res: Response) => showPortolio);
+
+  robot.briefing("crypto", (userId: string) => getPortfolio(userId));
 }
