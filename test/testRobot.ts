@@ -167,6 +167,16 @@ class RobotTestSuite {
   }
 
   @test
+  hearNumberDecimalSlot(done) {
+    this.hearRespondTest(
+      false,
+      "i want {:NUMBER} kamikaze shots",
+      "i want 1.5 kamikaze shots, please",
+      done
+    );
+  }
+
+  @test
   hearWordSlot(done) {
     this.hearRespondTest(
       false,
