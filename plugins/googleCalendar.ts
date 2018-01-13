@@ -72,7 +72,7 @@ export default function(robot: Robot) {
     }, 1000);
   }
 
-  robot.hear(/authorize google calendar/i, {}, requestAuthorize);
+  robot.hear("authorize google calendar", {}, requestAuthorize);
 
   // TODO: add these as part of a conversation
   robot.hear(/authkey\s+([A-Za-z0-9/_-]+)/i, {}, (response: Response) => {
@@ -185,10 +185,10 @@ export default function(robot: Robot) {
       callback();
     } else {
       robot.logger.warn(
-        "[googleCalendar] No calendars configured. Chat with the bot to authorize Google " +
+        "[googleCalendar] No calendars authorized. Chat with the bot to authorize Google " +
           "Calendar"
       );
-      throw new Error("No calendars configured");
+      throw new Error("No calendars authorized");
     }
   }
 
@@ -319,4 +319,12 @@ was ${calendarIds.length}. Not fetching.`);
       }
     });
   }
+
+  robot.briefing("agenda", () => {
+    return new Promise((resolve) => {
+      getAgenda((agenda) => {
+        resolve(agenda);
+      });
+    });
+  });
 }
