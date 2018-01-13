@@ -10,12 +10,16 @@ export default class Response {
   message: Message;
   match: any;
   envelope: Envelope;
+  userId: string;
 
   constructor(bot, message, match, adapter) {
     this.bot = bot;
     this.message = message;
     this.match = match;
     this.envelope = new Envelope(message.room, message.user, message, adapter.adapterName);
+    if (message && message.user && message.user.id) {
+      this.userId = message.user.id;
+    }
   }
 
   // Actually takes a list of 1 to n arguments
