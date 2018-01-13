@@ -16,6 +16,8 @@
     "./plugins/mongo-brain",
     "./plugins/admin",
     "./plugins/emotionChip",
+    "./plugins/briefing",
+
     "./plugins/forecastio",
     "./plugins/inspirationalQuote",
     "./plugins/cta",

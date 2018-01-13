@@ -49,6 +49,10 @@ export interface EmptyCallback {
   (): void;
 }
 
+export interface BriefingCallback {
+  (userId: string): Promise<string>;
+}
+
 export default class Robot extends EventEmitter {
   name: string;
   config: Config;
@@ -64,6 +68,7 @@ export default class Robot extends EventEmitter {
   raven: any;
   server: any;
   cronjobs: any[] = [];
+  briefings: any = {}; // name: fn
   private expressServer: any;
 
   constructor(config: Config) {
@@ -364,6 +369,18 @@ export default class Robot extends EventEmitter {
     this.cronjobs.push(job);
   }
 
+  // Briefings happen on a defined schedule per user. You cannot control when the
+  // briefing callback will be called, only what you return.
+  // Return a string to have it included in the briefing, or undefined to have it
+  // skipped. Results will be returned in alphabetical order by the name parameter, so
+  // you can use this to ensure your briefing is near the top (for example, by prepending 0 to your
+  // name.)
+  // The briefings are actually sent out in the briefing plugin.
+  briefing(name: string, callback: BriefingCallback) {
+    this.logger.info(`Adding briefing ${name}`);
+    this.briefings[name] = callback;
+  }
+
   // Get a key from the environment, or throw an error if it's not defined
   envKey(key) {
     let value = process.env[key];
@@ -481,7 +498,9 @@ export default class Robot extends EventEmitter {
 
   shutdown() {
     this.emit("shutdown");
-    this.expressServer.close();
+    if (this.expressServer) {
+      this.expressServer.close();
+    }
   }
 
   // filesystemPath: Relative path to the file
