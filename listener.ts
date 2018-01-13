@@ -84,7 +84,7 @@ class SlotMatcher {
   DEFAULT_SLOTS = {
     WORD: "(\\w+)",
     MULTIWORD: "([\\w\\s]+)",
-    NUMBER: "(\\d+)",
+    NUMBER: "([\\d\\.]+)",
     BOT_NAME: (text: string) => `${this.robot.config.get("BOT_NAME")}:?`,
     // URL: (text: string) => {return false;},
   };
