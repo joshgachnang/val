@@ -1,4 +1,3 @@
-"use strict";
 // Description:
 //   Flip the tables
 //
@@ -10,6 +9,7 @@
 //
 // Author:
 //   pcsforeducation
+
 import Response from "../response";
 import Robot from "../robot";
 

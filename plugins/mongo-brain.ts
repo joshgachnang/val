@@ -1,4 +1,3 @@
-"use strict";
 // Description:
 //   val-mongodb-brain
 //   support for MongoDB

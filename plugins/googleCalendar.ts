@@ -1,4 +1,3 @@
-"use strict";
 // Description:
 //   Access your Google calendar
 //
@@ -8,6 +7,7 @@
 //
 // Author:
 //   pcsforeducation
+
 import * as fs from "fs";
 const google = require("googleapis");
 const googleAuth = require("google-auth-library");
@@ -43,7 +43,7 @@ export default function(robot: Robot) {
     try {
       authorize(() => {
         listEvents((events) => {
-          res.json({events: events});
+          res.json({events});
         });
       });
     } catch (e) {
