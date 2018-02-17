@@ -1,10 +1,6 @@
-"use strict";
 // Description:
 //   Make the bot more human. Feel free to disable for maximum efficiency. But this will make the
-//   bot sad.
-//
-// Commands:
-//   hubot hello - the bot replies in a very human manner
+//   bot sad. Commands not listed.
 //
 // Author:
 //   pcsforeducation

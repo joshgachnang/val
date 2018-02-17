@@ -57,6 +57,7 @@ export default class Robot extends EventEmitter {
   name: string;
   config: Config;
   pluginListeners: Array<Listener> = [];
+  help: any = {};
   commands: any;
   errorHandlers: any;
   TextMessage: TextMessage; // tslint:disable-line
@@ -155,9 +156,12 @@ export default class Robot extends EventEmitter {
       }
 
       let filename = require.resolve(plugin);
-      this.parseHelp(filename);
-      // Save the module to the roobt. Some plugins might use this for inter-plugin calls.
-      this.plugins[plugin] = pluginModule;
+      let help = this.parseHelp(filename);
+      let parts = filename.split("/");
+      let pluginName = parts[parts.length - 1].replace(".js", "").replace(".coffee", "");
+      this.help[pluginName] = help;
+      // Save the module to the root. Some plugins might use this for inter-plugin calls.
+      this.plugins[pluginName] = pluginModule;
     }
     this.logger.debug("[Robot] Finished loading plugins");
     this.emit("pluginsInitialized");
@@ -216,32 +220,23 @@ export default class Robot extends EventEmitter {
     return new RegExp("^\\s*[@]*" + name.toLowerCase() + "[:,]?\\s*(?:" + pattern + ")", modifiers);
   }
 
-  parseHelp(path) {
+  parseHelp(path: string) {
     let scriptDocumentation = {};
     let body = readFileSync(path, "utf-8");
     let currentSection = null;
 
     for (let line of body.split("\n")) {
-      // tslint:disable
-      if (line === '"use strict";') {
-        // tslint:enable
-        // Typescript -> JS compilation adds 'use strict'
+      // Check if the line is a comment
+      if (!/^(#|\/\/)\s?/.exec(line)) {
+        currentSection = null;
         continue;
       }
-      // Check for TS outputting a module
-      if (line.trim() === `Object.defineProperty(exports, "__esModule", { value: true });`) {
-        continue;
-      }
-      if (!(line[0] === "#" || line.substr(0, 2) === "//")) {
-        break;
-      }
+
       let cleanedLine = line.replace(/^(#|\/\/)\s?/, "").trim();
-      if (cleanedLine.length === 0) {
+      if (cleanedLine === "") {
         continue;
       }
-      if (cleanedLine.toLowerCase() === "none") {
-        continue;
-      }
+
       let nextSection = cleanedLine
         .toLowerCase()
         .replace(":", "")
@@ -249,21 +244,20 @@ export default class Robot extends EventEmitter {
       if (HUBOT_DOCUMENTATION_SECTIONS.indexOf(nextSection) >= 0) {
         currentSection = nextSection;
         scriptDocumentation[currentSection] = [];
-      } else {
-        if (currentSection) {
-          scriptDocumentation[currentSection].push(cleanedLine.trim());
-          if (currentSection === "commands") {
-            // Support old hubot plugins
-            let command = cleanedLine.replace("@hubot", "@" + this.name).trim();
-            command = command.replace("hubot", "@" + this.name);
-            // New version going forward
-            command = command.replace("@bot", "@" + this.name);
-            command = command.replace("bot", "@" + this.name);
-            this.commands.push(command);
-          }
+      } else if (currentSection) {
+        if (currentSection === "commands") {
+          // Support old hubot plugins
+          cleanedLine = cleanedLine.replace("@hubot", "@" + this.name);
+          cleanedLine = cleanedLine.replace("hubot", "@" + this.name);
+          // New version going forward
+          cleanedLine = cleanedLine.replace("@bot", "@" + this.name);
+          cleanedLine = cleanedLine.replace("bot", "@" + this.name);
+          this.commands.push(cleanedLine);
         }
+        scriptDocumentation[currentSection].push(cleanedLine);
       }
     }
+    return scriptDocumentation;
   }
 
   reply(envelope: Envelope, user: User, messages: string[] | string) {

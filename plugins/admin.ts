@@ -1,4 +1,3 @@
-"use strict";
 // Description:
 //   Admin functions for managing the bot.
 //

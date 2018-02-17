@@ -38,7 +38,12 @@ export default function(robot) {
         robot.logger.warn(`[forecastio] refresh error ${error}`);
         return;
       }
-      robot.logger.debug("[forecastio] Refreshed forecast");
+      try {
+        forecast = JSON.parse(body);
+      } catch (error) {
+        robot.logger.warn(`[forecastio] parse error ${error}`);
+      }
+      // robot.logger.debug("[forecastio] Refreshed forecast", body);
     });
   }
 

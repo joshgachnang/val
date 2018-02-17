@@ -75,7 +75,7 @@ class EchoTest extends PluginTestSuite {
 @suite
 class AsyncPluginInitTest extends PluginTestSuite {
   @test
-  asyncPlugin() {
+  async asyncPlugin() {
     let config = new Config();
     config.set("EXPRESS_BIND_PORT", "8081");
     config.set("BOT_NAME", "k2so");
@@ -85,9 +85,84 @@ class AsyncPluginInitTest extends PluginTestSuite {
     assert.equal(Object.keys(this.robot.plugins).length, 0);
     let promise = this.robot.init();
     assert.equal(Object.keys(this.robot.plugins).length, 0);
-    return promise.then(() => {
-      assert.equal(Object.keys(this.robot.plugins).length, 1);
+    await promise;
+    assert.equal(Object.keys(this.robot.plugins).length, 1);
+  }
+}
+
+@suite
+class RobotHelpSuite extends PluginTestSuite {
+  @test
+  async parseHelp() {
+    let config = new Config();
+    config.set("EXPRESS_BIND_PORT", "8081");
+    config.set("BOT_NAME", "k2so");
+    config.set("PLUGINS", ["./test/asyncPlugin"]);
+    config.set("ADAPTERS", ["./test/fakeAdapter"]);
+    this.robot = new Robot(config);
+    await this.robot.init();
+    let filename = require.resolve("./asyncPlugin");
+    let res = this.robot.parseHelp(filename);
+    assert.deepEqual(res, {
+      author: ["pcsforeducation"],
+      commands: [
+        "@k2so async - pretends to async some things (not really)",
+        "await - waits on some stuff",
+      ],
+      configuration: ["FAKE - some environment variable"],
+      dependencies: ['"fake": "0.0.1"'],
+      description: ["Async Test Plugin"],
+      notes: ["These would be some notes about how cool async is"],
     });
+  }
+
+  @test
+  async helpCommand() {
+    let config = new Config();
+    config.set("EXPRESS_BIND_PORT", "8081");
+    config.set("BOT_NAME", "k2so");
+    config.set("PLUGINS", ["./test/asyncPlugin", "./plugins/help"]);
+    config.set("ADAPTERS", ["./test/fakeAdapter"]);
+    this.robot = new Robot(config);
+    await this.robot.init();
+    assert.deepEqual(this.robot.help, {
+      asyncPlugin: {
+        author: ["pcsforeducation"],
+        commands: [
+          "@k2so async - pretends to async some things (not really)",
+          "await - waits on some stuff",
+        ],
+        configuration: ["FAKE - some environment variable"],
+        dependencies: ['"fake": "0.0.1"'],
+        description: ["Async Test Plugin"],
+        notes: ["These would be some notes about how cool async is"],
+      },
+      help: {
+        commands: ["@k2so help - displays help for all commands"],
+        description: ["Find a list of commands"],
+      },
+    });
+    this.robot.receive(
+      this.getTextMessage(`@${this.robotName}: help`),
+      this.robot.adapters.fake,
+      undefined
+    );
+    // TODO: gross.
+    await new Promise((resolve) =>
+      setTimeout(() => {
+        assert.equal(this.robot.adapters.fake.events.length, 2);
+        let strings = this.robot.adapters.fake.events[1].data.strings;
+        console.log(strings[1]);
+        // TODO: Not sure why strings[1] is an array..
+        assert.equal(
+          strings[1][0],
+          "Commands:\nasyncPlugin:\n-----------\n@k2so async - pretends to async some things " +
+            "(not really)\nawait - waits on some stuff\n\nhelp:\n----\n@k2so help - displays " +
+            "help for all commands\n"
+        );
+        resolve();
+      }, 10)
+    );
   }
 }
 

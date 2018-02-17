@@ -5,8 +5,9 @@
         "outDir": "dist",
         "skipLibCheck": true,
         "sourceMap": true,
-        // "inlineSourceMap": true,
-        "experimentalDecorators": true
+        //"inlineSourceMap": true,
+        "experimentalDecorators": true,
+        "removeComments": false
     },
     "include": [
         "adapter.ts",

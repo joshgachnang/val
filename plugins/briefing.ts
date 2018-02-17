@@ -1,7 +1,7 @@
-"use strict";
 // Description:
 //   Sends out briefings at registered times.
 //
+
 import Response from "../response";
 import Robot from "../robot";
 

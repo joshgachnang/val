@@ -1,4 +1,3 @@
-"use strict";
 // Description:
 //   Allow posting arbitrary events and querying them
 //
@@ -12,6 +11,7 @@
 //
 // Author:
 //   pcsforeducation
+
 import * as moment from "moment-timezone";
 
 import Response from "../response";

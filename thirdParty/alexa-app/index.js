@@ -1,4 +1,3 @@
-var Promise = require("bluebird");
 var AlexaUtterances = require("../alexa-utterances");
 var SSML = require("./to-ssml");
 var alexa = {};
