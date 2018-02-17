@@ -28,7 +28,7 @@ export default function(robot: Robot) {
         }
       });
 
-    robot.reply(res.envelope, res.envelope.user, msg);
+    res.reply(msg);
   }
 
   robot.respond(/help/i, {}, helpMessage);
