@@ -76,7 +76,8 @@ export default function(robot: Robot) {
     for (let e of eventList) {
       let time = moment(e.created);
       if (moment().diff(time, "hours") < hours) {
-        events += `${time.format("ddd, HH:mm")}: `;
+        // TODO use users timezone
+        events += `${time.tz("America/Chicago").format("ddd, HH:mm")}: `;
         if (e.label) {
           events += `${e.label} - `;
         }
