@@ -34,4 +34,8 @@ export default function(robot: Robot) {
     let randomCode = getRandomCode();
     twilioAdapter.sendMessage(`Please enter this code: ${randomCode}`, phoneNumber, undefined);
   });
+
+  robot.respond("what's my user id", {}, (res: Response) => {
+    res.reply(`You userId is ${res.userId}`);
+  });
 }
