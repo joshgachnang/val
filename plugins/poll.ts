@@ -13,6 +13,8 @@
 // Author:
 //   pcsforeducation
 
+import * as pluralize from "pluralize";
+
 import Response from "../response";
 import Robot from "../robot";
 
@@ -21,7 +23,7 @@ const VOTE_KEY = "pollVotes";
 
 export default function(robot: Robot) {
   function printPoll(pollData) {
-    return pollData.map((item, i) => `${i}: ${item}\n`);
+    return pollData.map((item, i) => `${i + 1}: ${item}`).join("\n");
   }
 
   // `hear` will trigger any time says the phrase. The trigger can be a regex, string, or a string
@@ -80,7 +82,7 @@ export default function(robot: Robot) {
           `"add SOMETHING to ${poll}"`
       );
     }
-    res.reply(`Here's what I have for ${poll}:\n${printPoll(poll)}`);
+    res.reply(`Here's what I have for ${poll}:\n${printPoll(results)}`);
   });
 
   robot.respond("clear poll {:WORD}", {}, (res: Response) => {
@@ -119,11 +121,11 @@ export default function(robot: Robot) {
     res.reply(`Removed item ${res.match[1]} from ${res.match[2]}`);
   });
 
-  robot.respond("vote {:NUMBER} on {:WORD}", {}, (res: Response) => {
+  robot.respond("vote {:NUMBER} {on|for} {:WORD}", {}, (res: Response) => {
     let votes = robot.brain.get(VOTE_KEY) || {};
     let polls = robot.brain.get(POLL_KEY) || {};
 
-    let poll = res.match[2];
+    let poll = res.match[3];
     if (!polls[poll]) {
       return res.reply(
         `Uh oh! I couldn't find a poll ${poll}! You can add it by telling me to ` +
@@ -169,7 +171,13 @@ export default function(robot: Robot) {
     let response = `Votes for ${poll}:\n`;
     Object.keys(totals)
       .sort((a, b) => totals[b] - totals[a])
-      .map((item, i) => (response += `${i + 1}: ${item} with ${totals[item]} votes\n`));
+      .map(
+        (item, i) =>
+          (response += `${i + 1}: ${item} with ${totals[item]} ${pluralize(
+            "vote",
+            totals[item]
+          )}\n`)
+      );
     res.reply(response);
   });
 }

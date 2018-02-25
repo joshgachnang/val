@@ -44,6 +44,7 @@
     "node-rescuetime": "0.1.1",
     "node-uber": "2.0.0",
     "numbered": "1.1.0",
+    "pluralize": "7.0.0",
     "q": "1.5.1",
     "querystring": "0.2.0",
     "raven": "2.3.0",
