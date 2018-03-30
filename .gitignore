@@ -16,3 +16,4 @@ dist/
 prodenvfile
 configuration.json
 configuration.prd.json
+firebase.json

@@ -10,6 +10,7 @@ export default class Config {
     DEV: "false",
     MONGODB_URL: "mongodb://localhost/",
     MONGODB_DATABASE: "hubot-brain",
+    FIREBASE_PROJECT_ID: "",
     CRON_TIMEZONE: "America/Chicago",
     ADAPTERS: ["./adapters/slack", "./adapters/alexa"],
   };
