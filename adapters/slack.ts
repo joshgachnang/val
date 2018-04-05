@@ -181,7 +181,7 @@ export default class SlackAdapter extends Adapter {
     return this.slackRequest("chat.postMessage", body);
   }
 
-  send(envelope, strings) {
+  send(envelope: Envelope, strings: string | string[]) {
     if (envelope.room === undefined) {
       for (let str of strings) {
         this.sendMessageToUser(envelope.user.slack.id, str, {link_names: 1});
