@@ -15,8 +15,16 @@
 import Response from "../response";
 import Robot from "../robot";
 import * as cheerio from "cheerio";
+import * as moment from "moment";
 
 const SCORES_KEY = "triviaStatsScores";
+
+function getScoreURL(hour: number): string {
+  if (hour === 54) {
+    return "";
+  }
+  return `http://90fmtrivia.org/TriviaScores${hour}/scorePages/results.html`;
+}
 
 function parseHour(text: string): number {
   let n = text.replace("Team Standings as of Hour ", "").toLowerCase();
@@ -64,6 +72,19 @@ function getHour() {
   return 54;
 }
 
+const START_TIMES = {
+  "2018": "2018-04-12T23:00:00.000Z",
+  "2019": "2019-04-12T23:00:00.000Z",
+  "2020": "2020-04-17T23:00:00.000Z",
+  "2021": "2021-04-16T23:00:00.000Z",
+};
+
+// Let you specify a longer duration for scraping.
+function duringTrivia(hours: number = 54): boolean {
+  let start = moment(START_TIMES[moment().year()]);
+  return moment().isBetween(start, start.add(hours, "hours"));
+}
+
 function parsedHtmlToScores(parsed) {
   let scores = {}; // Map of {index: {place: number, score: number, teams: [strings]}}
   parsed("dt .place-number").map((i, val) => {
@@ -94,6 +115,21 @@ function parsedHtmlToScores(parsed) {
   return placeScores;
 }
 
+async function cronScrape(robot: Robot) {
+  // Scrape for 8 hours after the contest to get final scores
+  if (!duringTrivia(62)) {
+    return;
+  }
+  let year = moment().year();
+  let allScores = (await robot.db.get(null, SCORES_KEY)) || {};
+  let thisYearScores = allScores[year] || {};
+  let hours = Object.keys(thisYearScores).sort();
+  let firstHour = Number(hours ? hours[hours.length - 1] + 1 : 1);
+  for (let i = firstHour; i <= 54; i++) {
+    await scrape(robot, year, i);
+  }
+}
+
 async function scrape(robot: Robot, year: number, hour: number) {
   let response = await robot.request(
     "http://www.90fmtrivia.org/TriviaScores2017/scorePages/TSK_results.html"
@@ -104,14 +140,14 @@ async function scrape(robot: Robot, year: number, hour: number) {
   // let year = getYear();
   textHour = parseHour(textHour);
 
-  let allScores = robot.brain.get(SCORES_KEY) || {};
+  let allScores = (await robot.db.get(null, SCORES_KEY)) || {};
   if (!allScores[year]) {
     allScores[year] = {};
   }
-  if (allScores[year][hour]) {
-    robot.logger.debug(`[triviastats] Already scraped ${year}, hour ${hour}.`);
-    return;
-  }
+  // if (allScores[year][hour]) {
+  //   robot.logger.debug(`[triviastats] Already scraped ${year}, hour ${hour}.`);
+  //   return;
+  // }
 
   let hourScores = parsedHtmlToScores(parsed);
   allScores[year][hour] = hourScores;
@@ -120,33 +156,52 @@ async function scrape(robot: Robot, year: number, hour: number) {
     `[triviastats] Scraped ${year}, hour ${hour}, found ${Object.keys(hourScores).length} scores.`
   );
 
-  robot.brain.set(SCORES_KEY, allScores);
+  await robot.db.set(null, SCORES_KEY, allScores);
+
+  // Find our team's scores.
+  let matchingScores = await findTeamScore(robot, "WII");
+  let message = "";
+  if (matchingScores.length === 0) {
+    message = "Didn't find any matching teams";
+  } else {
+    message = matchingScores.join("\n");
+  }
+  // TODO: make a standard thing.
+  robot.adapters["Slack"].sendMessageToChannel("general", message);
+}
+
+async function findTeamScore(robot: Robot, search: string): Promise<string[]> {
+  let allScores = (await robot.db.get(null, SCORES_KEY)) || {};
+  let scores = Object.values(allScores["2017"]["54"]);
+  let matchingScores = [];
+  scores.map((score) => {
+    for (let name of score.teams) {
+      if (name.toLowerCase().indexOf(search.toLowerCase()) > -1) {
+        matchingScores.push(`In ${score.place} place with ${score.score} points: ${name}.`);
+      }
+    }
+  });
+  return matchingScores;
 }
 
 export default function(robot: Robot) {
   robot.respond("scrape {:NUMBER} {:NUMBER}", {}, async (res: Response) => {
-    console.log("RES", res.match);
     scrape(robot, res.match[1], res.match[2]);
     res.send("alright, scraped!");
   });
 
-  robot.respond("what place is {:MULTIWORD}", {}, (res: Response) => {
+  robot.respond("what place is {:MULTIWORD}", {}, async (res: Response) => {
     let search = res.match[1];
-    let allScores = robot.brain.get(SCORES_KEY) || {};
-    let scores = Object.values(allScores["2017"]["54"]);
-    let matchingScores = [];
-    scores.map((score) => {
-      for (let name of score.teams) {
-        if (name.toLowerCase().indexOf(search.toLowerCase()) > -1) {
-          matchingScores.push(`In ${score.place} place with ${score.score} points: ${name}.`);
-        }
-      }
-    });
-    console.log("MATCHING", matchingScores);
+    let matchingScores = await findTeamScore(robot, search);
     if (matchingScores.length === 0) {
       res.send("Didn't find any matching teams");
     } else {
       res.send(matchingScores.join("\n"));
     }
+  });
+
+  // Scrape every minute.
+  robot.cron("triviaStats", "* * * * *", () => {
+    cronScrape(robot);
   });
 }
