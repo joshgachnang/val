@@ -4,6 +4,7 @@
 
 import Response from "../response";
 import Robot from "../robot";
+import User from "../user";
 
 const BRIEFING_KEY = "briefings";
 
@@ -24,7 +25,7 @@ export default function(robot: Robot) {
     }
 
     // Find slack user to send to
-    let user = robot.brain.userForId(userId);
+    let user = await robot.db.getUser(userId);
     if (!user) {
       robot.logger.warn(`[briefing] Couldn't find user for userId ${userId}`);
       return;
@@ -39,28 +40,28 @@ export default function(robot: Robot) {
     robot.adapters["Slack"].sendToName(user.slack.name, `Good ${time}!\n\n${text}`);
   }
 
-  function executeBriefings(time: string) {
-    let users = robot.brain.get(BRIEFING_KEY) || {};
-    for (let userId of Object.keys(users)) {
-      let briefings = Object.keys(users[userId]);
-      if (briefings.indexOf(time) > -1) {
-        sendBriefings(userId, time);
+  async function executeBriefings(time: string) {
+    let users = await robot.db.getUsers();
+    for (let user of Object.values(users)) {
+      let briefings = (await robot.db.get(user.id, BRIEFING_KEY)) || {};
+      if (briefings[time]) {
+        sendBriefings(user.id, time);
       }
     }
   }
 
-  robot.cron("morning breifing", "00 7 * * *", () => executeBriefings("morning"));
-  robot.cron("afternoon breifing", "30 12 * * *", () => executeBriefings("afternoon"));
+  robot.cron("morning briefing", "00 7 * * *", () => executeBriefings("morning"));
+  robot.cron("afternoon briefing", "30 12 * * *", () => executeBriefings("afternoon"));
   robot.cron("evening briefing", "0 18 * * *", () => executeBriefings("evening"));
 
-  robot.respond("add {morning|afternoon|evening} briefing", {}, (res: Response) => {
+  robot.respond("add {morning|afternoon|evening} briefing", {}, async (res: Response) => {
     let userId = res.envelope.user.id;
-    let briefings = robot.brain.getForUser(BRIEFING_KEY, userId) || {};
+    let briefings = (await robot.db.get(userId, BRIEFING_KEY)) || {};
     let time = res.match[1];
 
     // TODO: support choosing which items per briefing
     briefings[time] = [];
-    robot.brain.setForUser(BRIEFING_KEY, briefings, userId);
+    await robot.db.set(userId, BRIEFING_KEY, briefings);
 
     if (briefings.length !== 1) {
       res.reply(`Alright! I'm going to send you a ${time} briefing each day.`);
@@ -72,12 +73,12 @@ export default function(robot: Robot) {
     }
   });
 
-  robot.respond("remove {morning|afternoon|evening} briefing", {}, (res: Response) => {
+  robot.respond("remove {morning|afternoon|evening} briefing", {}, async (res: Response) => {
     let userId = res.envelope.user.id;
-    let briefings = robot.brain.getForUser(BRIEFING_KEY, userId) || {};
+    let briefings = (await robot.db.get(userId, BRIEFING_KEY)) || {};
     let time = res.match[1];
     delete briefings[time];
-    robot.brain.setForUser(BRIEFING_KEY, briefings, userId);
+    await robot.db.set(userId, BRIEFING_KEY, briefings);
     if (Object.keys(briefings).length === 0) {
       res.reply(
         `Got it! You're not registered for any briefings right now! You can add one by telling ` +

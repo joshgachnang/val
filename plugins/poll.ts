@@ -34,8 +34,8 @@ export default function(robot: Robot) {
 
   // `respond` will only trigger when someone messages the bot, e.g. in a private message or by
   // saying something like "@BOTNAME hello".
-  robot.respond("add poll {:WORD}", {}, (res: Response) => {
-    let polls = robot.brain.get(POLL_KEY) || {};
+  robot.respond("add poll {:WORD}", {}, async (res: Response) => {
+    let polls = (await robot.db.get(null, POLL_KEY)) || {};
     let poll = res.match[1];
     if (polls[poll]) {
       return res.reply(
@@ -44,15 +44,15 @@ export default function(robot: Robot) {
       );
     }
     polls[poll] = [];
-    robot.brain.set(POLL_KEY, polls);
+    await robot.db.set(null, POLL_KEY, polls);
     res.reply(
       `Ok! Added new poll ${poll}. You can add to it by telling me to ` +
         `"add SOMETHING to ${poll}"`
     );
   });
 
-  robot.respond("add {:MULTIWORD} to {:WORD}", {}, (res: Response) => {
-    let polls = robot.brain.get(POLL_KEY) || {};
+  robot.respond("add {:MULTIWORD} to {:WORD}", {}, async (res: Response) => {
+    let polls = (await robot.db.get(null, POLL_KEY)) || {};
     let item = res.match[1];
     let poll = res.match[2];
     if (!polls[poll]) {
@@ -62,12 +62,12 @@ export default function(robot: Robot) {
       );
     }
     polls[poll].push(item);
-    robot.brain.set(POLL_KEY, polls);
+    await robot.db.set(null, POLL_KEY, polls);
     res.reply(`Added ${res.match[1]} to ${res.match[2]}`);
   });
 
-  robot.respond("show poll {:WORD}", {}, (res: Response) => {
-    let polls = robot.brain.get(POLL_KEY) || {};
+  robot.respond("show poll {:WORD}", {}, async (res: Response) => {
+    let polls = (await robot.db.get(null, POLL_KEY)) || {};
     let poll = res.match[1];
     if (!polls[poll]) {
       return res.reply(
@@ -85,8 +85,8 @@ export default function(robot: Robot) {
     res.reply(`Here's what I have for ${poll}:\n${printPoll(results)}`);
   });
 
-  robot.respond("clear poll {:WORD}", {}, (res: Response) => {
-    let polls = robot.brain.get(POLL_KEY) || {};
+  robot.respond("clear poll {:WORD}", {}, async (res: Response) => {
+    let polls = (await robot.db.get(null, POLL_KEY)) || {};
     let poll = res.match[1];
     if (!polls[poll]) {
       return res.reply(
@@ -95,12 +95,12 @@ export default function(robot: Robot) {
       );
     }
     polls[poll] = [];
-    robot.brain.set(POLL_KEY, polls);
+    await robot.db.set(null, POLL_KEY, polls);
     res.reply(`Cleared poll ${res.match[1]}.`);
   });
 
-  robot.respond("remove item {:NUMBER} from {:WORD}", {}, (res: Response) => {
-    let polls = robot.brain.get(POLL_KEY) || {};
+  robot.respond("remove item {:NUMBER} from {:WORD}", {}, async (res: Response) => {
+    let polls = (await robot.db.get(null, POLL_KEY)) || {};
     let index = Number(res.match[1]);
 
     let poll = res.match[2];
@@ -117,13 +117,13 @@ export default function(robot: Robot) {
 
     // Text interface is 1-indexed, splice is 0-indexed
     polls[poll].splice(index - 1, 1);
-    robot.brain.set(POLL_KEY, polls);
+    await robot.db.set(null, POLL_KEY, polls);
     res.reply(`Removed item ${res.match[1]} from ${res.match[2]}`);
   });
 
-  robot.respond("vote {:NUMBER} {on|for} {:WORD}", {}, (res: Response) => {
-    let votes = robot.brain.get(VOTE_KEY) || {};
-    let polls = robot.brain.get(POLL_KEY) || {};
+  robot.respond("vote {:NUMBER} {on|for} {:WORD}", {}, async (res: Response) => {
+    let votes = (await robot.db.get(null, VOTE_KEY)) || {};
+    let polls = (await robot.db.get(null, POLL_KEY)) || {};
 
     let poll = res.match[3];
     if (!polls[poll]) {
@@ -150,12 +150,12 @@ export default function(robot: Robot) {
     }
 
     votes[poll][res.userId].push(voteItem);
-    robot.brain.set(VOTE_KEY, votes);
+    await robot.db.set(null, VOTE_KEY, votes);
     res.reply(`Voted for ${voteItem}, thanks!`);
   });
 
-  robot.respond("show votes for {:WORD}", {}, (res: Response) => {
-    let votes = robot.brain.get(VOTE_KEY) || {};
+  robot.respond("show votes for {:WORD}", {}, async (res: Response) => {
+    let votes = (await robot.db.get(null, VOTE_KEY)) || {};
     let poll = res.match[1];
     if (!votes[poll]) {
       return res.reply(`Sorry, ${poll} hasn't been created yet!`);

@@ -465,8 +465,17 @@ export default class Robot extends EventEmitter {
 
     app.use(bodyParser.urlencoded({extended: false}));
     app.use(bodyParser.json());
-    app.use("/static", express.static("static"));
-    app.use("/bower_components", express.static("bower_components"));
+    app.use((req, res, next) => {
+      if (req.query && req.query["token"]) {
+        let userId = this.db.getUserFromAuthToken(req.query["token"]);
+        if (!userId) {
+          return res.status(401).send();
+        } else {
+          res.locals.userId = userId;
+        }
+      }
+      next();
+    });
     this.router = app;
   }
 

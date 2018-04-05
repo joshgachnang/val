@@ -7,7 +7,7 @@
 //   "lodash" : "*"
 //
 // Configuration:
-//   MONGODB_URL or 'mongodb://localhost/hubot-brain'
+//   firebase.json in root directory.
 //
 // Author:
 //   Josh Gachnang <josh@servercobra.com>
@@ -25,6 +25,7 @@ const GLOBAL_KEY = "GLOBAL";
 export default class DB {
   robot: Robot;
   db: any;
+  userTokenMap: {[token: string]: string} = {};
 
   constructor(robot: Robot) {
     this.robot = robot;
@@ -37,18 +38,31 @@ export default class DB {
       projectId: projectId,
       keyFilename: "firebase.json",
     });
+    this.initUserTokenMap();
+  }
+
+  async initUserTokenMap(users?: any): Promise<void> {
+    if (!users) {
+      users = await this.getUsers();
+    }
+    for (let user of Object.values(users)) {
+      if (user.authToken) {
+        this.userTokenMap[user.authToken] = user.id;
+      }
+    }
+    console.log("TOKEN MAP", this.userTokenMap);
   }
 
   // By default, everything is stored per user.
-  private getKey(userId, key) {
-    if (userId === GLOBAL_KEY) {
+  private getKey(userId, key): string {
+    if (userId === GLOBAL_KEY || userId === null) {
       return `GLOBAL/${key}`;
     } else {
       return `${userId}/${key}`;
     }
   }
 
-  set(userId, key, value) {
+  set(userId, key, value): Promise<void> {
     console.log("SETTING", this.getKey(userId, key));
     console.log("TO VALUE", value);
     return this.db.doc(this.getKey(userId, key)).set(value);
@@ -67,23 +81,34 @@ export default class DB {
   }
 
   // Update or create new user
-  public async updateUser(user: User) {
+  public async updateUser(user: User): Promise<void> {
     if (!user || !user.id) {
       this.robot.logger.warn(`[brain] Cannot update undefined user: ${user}`);
       return;
     }
-    let userList = await this.get(GLOBAL_KEY, "users");
-    let users = _.keyBy(userList, "id");
+    let users = await this.get(GLOBAL_KEY, "users");
     if (!users) {
       users = {};
     }
     // Should merge the user here rather than just setting it. This just clobbers them.
     users[user.id] = user;
     await this.set(GLOBAL_KEY, "users", users);
+    await this.initUserTokenMap(users);
   }
 
-  public async getUsers() {
+  public async getUser(userId: string): Promise<User> {
+    let users = await this.get(GLOBAL_KEY, "users");
+    return users[userId] as User;
+  }
+
+  public async getUsers(): Promise<User[]> {
     return await this.get(GLOBAL_KEY, "users");
+  }
+
+  // Keeps a cached mapping of user token to user id so we can easily check if a token belongs
+  // or not
+  public getUserFromAuthToken(token: string): string {
+    return this.userTokenMap[token];
   }
 
   // Categories
@@ -100,7 +125,7 @@ export default class DB {
     return Object.keys(allItems);
   }
 
-  public async addItemToCategory(category: string, item: string) {
+  public async addItemToCategory(category: string, item: string): Promise<void> {
     let allItems = (await this.get(GLOBAL_KEY, this.CATEGORY_KEY)) || {};
     if (!allItems[category]) {
       allItems[category] = [];
@@ -109,7 +134,7 @@ export default class DB {
     await this.set(GLOBAL_KEY, this.CATEGORY_KEY, allItems);
   }
 
-  public async removeItemAtIndexInCategory(category: string, index: number) {
+  public async removeItemAtIndexInCategory(category: string, index: number): Promise<void> {
     let allItems = (await this.get(GLOBAL_KEY, this.CATEGORY_KEY)) || {};
     let items = allItems[category] || [];
     items.splice(index, 1);
@@ -128,7 +153,7 @@ export default class DB {
     return items;
   }
 
-  public async registerDefaultsForCateogry(category: string, items: string[]) {
+  public async registerDefaultsForCateogry(category: string, items: string[]): Promise<void> {
     let allItems = (await this.get(GLOBAL_KEY, this.CATEGORY_KEY)) || {};
     console.log("all items", allItems);
     let existingItems = allItems[category] || [];
