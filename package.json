@@ -43,7 +43,6 @@
     "mongoose": "4.13.7",
     "node-gyp": "3.6.2",
     "node-rescuetime": "0.1.1",
-    "node-uber": "2.0.0",
     "numbered": "1.1.0",
     "parse5": "^4.0.0",
     "pluralize": "7.0.0",
@@ -54,6 +53,7 @@
     "request-promise": "4.2.2",
     "request-promise-native": "1.0.5",
     "scoped-http-client": "0.11.0",
+    "twitter": "1.7.1",
     "winston": "2.4.0",
     "ws": "3.3.3",
     "xml2js-promise": "0.0.2"
