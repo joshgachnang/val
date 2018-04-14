@@ -51,7 +51,7 @@ export default function(robot: Robot) {
     );
   });
 
-  robot.respond("add {:MULTIWORD} to {:WORD}", {}, async (res: Response) => {
+  robot.respond("add {:MULTIANY} to {:WORD}", {}, async (res: Response) => {
     let polls = (await robot.db.get(null, POLL_KEY)) || {};
     let item = res.match[1];
     let poll = res.match[2];

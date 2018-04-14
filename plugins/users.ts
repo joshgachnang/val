@@ -51,7 +51,7 @@ export default function(robot: Robot) {
     twilioAdapter.sendMessage(`Please enter this code: ${randomCode}`, phoneNumber, undefined);
   });
 
-  robot.respond("{what's|what is} my user id", {}, (res: Response) => {
+  robot.respond("{what's|what is|whats} my user id", {}, (res: Response) => {
     res.reply(`You userId is ${res.userId}`);
   });
 

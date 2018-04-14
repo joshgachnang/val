@@ -21,7 +21,8 @@ const SCORES_KEY = "triviaStatsScores";
 
 function getScoreURL(hour: number): string {
   if (hour === 54) {
-    return "";
+    // Hack for scraping last year.
+    return "http://www.90fmtrivia.org/TriviaScores2017/scorePages/TSK_results.html";
   }
   return `http://90fmtrivia.org/TriviaScores${hour}/scorePages/results.html`;
 }
@@ -131,9 +132,7 @@ async function cronScrape(robot: Robot) {
 }
 
 async function scrape(robot: Robot, year: number, hour: number) {
-  let response = await robot.request(
-    "http://www.90fmtrivia.org/TriviaScores2017/scorePages/TSK_results.html"
-  );
+  let response = await robot.request(getScoreURL(Number(hour)));
   let parsed = cheerio.load(response);
   let textHour = parsed("h1").text();
 
@@ -144,12 +143,16 @@ async function scrape(robot: Robot, year: number, hour: number) {
   if (!allScores[year]) {
     allScores[year] = {};
   }
-  // if (allScores[year][hour]) {
-  //   robot.logger.debug(`[triviastats] Already scraped ${year}, hour ${hour}.`);
-  //   return;
-  // }
+  if (allScores[year][hour]) {
+    robot.logger.debug(`[triviastats] Already scraped ${year}, hour ${hour}.`);
+    return;
+  }
 
   let hourScores = parsedHtmlToScores(parsed);
+  if (Object.keys(hourScores).length === 0) {
+    robot.logger.debug(`[triviastats] Found no scores for ${year} hour ${hour}.`);
+    return;
+  }
   allScores[year][hour] = hourScores;
 
   robot.logger.info(
@@ -167,7 +170,10 @@ async function scrape(robot: Robot, year: number, hour: number) {
     message = matchingScores.join("\n");
   }
   // TODO: make a standard thing.
-  robot.adapters["Slack"].sendMessageToChannel("general", message);
+  robot.adapters.Slack.sendMessageToChannel("triviastats", `<!channel> ${message}`);
+
+  // Post to twitter that new scores are posted!
+  robot.adapters.Twitter.post(`Trivia scores for Hour ${hour} are posted!`);
 }
 
 async function findTeamScore(robot: Robot, search: string): Promise<string[]> {
@@ -187,7 +193,7 @@ async function findTeamScore(robot: Robot, search: string): Promise<string[]> {
 export default function(robot: Robot) {
   robot.respond("scrape {:NUMBER} {:NUMBER}", {}, async (res: Response) => {
     scrape(robot, res.match[1], res.match[2]);
-    res.send("alright, scraped!");
+    res.send("alright, scraping!");
   });
 
   robot.respond("what place is {:MULTIWORD}", {}, async (res: Response) => {

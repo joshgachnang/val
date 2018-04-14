@@ -14,7 +14,7 @@ import Response from "../response";
 import Robot from "../robot";
 
 export default function(robot: Robot) {
-  robot.respond("twitter post {:MULTIWORD}", {}, async (res: Response) => {
+  robot.respond("twitter post {:MULTIANY}", {}, async (res: Response) => {
     console.log("POST", res.match[1]);
     console.log(await robot.adapters.Twitter.post(res.match[1]));
     res.reply("Ok! Posted!");
