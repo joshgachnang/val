@@ -101,4 +101,8 @@ export default class User {
     }
     return false;
   }
+
+  public serialize() {
+    return JSON.parse(JSON.stringify(this));
+  }
 }

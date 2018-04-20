@@ -19,6 +19,7 @@ import * as _ from "lodash";
 import Robot from "./robot";
 import User from "./user";
 import {EventEmitter} from "events";
+import {raw} from "body-parser";
 
 const GLOBAL_KEY = "GLOBAL";
 
@@ -91,18 +92,45 @@ export default class DB {
       users = {};
     }
     // Should merge the user here rather than just setting it. This just clobbers them.
-    users[user.id] = user;
+    // Handle both user objects and Users.
+    users[user.id] = user.serialize ? user.serialize() : user;
     await this.set(GLOBAL_KEY, "users", users);
     await this.initUserTokenMap(users);
   }
 
   public async getUser(userId: string): Promise<User> {
-    let users = await this.get(GLOBAL_KEY, "users");
-    return users[userId] as User;
+    let users = (await this.get(GLOBAL_KEY, "users")) || {};
+    return new User(users[userId]);
   }
 
-  public async getUsers(): Promise<User[]> {
-    return await this.get(GLOBAL_KEY, "users");
+  public async getUsers(): Promise<{[id: string]: User}> {
+    let rawUsers = (await this.get(GLOBAL_KEY, "users")) || {};
+    let users = {};
+    for (let id of Object.keys(rawUsers)) {
+      users[id] = new User(rawUsers[id]);
+    }
+    return users;
+  }
+
+  public async userForId(id: string): Promise<User> {
+    if (!id) {
+      this.robot.logger.warn("[brain] userForId cannot search for undefined id");
+      return undefined;
+    }
+    // Ask each user object if the id is contained in thir user object
+    let user: User;
+    let users = await this.getUsers();
+    for (let u of Object.values(users)) {
+      if (u.containsId(id)) {
+        user = u;
+        break;
+      }
+    }
+    if (!user) {
+      return undefined;
+    } else {
+      return user;
+    }
   }
 
   // Keeps a cached mapping of user token to user id so we can easily check if a token belongs
