@@ -88,7 +88,7 @@ export default async function(robot: Robot) {
   });
 
   robot.router.get("/alexa/flashBreifing", async (req, res) => {
-    let agenda = await getAgenda(res.local.userId);
+    let agenda = await getAgenda(res.locals.userId);
     return res.json([
       {
         uid: `id1${moment()
