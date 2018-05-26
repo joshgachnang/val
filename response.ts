@@ -1,7 +1,7 @@
 "use strict";
 
 import Envelope from "./envelope";
-import {Message} from "./message";
+import {Message, TextMessage} from "./message";
 import Robot from "./robot";
 import User from "./user";
 
@@ -12,14 +12,27 @@ export default class Response {
   envelope: Envelope;
   userId: string;
 
-  constructor(bot, message, match, adapter) {
+  constructor(bot: Robot, message: Message, match: any, adapter: any) {
     this.bot = bot;
     this.message = message;
     this.match = match;
-    this.envelope = new Envelope(message.room, message.user, message, adapter.adapterName);
+    this.envelope = new Envelope(
+      (message as TextMessage).room, // might be undefined for non text messages, and that's ok.
+      message.user,
+      message,
+      adapter.adapterName
+    );
     if (message && message.user && message.user.id) {
       this.userId = message.user.id;
     }
+  }
+
+  // Get the value of a named match.
+  // e.g. if you had a listener on `my favorite movie is {movie:MULTIWORD}`, `slot('movie')` would
+  // return the matching value from the user, e.g. 'Empire Strikes Back'.
+  slot(name: string) {
+    console.log(this.match, this.match.notes);
+    return this.match[name];
   }
 
   // Actually takes a list of 1 to n arguments
