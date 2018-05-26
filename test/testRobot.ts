@@ -216,6 +216,16 @@ class RobotTestSuite {
   }
 
   @test
+  hearMultiAnyMultiLineSlot(done) {
+    this.hearRespondTest(
+      false,
+      "i want 12 {:MULTIANY} please",
+      "i want 12 'kamikaze' \n\n shots, please",
+      done
+    );
+  }
+
+  @test
   hearMultiTypeSlot(done) {
     this.hearRespondTest(
       false,
