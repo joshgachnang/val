@@ -185,14 +185,37 @@ export default function(robot: Robot) {
     res.reply(response);
   });
 
+  function printPriceAndChange(priceData) {
+    let p = Number(priceData.price);
+    let priceText = "";
+    if (p > 100) {
+      priceText = `$${p.toFixed(0)}`;
+    } else if (p > 1) {
+      priceText = `$${p.toFixed(2)}`;
+    } else if (p > 0.1) {
+      priceText = `${(p * 100).toFixed(0)} cents`;
+    } else if (p > 0.001) {
+      priceText = `$${(p * 1000).toFixed(0)} per thousand`;
+    } else {
+      priceText = String(p);
+    }
+    let change = Number(priceData.change24percent);
+    if (change > 0) {
+      return `up ${change.toFixed(1)}% at ${priceText}`;
+    } else {
+      return `down ${Math.abs(change).toFixed(1)}% at ${priceText}`;
+    }
+  }
+
   flashBriefing("/cryptocurrency/flashbriefing", () => {
-    let btc = Number(prices["BTC"].price).toFixed(2);
-    let ltc = Number(prices["LTC"].price).toFixed(2);
-    let eth = Number(prices["ETH"].price).toFixed(2);
-    let bch = Number(prices["BCH"].price).toFixed(2);
+    let btc = printPriceAndChange(prices["BTC"]);
+    let ltc = printPriceAndChange(prices["LTC"]);
+    let eth = printPriceAndChange(prices["ETH"]);
+    let bch = printPriceAndChange(prices["BCH"]);
+    let xrp = printPriceAndChange(prices["XRP"]);
     return (
-      `The current bitcoin price is $${btc}. Ethereum is $${eth}. And Litecoin is priced ` +
-      `at $${ltc}`
+      `Bitcoin is ${btc} in the past 24 hours. Ethereum is ${eth}. Ripple is ${xrp}. ` +
+      `Bitcoin Cash is ${bch}. Litecoin is ${ltc}`
     );
   });
 

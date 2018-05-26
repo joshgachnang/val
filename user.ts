@@ -49,6 +49,7 @@ export default class User {
   public twilio: TwilioUser;
   public alexa: AlexaUser;
   public push: PushUser;
+  public authToken: string;
   // TODO: add other oauth users, e.g. google, facebook, twitter, fitbit, etc
 
   constructor(data: any) {
@@ -99,5 +100,9 @@ export default class User {
       return true;
     }
     return false;
+  }
+
+  public serialize() {
+    return JSON.parse(JSON.stringify(this));
   }
 }

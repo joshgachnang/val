@@ -23,15 +23,14 @@ const AUTH_TOKEN_KEY = "googleAuthToken";
 const CALENDAR_KEY = "googleCalendar";
 const CLIENT_SECRET_KEY = "googleCalendarClientSecret";
 
-export default function(robot: Robot) {
+export default async function(robot: Robot) {
   let oauth2Client;
   let redirectResponse: Response;
-  let credentials = robot.brain.get(CLIENT_SECRET_KEY);
-  if (credentials) {
-    setupCredentials(credentials);
-  }
 
-  function setupCredentials(credentials) {
+  async function setupCredentials(userId: string, credentials?: any) {
+    if (!credentials) {
+      credentials = await robot.db.get(userId, CLIENT_SECRET_KEY);
+    }
     let clientSecret = credentials.installed.client_secret;
     let clientId = credentials.installed.client_id;
     let redirectUrl = credentials.installed.redirect_uris[0];
@@ -39,19 +38,22 @@ export default function(robot: Robot) {
     oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
   }
 
-  robot.router.get("/calendars", (req, res) => {
+  // TODO: the api needs authentication..
+  robot.router.get("/calendars", async (req, res) => {
+    if (!res.locals.userId) {
+      return res.status(401).send();
+    }
     try {
-      authorize(() => {
-        listEvents((events) => {
-          res.json({events});
-        });
-      });
+      await authorize(res.locals.userId);
+      let events = await listEvents();
+      res.json({events});
     } catch (e) {
+      console.log(e);
       res.status(400).send({error: "No calendars configured"});
     }
   });
 
-  robot.respond(/add google calendar client secret (.*)/i, {}, (response: Response) => {
+  robot.respond(/add google calendar client secret (.*)/i, {}, async (response: Response) => {
     let match = response.match[1];
     // Remove linkifying
     match = match
@@ -59,8 +61,8 @@ export default function(robot: Robot) {
       .replace(/</g, "")
       .replace(/>/g, "");
     let clientSecret = JSON.parse(match);
-    robot.brain.set(CLIENT_SECRET_KEY, clientSecret);
-    setupCredentials(clientSecret);
+    await robot.db.set(response.userId, CLIENT_SECRET_KEY, clientSecret);
+    setupCredentials(response.userId, clientSecret);
     requestAuthorize(response);
   });
 
@@ -81,82 +83,74 @@ export default function(robot: Robot) {
     });
   });
 
-  robot.respond(`{what is|whats|what's} {on|} my agenda`, {}, (response: Response) => {
-    getAgenda((agenda) => {
-      if (!response) {
-        // TODO: What the fuck.
-        return;
-      }
-      response.reply(agenda);
-    });
+  robot.respond(`{what is|whats|what's} {on|} my agenda`, {}, async (response: Response) => {
+    response.reply(await getAgenda(response.userId));
   });
 
-  robot.router.get("/alexa/flashBreifing", (req, res) => {
-    getAgenda((agenda) => {
-      return res.json([
-        {
-          uid: `id1${moment()
-            .utcOffset(0)
-            .startOf("hour")
-            .unix()}`,
-          updateDate: moment()
-            .utcOffset(0)
-            .format("YYYY-MM-DD[T]HH:00:00.[0Z]"),
-          titleText: "Val agenda",
-          mainText: agenda,
-        },
-      ]);
-    });
+  robot.router.get("/alexa/flashBreifing", async (req, res) => {
+    let agenda = await getAgenda(res.locals.userId);
+    return res.json([
+      {
+        uid: `id1${moment()
+          .utcOffset(0)
+          .startOf("hour")
+          .unix()}`,
+        updateDate: moment()
+          .utcOffset(0)
+          .format("YYYY-MM-DD[T]HH:00:00.[0Z]"),
+        titleText: "Val agenda",
+        mainText: agenda,
+      },
+    ]);
   });
 
-  function getAgenda(callback: any) {
+  async function getAgenda(userId: string): Promise<string> {
     let today = moment();
+    let events;
     try {
-      authorize(() => {
-        listEvents((events) => {
-          let dayEvents = "";
-          let timeEvents = "";
-          let res = "";
-          events = events.sort((a, b) => {
-            return new Date(a.start.dateTime).getTime() - new Date(b.start.dateTime).getTime();
-          });
-          for (let event of events) {
-            if (!event.start) {
-              robot.logger.warn(`[googleCalendar] Event has no start: ${event}`);
-            }
-            let start = moment(event.start.dateTime || event.start.date, "YYYY-MM-DD[T]HH:mmss-Z");
-            if (start.diff(today, "days") === 0) {
-              let summary = event.summary;
-              if (event.start.date) {
-                if (dayEvents !== "") {
-                  dayEvents += " and ";
-                }
-                dayEvents += `${summary}`;
-              } else {
-                timeEvents += ` At ${start.format("h:mm a")}: ${summary}.`;
-              }
-            }
-          }
-          let leader = "";
-          if (dayEvents || timeEvents) {
-            leader = "Here's today's agenda:";
-          }
-          if (dayEvents) {
-            dayEvents = `All day, you have: ${dayEvents}`;
-          }
-          if (timeEvents && dayEvents) {
-            timeEvents = `And then ${timeEvents}`;
-          }
-          if (dayEvents) {
-            callback(`${leader} ${dayEvents}. ${timeEvents}`);
-          } else {
-            callback(`${leader} ${timeEvents}`);
-          }
-        });
-      });
+      await authorize(userId);
+      events = await listEvents();
     } catch (e) {
       robot.logger.error(`[googleCalendar] error: ${e}`);
-      callback("No calendars configured");
+      return "No calendars configured";
+    }
+    let dayEvents = "";
+    let timeEvents = "";
+    let res = "";
+    events = events.sort((a, b) => {
+      return new Date(a.start.dateTime).getTime() - new Date(b.start.dateTime).getTime();
+    });
+    for (let event of events) {
+      if (!event.start) {
+        robot.logger.warn(`[googleCalendar] Event has no start: ${event}`);
+      }
+      let start = moment(event.start.dateTime || event.start.date, "YYYY-MM-DD[T]HH:mmss-Z");
+      if (start.diff(today, "days") === 0) {
+        let summary = event.summary;
+        if (event.start.date) {
+          if (dayEvents !== "") {
+            dayEvents += " and ";
+          }
+          dayEvents += `${summary}`;
+        } else {
+          timeEvents += ` At ${start.format("h:mm a")}: ${summary}.`;
+        }
+      }
+    }
+    let leader = "";
+    if (dayEvents || timeEvents) {
+      leader = "Here's today's agenda:";
+    }
+    if (dayEvents) {
+      dayEvents = `All day, you have: ${dayEvents}`;
+    }
+    if (timeEvents && dayEvents) {
+      timeEvents = `And then ${timeEvents}`;
+    }
+    if (dayEvents) {
+      return `${leader} ${dayEvents}. ${timeEvents}`;
+    } else {
+      return `${leader} ${timeEvents}`;
     }
   }
 
@@ -174,15 +168,13 @@ export default function(robot: Robot) {
    * @param {Object} credentials The authorization client credentials.
    * @param {function} callback The callback to call with the authorized client.
    */
-  function authorize(callback) {
+  async function authorize(userId: string) {
+    await setupCredentials(userId);
     // Check if we have previously stored a token.
-    let tokens = robot.brain.get(AUTH_TOKEN_KEY);
-    if (tokens) {
-      // Authorize all the tokens
-      tokens.forEach(function(token) {
-        oauth2Client.credentials = token;
-      });
-      callback();
+    let token = await robot.db.get(userId, AUTH_TOKEN_KEY);
+    console.log("TOKENS", token);
+    if (token) {
+      oauth2Client.credentials = token;
     } else {
       robot.logger.warn(
         "[googleCalendar] No calendars authorized. Chat with the bot to authorize Google " +
@@ -239,7 +231,7 @@ export default function(robot: Robot) {
    *
    * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
    */
-  function listEvents(callback) {
+  async function listEvents() {
     let calendar = google.calendar("v3");
     let events = [];
     let counter = 0;
@@ -264,50 +256,48 @@ was ${calendarIds.length}. Not fetching.`);
         .endOf("day")
         .toISOString();
       robot.logger.debug(`[googleCalendar] Getting calendar events from ${min} to ${max}`);
-      calendar.events.list(
-        {
-          auth: oauth2Client,
-          calendarId: calendarIds[0].id,
-          timeMin: min,
-          timeMax: max,
-          maxResults: 10,
-          singleEvents: true,
-          orderBy: "startTime",
-        },
-        function(err, response) {
-          if (err) {
-            robot.logger.warn(`[googleCalendar] The Google Calendar API returned an error: ${err}`);
-            return;
-          }
-          let e = response.items;
-          events.push(e.slice(0, 10));
+      let items;
+      try {
+        items = await new Promise((resolve, reject) => {
+          calendar.events.list(
+            {
+              auth: oauth2Client,
+              calendarId: calendarIds[0].id,
+              timeMin: min,
+              timeMax: max,
+              maxResults: 10,
+              singleEvents: true,
+              orderBy: "startTime",
+            },
+            (err, data) => {
+              if (err) {
+                return reject(err);
+              }
+              resolve(data.items);
+            }
+          );
+        });
+      } catch (err) {
+        robot.logger.warn(`[googleCalendar] The Google Calendar API returned an error: ${err}`);
+        return;
+      }
 
-          // Eww. Promise.all this..
-          counter += 1;
-          if (counter === config.get("CALENDAR_NAMES").length) {
-            // flatten
-            events = [].concat.apply([], events);
-            callback(events);
-          }
-        }
-      );
+      events.push(items.slice(0, 10));
+      events = [].concat.apply([], events);
     }
+    return events;
   }
+
   function listCalendars(callback) {
     let calendar = google.calendar("v3");
-    calendar.calendarList.list(
-      {
-        auth: oauth2Client,
-      },
-      function(err, response) {
-        if (err) {
-          robot.logger.warn(`[googleCalendar] The list calendar API returned an error: ${err}`);
-          callback(null);
-          return;
-        }
-        callback(response);
+    calendar.calendarList.list({auth: oauth2Client}, function(err, response) {
+      if (err) {
+        robot.logger.warn(`[googleCalendar] The list calendar API returned an error: ${err}`);
+        callback(null);
+        return;
       }
-    );
+      callback(response);
+    });
   }
 
   function cacheCalendars() {
@@ -320,11 +310,7 @@ was ${calendarIds.length}. Not fetching.`);
     });
   }
 
-  robot.briefing("agenda", () => {
-    return new Promise((resolve) => {
-      getAgenda((agenda) => {
-        resolve(agenda);
-      });
-    });
+  robot.briefing("agenda", async (userId: string) => {
+    return await getAgenda(userId);
   });
 }

@@ -20,6 +20,7 @@ import * as winston from "winston";
 import Adapter from "./adapter";
 import Brain from "./brain";
 import Config from "./config";
+import DB from "./db";
 import Envelope from "./envelope";
 import {APIError} from "./errors";
 import {Listener, TextListener} from "./listener";
@@ -27,6 +28,7 @@ import {Message, TextMessage} from "./message";
 import "./polyfill";
 import Response from "./response";
 import User from "./user";
+import {Db} from "mongodb";
 
 let HUBOT_DOCUMENTATION_SECTIONS = [
   "description",
@@ -57,6 +59,7 @@ export default class Robot extends EventEmitter {
   name: string;
   config: Config;
   pluginListeners: Array<Listener> = [];
+  db: DB;
   help: any = {};
   commands: any;
   errorHandlers: any;
@@ -118,6 +121,9 @@ export default class Robot extends EventEmitter {
 
   async init() {
     this.logger.debug("[Robot] Starting Robot");
+
+    this.logger.info("[Robot] Initializing Firebase DB");
+    this.db = new DB(this);
 
     for (let adapter of this.config.get("ADAPTERS")) {
       this.logger.info("[Robot] loading adapter:", adapter);
@@ -459,8 +465,17 @@ export default class Robot extends EventEmitter {
 
     app.use(bodyParser.urlencoded({extended: false}));
     app.use(bodyParser.json());
-    app.use("/static", express.static("static"));
-    app.use("/bower_components", express.static("bower_components"));
+    app.use((req, res, next) => {
+      if (req.query && req.query["token"]) {
+        let userId = this.db.getUserFromAuthToken(req.query["token"]);
+        if (!userId) {
+          return res.status(401).send();
+        } else {
+          res.locals.userId = userId;
+        }
+      }
+      next();
+    });
     this.router = app;
   }
 

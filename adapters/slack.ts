@@ -97,7 +97,7 @@ export default class SlackAdapter extends Adapter {
     }
     let raw = _.extend({}, body);
 
-    let text = this.formatMessage(body);
+    let text = await this.formatMessage(body);
     if (!text) return;
 
     let message = new TextMessage(user, text, room, body.id, this, raw);
@@ -132,7 +132,7 @@ export default class SlackAdapter extends Adapter {
     let users = (await this.slackRequest("users.list")) as any;
     for (let slackUser of users.members) {
       // See if we have a matching user in brain already
-      let user = this.robot.brain.userForId(slackUser.id);
+      let user = await this.robot.db.userForId(slackUser.id);
       if (!user) {
         user = new User({slack: slackUser});
       }
@@ -143,7 +143,7 @@ export default class SlackAdapter extends Adapter {
         this.logger.debug(`[slack] found myself! id: ${slackUser.id}, name: ${slackUser.name}`);
         this.me = user.slack;
       }
-      this.robot.brain.updateUser(user);
+      this.robot.db.updateUser(user.serialize());
     }
     this.logger.debug(`Found ${Object.keys(this.users).length} users`);
   }
@@ -181,7 +181,7 @@ export default class SlackAdapter extends Adapter {
     return this.slackRequest("chat.postMessage", body);
   }
 
-  send(envelope, strings) {
+  send(envelope: Envelope, strings: string | string[]) {
     if (envelope.room === undefined) {
       for (let str of strings) {
         this.sendMessageToUser(envelope.user.slack.id, str, {link_names: 1});
@@ -287,7 +287,7 @@ export default class SlackAdapter extends Adapter {
 
   // Take a slack message and replace the <ID>'s with users, save original
   // message
-  private formatMessage(data: any): string {
+  private async formatMessage(data: any): Promise<string> {
     if (!data || !data.text) {
       // TODO: happens with Giphy messages and probably a lot of others. Should handle better
       this.robot.logger.warn(`[slack] cannot format message without text: ${data}`);
@@ -296,7 +296,7 @@ export default class SlackAdapter extends Adapter {
     for (let match of data.text.match(/<@(\w+)>/gi) || []) {
       let userString = match.slice(2, -1);
       // console.log('format user for id', match, userString);
-      let user = this.robot.brain.userForId(userString);
+      let user = await this.robot.db.userForId(userString);
       if (!user) {
         this.robot.logger.warn(`[slack] found unknown user ${userString}, match: ${match}`);
         continue;

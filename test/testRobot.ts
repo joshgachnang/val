@@ -191,6 +191,40 @@ class RobotTestSuite {
     this.hearRespondTest(false, "i want 12 {:MULTIWORD}", "i want 12 kamikaze shots, please", done);
   }
 
+  hearWordPunctuationFail(done) {
+    this.failHearRespond(false, "i want 12 {:WORD}", "i want 12 'kamikaze' shots, please", done);
+  }
+
+  @test
+  hearAnySlot(done) {
+    this.hearRespondTest(
+      false,
+      "i want 12 {:ANY} shots",
+      "i want 12 'kamikaze' shots, please",
+      done
+    );
+  }
+
+  @test
+  hearMultiAnySlot(done) {
+    this.hearRespondTest(
+      false,
+      "i want 12 {:MULTIANY}",
+      "i want 12 'kamikaze' shots, please",
+      done
+    );
+  }
+
+  @test
+  hearMultiAnyMultiLineSlot(done) {
+    this.hearRespondTest(
+      false,
+      "i want 12 {:MULTIANY} please",
+      "i want 12 'kamikaze' \n\n shots, please",
+      done
+    );
+  }
+
   @test
   hearMultiTypeSlot(done) {
     this.hearRespondTest(

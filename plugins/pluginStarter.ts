@@ -27,7 +27,7 @@ import Robot from "../robot";
 // when the plugin is first loaded by the Robot and should do any setup necessary, such as setting
 // up HTTP endpoints or listening for phrases.
 // If the plugin returns a promise, the Robot will wait for the promise to resolve before moving to
-// load the next plugin. You should only do this when absolutely necessary (see mongo-brain), as it
+// load the next plugin. You should only do this when absolutely necessary, as it
 // can massively increase startup time.
 export default function(robot: Robot) {
   async function hello() {
