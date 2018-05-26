@@ -8,8 +8,7 @@
     "build": "npm run build:clean && npm run build:copy && npm run build:compile",
     "build:clean": "rm -rf dist/*",
     "build:compile": "tsc",
-    "build:copy":
-      "mkdir -p dist/config/ && cp -a thirdParty dist/ && if [ -f configuration.json  ]; then cp configuration.json  dist/; fi",
+    "build:copy": "mkdir -p dist/config/ && cp -a thirdParty dist/ && if [ -f configuration.json  ]; then cp configuration.json  dist/; fi",
     "docker": "npm run build && docker build -t servercobra/val . && docker push servercobra/val",
     "precommit": "prettier --print-width 100 --trailing-comma 'all'  --write '**/*.ts'",
     "start": "node dist/server.js",
@@ -24,8 +23,10 @@
   "license": "GPL-3.0",
   "dependencies": {
     "@google-cloud/firestore": "^0.13.1",
+    "@octokit/rest": "^15.4.0",
     "better-require": "0.0.3",
     "body-parser": "1.18.2",
+    "bson-objectid": "^1.2.3",
     "cheerio": "^1.0.0-rc.2",
     "coffee-script": "1.12.7",
     "cors": "2.8.4",
@@ -67,6 +68,7 @@
     "@types/mongodb": "2.2.18",
     "@types/mongoose": "4.7.30",
     "@types/node": "8.5.2",
+    "@types/request": "^2.47.0",
     "@types/supertest": "2.0.4",
     "@types/winston": "2.3.7",
     "babel-cli": "6.26.0",
@@ -91,7 +93,9 @@
     "watchify": "3.9.0"
   },
   "babel": {
-    "presets": ["es2016"]
+    "presets": [
+      "es2016"
+    ]
   },
   "prettier": {
     "arrowParens": "always",
