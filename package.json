@@ -8,7 +8,8 @@
     "build": "npm run build:clean && npm run build:copy && npm run build:compile",
     "build:clean": "rm -rf dist/*",
     "build:compile": "tsc",
-    "build:copy": "mkdir -p dist/config/ && cp -a thirdParty dist/ && if [ -f configuration.json  ]; then cp configuration.json  dist/; fi",
+    "build:copy":
+      "mkdir -p dist/config/ && cp -a thirdParty dist/ && if [ -f configuration.json  ]; then cp configuration.json  dist/; fi",
     "docker": "npm run build && docker build -t servercobra/val . && docker push servercobra/val",
     "precommit": "prettier --print-width 100 --trailing-comma 'all'  --write '**/*.ts'",
     "start": "node dist/server.js",
@@ -22,8 +23,9 @@
   "author": "Josh Gachnang",
   "license": "GPL-3.0",
   "dependencies": {
-    "@google-cloud/firestore": "^0.13.1",
-    "@octokit/rest": "^15.4.0",
+    "@google-cloud/firestore": "0.13.1",
+    "@octokit/rest": "15.4.0",
+    "alexa-app": "4.2.2",
     "better-require": "0.0.3",
     "body-parser": "1.18.2",
     "bson-objectid": "^1.2.3",
@@ -46,7 +48,7 @@
     "node-gyp": "3.6.2",
     "node-rescuetime": "0.1.1",
     "numbered": "1.1.0",
-    "parse5": "^4.0.0",
+    "parse5": "4.0.0",
     "pluralize": "7.0.0",
     "q": "1.5.1",
     "raven": "2.3.0",
@@ -57,7 +59,8 @@
     "twitter": "1.7.1",
     "winston": "2.4.0",
     "ws": "3.3.3",
-    "xml2js-promise": "0.0.2"
+    "xml2js-promise": "0.0.2",
+    "xregexp": "4.1.1"
   },
   "devDependencies": {
     "@types/body-parser": "1.16.8",
@@ -93,9 +96,7 @@
     "watchify": "3.9.0"
   },
   "babel": {
-    "presets": [
-      "es2016"
-    ]
+    "presets": ["es2016"]
   },
   "prettier": {
     "arrowParens": "always",

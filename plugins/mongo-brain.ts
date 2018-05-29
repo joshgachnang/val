@@ -28,6 +28,10 @@ export default function(robot) {
   let db;
   let cache = {};
 
+  if (!robot.config.get("MONGODB_URL")) {
+    return Promise.resolve();
+  }
+
   return MongoClient.connect(robot.config.get("MONGODB_URL"))
     .then((client) => {
       db = client.db(robot.config.get("MONGODB_DATABASE"));

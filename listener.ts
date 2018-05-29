@@ -1,5 +1,7 @@
 "use strict";
 
+import * as XRegExp from "xregexp";
+
 import {TextMessage} from "./message";
 import Response from "./response";
 import Robot from "./robot";
@@ -39,13 +41,7 @@ export class Listener {
   call(message, adapter, responseMiddleware) {
     let match = this.matcher(message);
     if (match) {
-      this.robot.logger.debug(`[listener] found match: ${match}`);
-      if (this.regex) {
-        this.robot.logger.debug(
-          `[listener] Message '${message.text}' matched regex ${this.regex};` +
-            `listener.options = ${this.options}`
-        );
-      }
+      this.robot.logger.debug("[listener] found match:", match);
 
       let response: Response;
       try {
@@ -78,15 +74,16 @@ export class Listener {
 
 class SlotMatcher {
   // TODO compile all the regexes into one
-  private regex: RegExp;
+  private regex: XRegExp;
   private robot: Robot;
+  private regexString: string;
 
   DEFAULT_SLOTS = {
-    WORD: "(\\w+)",
-    MULTIWORD: "([\\w\\s]+)",
-    ANY: "s?(.+)s?",
-    MULTIANY: "(.+)",
-    NUMBER: "([\\d\\.]+)",
+    WORD: "($SLOTNAME\\w+)",
+    MULTIWORD: "($SLOTNAME[\\w\\s]+)",
+    ANY: "s?($SLOTNAME.+)s?",
+    MULTIANY: "($SLOTNAME.+)",
+    NUMBER: "($SLOTNAME[\\d\\.\\,]+)",
     BOT_NAME: (text: string) => `${this.robot.config.get("BOT_NAME")}:?`,
     // URL: (text: string) => {return false;},
   };
@@ -94,16 +91,28 @@ class SlotMatcher {
   constructor(robot: Robot, text: string) {
     this.robot = robot;
     this.buildRegexes(text);
-    console.log(`Adding hear listener: ${this.regex}`);
   }
 
   private stringPaddedRegex(text: string) {
     return `\\b${text}\\b`;
   }
 
+  private getSlotRegex(slot: string, name?: string): string {
+    let regex = this.DEFAULT_SLOTS[slot];
+    if (typeof regex !== "string") {
+      return regex;
+    }
+    if (name) {
+      regex = regex.replace("$SLOTNAME", `?<${name}>`);
+    } else {
+      regex = regex.replace("$SLOTNAME", "");
+    }
+    return regex;
+  }
+
   // Match strings of the type "{opt1|opt2|opt3...}" and replace the slot with each option
-  private orMatches(text: string): string {
-    let orRegex = new RegExp("{(['\\w\\d\\s\\|]+)}", "g");
+  private orMatches(text: string, slotName?: string): string {
+    let orRegex = new XRegExp(`{(['\\w\\d\\s\\|]+)}`, "g");
 
     let matches = [];
     let orMatch = orRegex.exec(text);
@@ -134,8 +143,8 @@ class SlotMatcher {
     return text;
   }
 
-  private typeMatches(text: string): string {
-    let orRegex = new RegExp("{([\\w\\d\\s\\:]+)}", "g");
+  private typeMatches(text: string, slotName?: string): string {
+    let orRegex = new XRegExp("{([\\w\\d\\s\\:]+)}", "g");
 
     let matches = [];
     let orMatch = orRegex.exec(text);
@@ -150,7 +159,7 @@ class SlotMatcher {
         throw new Error(`[listener] Cannot parse invalid slot syntax: ${match}`);
       }
 
-      let slotRegex = this.DEFAULT_SLOTS[parts[1]];
+      let slotRegex = this.getSlotRegex(parts[1], parts[0]);
       if (!slotRegex) {
         throw new Error(`[listener] Cannot find slot ${parts[1]} for match: ${match}`);
       }
@@ -165,11 +174,12 @@ class SlotMatcher {
     let regexString = "";
     regexString = this.orMatches(text);
     regexString = this.typeMatches(regexString);
-    this.regex = new RegExp(regexString);
+    // this.regexString = regexString;
+    this.regex = new XRegExp(regexString, "gi");
   }
 
   public match(text: string) {
-    return this.regex.exec(text);
+    return XRegExp.exec(text, this.regex);
   }
 }
 

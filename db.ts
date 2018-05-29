@@ -51,7 +51,6 @@ export default class DB {
         this.userTokenMap[user.authToken] = user.id;
       }
     }
-    console.log("TOKEN MAP", this.userTokenMap);
   }
 
   // By default, everything is stored per user.
@@ -64,8 +63,6 @@ export default class DB {
   }
 
   set(userId, key, value): Promise<void> {
-    console.log("SETTING", this.getKey(userId, key));
-    console.log("TO VALUE", value);
     return this.db.doc(this.getKey(userId, key)).set(value);
   }
 
@@ -73,7 +70,6 @@ export default class DB {
     let docs = [];
     let all = await this.db.doc(this.getKey(userId, key)).get();
     if (all.forEach) {
-      console.log("GET ALL", all);
       all.forEach((doc) => docs.push(doc.data()));
       return docs;
     } else {
@@ -183,7 +179,6 @@ export default class DB {
 
   public async registerDefaultsForCateogry(category: string, items: string[]): Promise<void> {
     let allItems = (await this.get(GLOBAL_KEY, this.CATEGORY_KEY)) || {};
-    console.log("all items", allItems);
     let existingItems = allItems[category] || [];
     if (existingItems.length > 0) {
       return;

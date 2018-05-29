@@ -1,4 +1,5 @@
-const alexa = require("../thirdParty/alexa-app/");
+const alexa = require("alexa-app");
+import * as express from "express";
 const app = new alexa.app("val");
 
 import Adapter from "../adapter";
@@ -60,55 +61,57 @@ export default class AlexaAdapter extends Adapter {
   constructor(robot) {
     super(robot);
     this.robot = robot;
-
-    //    robot.on('pluginInitialized', this.postPluginInit());
   }
 
-  run() {
-    this.robot.router.get("/alexa/schema", (req, res) => {
-      let schema = app.schema();
-      //      robot.logger.debug('schema', schema);
-      let utterances = app.utterances();
-      this.robot.logger.debug("UTTERANCES", utterances);
-      utterances = utterances.replace(new RegExp("\\n", "g"), "<br />");
-      let template = `<h2>Schema:</h2><p>${schema}</p><h2>Utterances:</h2><p>${utterances}</p>`;
-      res.send(template);
-    });
+  getSchema(req, res) {
+    return res.send(app.schemas.askcli());
+  }
 
-    // Expose alexa-app
-    app.express(this.robot.router, "/alexa/api/", true);
+  run() {}
+
+  createApp(name: string, intents: any, invocationName?: string, welcomeMessage?: string) {
+    console.log(`[alexa] creating Alexa app ${name}`);
+
+    if (!welcomeMessage) {
+      welcomeMessage = `hello, welcome to ${invocationName}`;
+    }
+
+    if (invocationName) {
+      app.invocationName = invocationName;
+    }
 
     app.launch((req, res) => {
-      res.say("hello, my name is val.");
+      res.say(welcomeMessage);
     });
 
-    let utterances = ["say the number {1-2|number}"];
-    let slots = {number: "NUMBER"};
-    let numberIntent = new AlexaIntent(
-      "saynumber",
-      utterances,
-      (slots) => {
-        return `you wanted the number ${slots.number}`;
-      },
-      slots
-    );
-    this.intents.push(numberIntent);
+    for (let intent of intents) {
+      this.createIntent(app, intent);
+    }
 
-    // app.intent("saynumber", {
-    //    slots: { number: "NUMBER" },
-    //    utterances: ["say the number {1-2|number}"]
-    //  }, (req, res) => {
-    //    this.robot.logger.info('Alexa intent' + req.name);
-    //    var number = req.slot("number");
-    //    res.say("You asked for the number " + number);
-    //  }
-    // );
+    // Expose alexa-app
+    let router = express.Router();
+    app.express({
+      router: router,
+      endpoint: "/" + name,
+      checkCert: true,
+      debug: true,
+    });
+    this.robot.router.use("/alexa", router);
+    this.robot.router.get(`/alexa/schema/${name}`, this.getSchema.bind(this));
+  }
+
+  createIntent(app: any, intent: any) {
+    console.log("creating intent", intent);
+    app.intent(intent.name, intent.options, intent.options.callback);
+    for (let slot of intent.options.customSlots || []) {
+      console.log("adding slot", slot.name, slot.values);
+      app.customSlot(slot.name, slot.values);
+    }
   }
 
   postPluginInit() {
     this.robot.logger.debug("[Alexa] Running post plugin init");
     // Register all the intents and such
-
     for (let intent of this.intents) {
       let options = {slots: undefined, utterances: intent.utterances};
       if (intent.slots) {

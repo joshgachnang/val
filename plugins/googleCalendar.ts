@@ -155,11 +155,11 @@ export default async function(robot: Robot) {
   }
 
   // Register an Alexa Intent
-  if (robot.adapters.AlexaAdapter) {
-    let alexaAdapter = robot.adapters.AlexaAdapter as AlexaAdapter;
-    let utterances = ["What is on my agenda"];
-    alexaAdapter.registerIntent("GetAgenda", utterances, (slots) => "What is on my agenda");
-  }
+  // if (robot.adapters.AlexaAdapter) {
+  // let alexaAdapter = robot.adapters.AlexaAdapter as AlexaAdapter;
+  // let utterances = ["What is on my agenda"];
+  // alexaAdapter.registerIntent("GetAgenda", utterances, (slots) => "What is on my agenda");
+  // }
 
   /**
    * Create an OAuth2 client with the given credentials, and then execute the

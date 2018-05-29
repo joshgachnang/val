@@ -96,9 +96,9 @@ export default function(robot: Robot) {
     sendJournalNotifications();
   });
 
-  robot.respond("journal {:MULTIANY}", {}, async (res: Response) => {
+  robot.respond("journal {notes:MULTIANY}", {}, async (res: Response) => {
     let journalData = await getJournalData(res.envelope.user.id);
-    journalData.entries.push({date: new Date(), text: res.match[1]});
+    journalData.entries.push({date: new Date(), text: res.slot("notes")});
     saveJournalData(res.envelope.user.id, journalData);
     res.reply("Alright! I saved that journal entry. See you tomorrow!");
   });
