@@ -93,7 +93,7 @@ export default class AlexaAdapter extends Adapter {
     app.express({
       router: router,
       endpoint: "/" + name,
-      checkCert: false,
+      checkCert: true,
       debug: true,
     });
     this.robot.router.use("/alexa", router);
