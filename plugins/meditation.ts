@@ -13,11 +13,11 @@ import Robot from "../robot";
 
 export default function(robot: Robot) {
   // Register an Alexa Intent
-  if (robot.adapters.AlexaAdapter) {
-    let alexaAdapter = robot.adapters.AlexaAdapter as AlexaAdapter;
-    let utterances = ["Start meditation"];
-    alexaAdapter.registerIntent("StartMeditation", utterances, (slots) => "Start meditation");
-  }
+  // if (robot.adapters.AlexaAdapter) {
+  // let alexaAdapter = robot.adapters.AlexaAdapter as AlexaAdapter;
+  // let utterances = ["Start meditation"];
+  // alexaAdapter.registerIntent("StartMeditation", utterances, (slots) => "Start meditation");
+  // }
 
   robot.hear(/start meditation/i, {}, (response: Response) => {
     if (!response) return;
