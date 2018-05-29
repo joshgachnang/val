@@ -173,6 +173,7 @@ export default class Robot extends EventEmitter {
     this.emit("pluginsInitialized");
 
     for (let adapterName in this.adapters) {
+      this.logger.debug(`[Robot] Initializing ${adapterName} adapter`);
       let adapterClass = this.adapters[adapterName];
       adapterClass.run();
     }
