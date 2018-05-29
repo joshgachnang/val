@@ -3,7 +3,7 @@ import Room from "./room";
 import User from "./user";
 
 export default class Envelope {
-  room: Room;
+  room?: Room;
   user: User;
   message: Message;
   adapterName: string;
