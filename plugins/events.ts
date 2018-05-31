@@ -46,28 +46,30 @@ export class Event {
 }
 
 export default function(robot: Robot) {
-  function getEvents(userId: string): Event[] {
-    let events = robot.brain.getForUser("events", userId) || [];
-    return events.map((e) => {
-      return new Event(e);
-    });
+  async function getEvents(userId: string): Promise<EventData[]> {
+    let data = (await robot.db.get(userId, "events")) || {};
+    return data.events || [];
   }
 
-  function saveEvents(events: Event[], userId: string) {
-    robot.brain.setForUser("events", events, userId);
+  function saveEvents(events: EventData[], userId: string) {
+    return robot.db.set(userId, "events", {events});
   }
 
-  function saveEvent(eventData, userId: string): Event {
-    robot.logger.info(`Saving event: ${eventData}`);
-    let e = new Event(eventData);
-    let events = getEvents(userId);
-    events.push(e);
+  async function saveEvent(event, userId: string): Promise<EventData> {
+    if (!event.created) {
+      event.created = new Date();
+    }
+    robot.logger.info(`Saving event: ${event}`, event);
+    let events = await getEvents(userId);
+    events.push(event);
+    console.log("saving events", events);
+
     saveEvents(events, userId);
-    return e;
+    return event;
   }
 
-  function eventsText(hours: number, kind: string, userId: string): string {
-    let eventList = getEvents(userId);
+  async function eventsText(hours: number, kind: string, userId: string): Promise<string> {
+    let eventList = await getEvents(userId);
     eventList = eventList.filter((e) => e.kind === kind);
     if (!eventList || eventList.length === 0) {
       return `No events in the past ${hours} hours`;
@@ -88,33 +90,33 @@ export default function(robot: Robot) {
   }
 
   // TODO: introduce api keys
-  robot.router.post("/events", (req, res) => {
+  robot.router.post("/events", async (req, res) => {
     console.log("EVENT POST", req.query.userId, req.body);
     if (!req.query.userId) {
       return res.status(403).send();
     }
-    let e = saveEvent(req.body, req.query.userId);
+    let e = await saveEvent(req.body, req.query.userId);
     return res.status(201).json(e);
   });
 
-  robot.router.get("/events", (req, res) => {
+  robot.router.get("/events", async (req, res) => {
     if (!req.query.userId) {
       return res.status(403).send();
     }
-    return res.json({events: getEvents(req.query.userId)});
+    return res.json({events: await getEvents(req.query.userId)});
   });
 
   // TODO: these should go in their own plugins
-  robot.respond("standup", {}, (res: Response) => {
-    res.reply("\n" + eventsText(27, "gitcommit", res.userId));
+  robot.respond("standup", {}, async (res: Response) => {
+    res.reply("\n" + (await eventsText(27, "gitcommit", res.userId)));
   });
 
-  robot.respond("weekly email", {}, (res: Response) => {
-    res.reply("\n" + eventsText(180, "gitcommit", res.userId));
+  robot.respond("weekly email", {}, async (res: Response) => {
+    res.reply("\n" + (await eventsText(180, "gitcommit", res.userId)));
   });
 
   // Format "[kind] (label) actual log stuff"
-  robot.respond(/log (.*)/i, {}, (res: Response) => {
+  robot.respond(/log (.*)/i, {}, async (res: Response) => {
     // Parse out kind and labels
     let text = res.match[1];
     let eventData: EventData = {};
@@ -133,7 +135,7 @@ export default function(robot: Robot) {
 
     eventData.description = text.trim();
     console.log("EVENT DATA", eventData);
-    saveEvent(eventData, res.userId);
+    await saveEvent(eventData, res.userId);
     res.reply("Ok! Saved that to your events.");
   });
 
