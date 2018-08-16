@@ -8,8 +8,7 @@
     "build": "npm run build:clean && npm run build:copy && npm run build:compile",
     "build:clean": "rm -rf dist/*",
     "build:compile": "tsc",
-    "build:copy":
-      "mkdir -p dist/config/ && cp -a thirdParty dist/ && if [ -f configuration.json  ]; then cp configuration.json  dist/; fi",
+    "build:copy": "mkdir -p dist/config/ && cp -a thirdParty dist/ && if [ -f configuration.json  ]; then cp configuration.json  dist/; fi",
     "docker": "npm run build && docker build -t servercobra/val . && docker push servercobra/val",
     "precommit": "prettier --print-width 100 --trailing-comma 'all'  --write '**/*.ts'",
     "start": "node dist/server.js",
@@ -85,7 +84,7 @@
     "eslint": "4.13.1",
     "mocha": "4.0.1",
     "mocha-typescript": "1.1.12",
-    "nodemon": "1.14.2",
+    "nodemon": "1.18.3",
     "prettier": "1.9.2",
     "rimraf": "2.6.2",
     "source-map-support": "0.5.0",
@@ -96,7 +95,9 @@
     "watchify": "3.9.0"
   },
   "babel": {
-    "presets": ["es2016"]
+    "presets": [
+      "es2016"
+    ]
   },
   "prettier": {
     "arrowParens": "always",
