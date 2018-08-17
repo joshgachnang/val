@@ -10,9 +10,7 @@ import * as cron from "cron";
 import * as express from "express";
 import {existsSync, readFileSync} from "fs";
 import * as fs from "fs";
-import * as https from "https";
 import * as path from "path";
-import {env, exit} from "process";
 import * as raven from "raven";
 import * as request from "request";
 import * as winston from "winston";
@@ -22,13 +20,11 @@ import Brain from "./brain";
 import Config from "./config";
 import DB from "./db";
 import Envelope from "./envelope";
-import {APIError} from "./errors";
 import {Listener, TextListener} from "./listener";
 import {Message, TextMessage} from "./message";
 import "./polyfill";
 import Response from "./response";
 import User from "./user";
-import {Db} from "mongodb";
 
 let HUBOT_DOCUMENTATION_SECTIONS = [
   "description",
@@ -143,11 +139,22 @@ export default class Robot extends EventEmitter {
         this.logger.warn(`Could not find plugin ${plugin}: ${e}`);
         continue;
       }
+
+      let filename = require.resolve(plugin);
+      let help = this.parseHelp(filename);
+      let parts = filename.split("/");
+      let pluginName = parts[parts.length - 1].replace(".js", "").replace(".coffee", "");
+
       let ret;
       try {
         // Use default here to get the default exported function
-        if (pluginModule.default) {
-          ret = pluginModule.default(this);
+        if (pluginModule.default && pluginModule.default.init) {
+          console.log("LOADING NEW MODULE", pluginName);
+          ret = pluginModule.default.init(this);
+          // Save new style plugins to robot so they can be called from other plugins.
+          this.plugins[pluginName] = pluginModule.default;
+        } else if (pluginModule.default) {
+          this.plugins[pluginName] = pluginModule;
         } else {
           // Backwards compatability with Hubot
           ret = pluginModule(this);
@@ -161,13 +168,7 @@ export default class Robot extends EventEmitter {
         await ret;
       }
 
-      let filename = require.resolve(plugin);
-      let help = this.parseHelp(filename);
-      let parts = filename.split("/");
-      let pluginName = parts[parts.length - 1].replace(".js", "").replace(".coffee", "");
       this.help[pluginName] = help;
-      // Save the module to the root. Some plugins might use this for inter-plugin calls.
-      this.plugins[pluginName] = pluginModule;
     }
     this.logger.debug("[Robot] Finished loading plugins");
     this.emit("pluginsInitialized");
