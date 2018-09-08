@@ -149,11 +149,11 @@ export default class Robot extends EventEmitter {
       try {
         // Use default here to get the default exported function
         if (pluginModule.default && pluginModule.default.init) {
-          ret = pluginModule.default.init(this);
+          ret = await pluginModule.default.init(this);
           // Save new style plugins to robot so they can be called from other plugins.
           this.plugins[pluginName] = pluginModule.default;
         } else if (pluginModule.default) {
-          pluginModule.default(this);
+          await pluginModule.default(this);
           this.plugins[pluginName] = pluginModule;
         } else {
           // Backwards compatability with Hubot
@@ -161,11 +161,6 @@ export default class Robot extends EventEmitter {
         }
       } catch (e) {
         throw new Error(`Failed to initialize plugin ${plugin}: ${e}`);
-      }
-      // Check if the plugin returns a promise. If so, await it.
-      if (ret && ret.then && typeof ret.then === "function") {
-        this.logger.debug(`Plugin returned promise, awaiting on: ${plugin}`);
-        await ret;
       }
 
       this.help[pluginName] = help;
