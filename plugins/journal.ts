@@ -25,10 +25,11 @@ interface UserJournalData {
 
 export default function(robot: Robot) {
   async function getJournalData(userId: string): Promise<UserJournalData> {
-    let journal = ((await robot.db.get(userId, JOURNAL_KEY)) as UserJournalData) || {
+    let defaultReturn = {
       enabled: false,
       entries: [],
     };
+    let journal = (await robot.db.get(userId, JOURNAL_KEY, defaultReturn)) as UserJournalData;
     return journal;
   }
 
@@ -50,8 +51,12 @@ export default function(robot: Robot) {
       );
       return;
     }
+    robot.logger.info(
+      `[journal] sending journal notification to slack user: ${user.slack.name} (${user.slack.id})`
+    );
     robot.adapters["Slack"].sendToName(
       user.slack.name,
+      user.slack.teamId,
       "Hello! Good morning! It is time to journal! You can make a journal entry by telling me " +
         "'journal' and then whatever you want to write down. I'll keep it safe and private. " +
         "Promise!"

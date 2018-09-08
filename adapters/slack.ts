@@ -2,9 +2,6 @@
 import {EventEmitter} from "events";
 
 import * as _ from "lodash";
-import * as request from "request";
-import * as winston from "winston";
-import * as WebSocket from "ws";
 
 import Adapter from "../adapter";
 import Envelope from "../envelope";
@@ -135,6 +132,8 @@ export default class SlackAdapter extends Adapter {
       let user = await this.robot.db.userForId(slackUser.id);
       if (!user) {
         user = new User({slack: slackUser});
+      } else {
+        user.updateSlackUser(slackUser);
       }
 
       this.users[slackUser.id] = user;
@@ -193,10 +192,10 @@ export default class SlackAdapter extends Adapter {
     }
   }
 
-  private findUserByName(name: string): User {
+  private findUserByName(name: string, teamId: string): User {
     let user: User;
     for (let u of Object.values(this.users)) {
-      if (u.slack.name === name) {
+      if (u.slack.name === name && u.slack.teamId === teamId) {
         user = u as User;
         break;
       }
@@ -216,14 +215,14 @@ export default class SlackAdapter extends Adapter {
   }
 
   // Send to a user by name, usually outside the normal requeset/response cycle (e.g. cronjob, etc)
-  sendToName(name: string, ...strings) {
-    let user = this.findUserByName(name);
+  sendToName(name: string, teamId: string, ...strings) {
+    let user = this.findUserByName(name, teamId);
 
     if (!user) {
       this.robot.logger.error(
-        `Could not find user to send message to by name: ${name}. msg: ${strings}`
+        `Could not find user to send message to by name: ${name} teamId: ${teamId} msg: ${strings}`
       );
-      throw new Error(`Slack sendToName, name not found: ${name}`);
+      throw new Error(`Slack sendToName, name not found: ${name} in team ${teamId}`);
     }
 
     let room = this.findChannelByUserId(user.slack.id);

@@ -6,11 +6,16 @@ export class SlackUser {
 
   // Profile data
   public realName: string;
+  public tzOffset: number;
+  public tzLabel: string;
 
   constructor(userObj: any) {
     this.id = userObj.id;
     this.name = userObj.name;
-    this.teamId = userObj.teamId;
+    this.tzOffset = userObj.tzOffset || userObj.tz_offset;
+    this.tzLabel = userObj.tzLabel || userObj.tz_label;
+    this.realName = userObj.realName || userObj.real_name;
+    this.teamId = userObj.teamId || userObj.team_id;
 
     if (userObj.profile) {
       this.realName = userObj.profile.real_name;
@@ -91,13 +96,23 @@ export default class User {
   }
 
   // See if any subusers have the same id
-  public containsId(id: string) {
+  public containsId(id: string): boolean {
     if (this.id === id) {
       return true;
     } else if (this.slack && this.slack.id === id) {
       return true;
     } else if (this.twilio && this.twilio.id === id) {
       return true;
+    }
+    return false;
+  }
+
+  public onTeam(id: string): boolean {
+    if (!id) {
+      return false;
+    }
+    if (this.slack) {
+      return this.slack.teamId === id;
     }
     return false;
   }

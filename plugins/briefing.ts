@@ -37,11 +37,15 @@ export default function(robot: Robot) {
       );
       return;
     }
-    robot.adapters["Slack"].sendToName(user.slack.name, `Good ${time}!\n\n${text}`);
+    robot.adapters["Slack"].sendToName(
+      user.slack.name,
+      user.slack.teamId,
+      `Good ${time}!\n\n${text}`
+    );
   }
 
-  async function executeBriefings(time: string) {
-    let users = await robot.db.getUsers();
+  async function executeBriefings(time: string, teamId?: string) {
+    let users = await robot.db.getUsers(teamId);
     for (let user of Object.values(users)) {
       let briefings = (await robot.db.get(user.id, BRIEFING_KEY)) || {};
       if (briefings[time]) {
@@ -93,6 +97,6 @@ export default function(robot: Robot) {
   });
 
   robot.respond("execute morning", {}, (res: Response) => {
-    executeBriefings("morning");
+    executeBriefings("morning", res.teamId);
   });
 }

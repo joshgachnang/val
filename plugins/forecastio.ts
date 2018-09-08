@@ -19,46 +19,73 @@ import * as request from "request";
 import Response from "../response";
 import Robot from "../robot";
 
-export default function(robot) {
-  let forecast = {};
+class ForecastIO {
+  robot: Robot;
+  DARKSKY_URL;
+  forecast = {};
 
-  let lat = robot.config.get("LATITUDE");
-  let lng = robot.config.get("LONGITUDE");
-  let key = robot.config.get("DARKSKY_KEY");
-  let DARKSKY_URL = `https://api.darksky.net/forecast/${key}/${lat},${lng}`;
-  if (!lat || !lng || !key) {
-    robot.logger.warn(`[ForecastIO] LATITUDE, LONGITUDE, and DARKSKY_KEY config keys
+  init(robot: Robot) {
+    this.robot = robot;
+
+    let lat = robot.config.get("LATITUDE");
+    let lng = robot.config.get("LONGITUDE");
+    let key = robot.config.get("DARKSKY_KEY");
+    this.DARKSKY_URL = `https://api.darksky.net/forecast/${key}/${lat},${lng}`;
+    if (!lat || !lng || !key) {
+      robot.logger.warn(`[ForecastIO] LATITUDE, LONGITUDE, and DARKSKY_KEY config keys
             required, not configuring`);
-    return;
+      return;
+    }
+    robot.respond("forecast", {}, async (res: Response) => {
+      res.reply(await this.getDayForecast());
+    });
+
+    robot.respond("{what's the weather|what's the forecast}", {}, async (res: Response) => {
+      res.reply(await this.getDayForecast());
+    });
+
+    setInterval(() => {
+      this.refreshForecast();
+    }, 5 * 60 * 1000);
+    this.refreshForecast();
+
+    robot.router.get("/forecastio/", (req, res) => {
+      res.json(this.forecast);
+    });
+
+    // We want the weather to be towards the top
+    robot.briefing("0weather", async () => {
+      return await this.getDayForecast();
+    });
   }
 
-  function refreshForecast() {
-    request(DARKSKY_URL, (error, res, body) => {
+  refreshForecast() {
+    request(this.DARKSKY_URL, (error, res, body) => {
       if (error) {
-        robot.logger.warn(`[forecastio] refresh error ${error}`);
+        this.robot.logger.warn(`[forecastio] refresh error ${error}`);
         return;
       }
       try {
-        forecast = JSON.parse(body);
+        this.forecast = JSON.parse(body);
       } catch (error) {
-        robot.logger.warn(`[forecastio] parse error ${error}`);
+        this.robot.logger.warn(`[forecastio] parse error ${error}`);
       }
       // robot.logger.debug("[forecastio] Refreshed forecast", body);
     });
   }
 
-  async function fetchForecast() {
+  async fetchForecast() {
     try {
-      let response = await robot.request({url: DARKSKY_URL, json: true});
-      forecast = response;
+      let response = await this.robot.request({url: this.DARKSKY_URL, json: true});
+      this.forecast = response;
       return response;
     } catch (e) {
-      robot.logger.error("[forecastio] Error fetching forecast", e);
+      this.robot.logger.error("[forecastio] Error fetching forecast", e);
       return {};
     }
   }
 
-  function friendlySummary(data) {
+  friendlySummary(data) {
     let summary;
     switch (data.icon) {
       case "clear-day":
@@ -96,44 +123,24 @@ export default function(robot) {
     return `${Math.floor(data.temperature)} ${summary}`;
   }
 
-  async function getDayForecast() {
-    let forecast: any = await fetchForecast();
-    let tempString = `It is currently ${friendlySummary(forecast.currently)}.`;
+  async getDayForecast() {
+    let forecast: any = await this.fetchForecast();
+    let tempString = `It is currently ${this.friendlySummary(forecast.currently)}.`;
     let now = moment().tz(forecast.timezone);
     for (let hour of forecast.hourly.data) {
       let time = moment.unix(hour.time).tz(forecast.timezone);
       // If it is 11am on the same day as today
       if (time.format("H") === "11" && now.format("E") === time.format("E")) {
-        tempString += ` At 11am, it will be ${friendlySummary(hour)}.`;
+        tempString += ` At 11am, it will be ${this.friendlySummary(hour)}.`;
         // Or 7pm on the same day as today
       } else if (time.format("H") === "18" && now.format("E") === time.format("E")) {
-        tempString += ` At 7pm, it will be ${friendlySummary(hour)}.`;
+        tempString += ` At 7pm, it will be ${this.friendlySummary(hour)}.`;
       }
     }
     tempString += ` The rest of the day: ${forecast.hourly.summary} `;
     tempString += ` This week: ${forecast.daily.summary} `;
     return tempString;
   }
-
-  robot.respond("forecast", {}, async (res: Response) => {
-    res.reply(await getDayForecast());
-  });
-
-  robot.respond("{what's the weather|what's the forecast}", {}, async (res: Response) => {
-    res.reply(await getDayForecast());
-  });
-
-  setInterval(() => {
-    refreshForecast();
-  }, 5 * 60 * 1000);
-  refreshForecast();
-
-  robot.router.get("/forecastio/", (req, res) => {
-    res.json(forecast);
-  });
-
-  // We want the weather to be towards the top
-  robot.briefing("0weather", async () => {
-    return await getDayForecast();
-  });
 }
+
+export default new ForecastIO();

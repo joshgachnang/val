@@ -66,21 +66,21 @@ export default class DB {
     return this.db.doc(this.getKey(userId, key)).set(value);
   }
 
-  async get(userId, key): Promise<any[] | any> {
+  async get(userId: string, key: string, defaultReturn?: any): Promise<any[] | any> {
     let docs = [];
     let all = await this.db.doc(this.getKey(userId, key)).get();
     if (all.forEach) {
       all.forEach((doc) => docs.push(doc.data()));
-      return docs;
     } else {
-      return all.data();
+      docs = all.data();
     }
+    return docs !== undefined ? docs : defaultReturn;
   }
 
   // Update or create new user
   public async updateUser(user: User): Promise<void> {
     if (!user || !user.id) {
-      this.robot.logger.warn(`[brain] Cannot update undefined user: ${user}`);
+      this.robot.logger.warn(`[db] Cannot update undefined user: ${user}`);
       return;
     }
     let users = await this.get(GLOBAL_KEY, "users");
@@ -99,18 +99,21 @@ export default class DB {
     return new User(users[userId]);
   }
 
-  public async getUsers(): Promise<{[id: string]: User}> {
+  public async getUsers(teamId?: string): Promise<{[id: string]: User}> {
     let rawUsers = (await this.get(GLOBAL_KEY, "users")) || {};
     let users = {};
     for (let id of Object.keys(rawUsers)) {
-      users[id] = new User(rawUsers[id]);
+      let user = new User(rawUsers[id]);
+      if (!teamId || user.onTeam(teamId)) {
+        users[id] = user;
+      }
     }
     return users;
   }
 
   public async userForId(id: string): Promise<User> {
     if (!id) {
-      this.robot.logger.warn("[brain] userForId cannot search for undefined id");
+      this.robot.logger.warn("[db] userForId cannot search for undefined id");
       return undefined;
     }
     // Ask each user object if the id is contained in thir user object
@@ -183,7 +186,7 @@ export default class DB {
     if (existingItems.length > 0) {
       return;
     }
-    this.robot.logger.debug(`[brain] Loading defaults for category ${category}`);
+    this.robot.logger.debug(`[db] Loading defaults for category ${category}`);
     allItems[category] = items;
     this.set(GLOBAL_KEY, this.CATEGORY_KEY, allItems);
   }
@@ -225,7 +228,7 @@ export default class DB {
 //     if (data) {
 //       _.extend(this.data, data);
 //     }
-//     this.robot.logger.info(`[brain] Merged data, current keys: ${Object.keys(this.data._private)}`);
+//     this.robot.logger.info(`[db] Merged data, current keys: ${Object.keys(this.data._private)}`);
 //     this.emit("loaded", this.data);
 //   }
 

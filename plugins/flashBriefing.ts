@@ -26,9 +26,11 @@ import * as moment from "moment-timezone";
 class FlashBriefing {
   init(robot: Robot) {
     let googleCalendar = robot.plugins.googleCalendar;
+    let forecastIO = robot.plugins.forecastio;
+
     robot.router.get("/alexa/flashBreifing", async (req, res) => {
-      console.log("PLUGINS", robot.plugins);
       let agenda = await googleCalendar.getAgenda(res.locals.userId);
+      let forecast = await forecastIO.getDayForecast();
       return res.json([
         {
           uid: `id1${moment()
@@ -39,7 +41,7 @@ class FlashBriefing {
             .utcOffset(0)
             .format("YYYY-MM-DD[T]HH:00:00.[0Z]"),
           titleText: "Val agenda",
-          mainText: agenda,
+          mainText: agenda + ` In today's forecast: ${forecast}`,
         },
       ]);
     });

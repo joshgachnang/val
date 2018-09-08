@@ -11,6 +11,7 @@ export default class Response {
   match: any;
   envelope: Envelope;
   userId: string;
+  teamId: string;
 
   constructor(bot: Robot, message: Message, match: any, adapter: any) {
     this.bot = bot;
@@ -24,6 +25,10 @@ export default class Response {
     );
     if (message && message.user && message.user.id) {
       this.userId = message.user.id;
+    }
+    if (message && message.user && message.user.slack && message.user.slack.teamId) {
+      // TODO support other team ids
+      this.teamId = message.user.slack.teamId;
     }
   }
 

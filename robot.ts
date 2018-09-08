@@ -149,11 +149,11 @@ export default class Robot extends EventEmitter {
       try {
         // Use default here to get the default exported function
         if (pluginModule.default && pluginModule.default.init) {
-          console.log("LOADING NEW MODULE", pluginName);
           ret = pluginModule.default.init(this);
           // Save new style plugins to robot so they can be called from other plugins.
           this.plugins[pluginName] = pluginModule.default;
         } else if (pluginModule.default) {
+          pluginModule.default(this);
           this.plugins[pluginName] = pluginModule;
         } else {
           // Backwards compatability with Hubot
