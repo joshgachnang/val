@@ -101,10 +101,8 @@ export default class AlexaAdapter extends Adapter {
   }
 
   createIntent(app: any, intent: any) {
-    console.log("creating intent", intent);
     app.intent(intent.name, intent.options, intent.options.callback);
     for (let slot of intent.options.customSlots || []) {
-      console.log("adding slot", slot.name, slot.values);
       app.customSlot(slot.name, slot.values);
     }
   }
