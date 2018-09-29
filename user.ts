@@ -48,12 +48,21 @@ export class PushUser {
   }
 }
 
+export class FacebookUser {
+  public id: string;
+
+  constructor(data: any) {
+    this.id = data.id;
+  }
+}
+
 export default class User {
   public id: string;
   public slack: SlackUser;
   public twilio: TwilioUser;
   public alexa: AlexaUser;
   public push: PushUser;
+  public facebook: FacebookUser;
   public authToken: string;
   // TODO: add other oauth users, e.g. google, facebook, twitter, fitbit, etc
 
@@ -77,6 +86,9 @@ export default class User {
     if (data.push) {
       this.updatePushUser(data.push);
     }
+    if (data.facebook) {
+      this.updateFacebookUser(data.facebook);
+    }
   }
 
   public updateSlackUser(slackUserObj: any) {
@@ -95,6 +107,10 @@ export default class User {
     this.push = new PushUser(pushUserObj);
   }
 
+  public updateFacebookUser(facebookUserObj: any) {
+    this.facebook = new FacebookUser(facebookUserObj);
+  }
+
   // See if any subusers have the same id
   public containsId(id: string): boolean {
     if (this.id === id) {
@@ -102,6 +118,8 @@ export default class User {
     } else if (this.slack && this.slack.id === id) {
       return true;
     } else if (this.twilio && this.twilio.id === id) {
+      return true;
+    } else if (this.facebook && this.facebook.id === id) {
       return true;
     }
     return false;

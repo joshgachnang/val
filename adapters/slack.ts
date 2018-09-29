@@ -101,7 +101,7 @@ export default class SlackAdapter extends Adapter {
     this.receive(message);
   }
 
-  private async slackRequest(method: string, body: any = {}) {
+  private async slackRequest(method: string, body: any = {}): Promise<any> {
     body.token = this.robot.config.get("SLACK_TOKEN");
     let response: any;
     try {
@@ -126,7 +126,13 @@ export default class SlackAdapter extends Adapter {
   }
 
   private async updateUsers() {
-    let users = (await this.slackRequest("users.list")) as any;
+    let users = await this.slackRequest("users.list");
+
+    if (!users || !users.members) {
+      console.warn(`[slack] error fetching users.`, users);
+      return;
+    }
+
     for (let slackUser of users.members) {
       // See if we have a matching user in brain already
       let user = await this.robot.db.userForId(slackUser.id);
@@ -148,8 +154,14 @@ export default class SlackAdapter extends Adapter {
   }
 
   private async updateChannels() {
-    let publicChannels = (await this.slackRequest("channels.list")) as any;
-    let ims = (await this.slackRequest("im.list")) as any;
+    let publicChannels = await this.slackRequest("channels.list");
+    let ims = await this.slackRequest("im.list");
+
+    if (!publicChannels || !publicChannels.channels || !ims || !ims.ims) {
+      console.warn(`[slack] error updating channels`, publicChannels, ims);
+      return;
+    }
+
     let channels = publicChannels.channels.concat(ims.ims);
     for (let channel of channels) {
       let room: Room;

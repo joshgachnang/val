@@ -4,7 +4,7 @@ import {TextMessage} from "../message";
 import Robot from "../robot";
 import Envelope from "../envelope";
 
-export default class Twilio extends Adapter {
+export default class TwitterAdapter extends Adapter {
   client: Twitter;
   robot: Robot;
   adapterName = "Twitter";
