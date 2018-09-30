@@ -12,7 +12,7 @@ export default class Config {
     MONGODB_DATABASE: "hubot-brain",
     FIREBASE_PROJECT_ID: "",
     CRON_TIMEZONE: "America/Chicago",
-    ADAPTERS: ["./adapters/slack", "./adapters/alexa"],
+    ADAPTERS: ["./adapters/slack", "./adapters/alexa", "./adapters/facebook"],
   };
 
   // Loaded values from config file
