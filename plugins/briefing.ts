@@ -54,7 +54,7 @@ export default function(robot: Robot) {
     }
   }
 
-  robot.cron("morning briefing", "00 7 * * *", () => executeBriefings("morning"));
+  robot.cron("morning briefing", "00 6 * * *", () => executeBriefings("morning"));
   robot.cron("afternoon briefing", "30 12 * * *", () => executeBriefings("afternoon"));
   robot.cron("evening briefing", "0 18 * * *", () => executeBriefings("evening"));
 

@@ -40,9 +40,13 @@ class ForecastIO {
       res.reply(await this.getDayForecast());
     });
 
-    robot.respond("{what's the weather|what's the forecast}", {}, async (res: Response) => {
-      res.reply(await this.getDayForecast());
-    });
+    robot.respond(
+      "{what's the weather|what's the forecast|what is the forecast|what is the weather}",
+      {},
+      async (res: Response) => {
+        res.reply(await this.getDayForecast());
+      }
+    );
 
     setInterval(() => {
       this.refreshForecast();
