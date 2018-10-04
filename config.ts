@@ -1,20 +1,6 @@
 import * as process from "process";
 
 export default class Config {
-  defaultValues = {
-    EXPRESS_BIND_ADDRESS: "0.0.0.0",
-    EXPRESS_BIND_PORT: "8080",
-    BOT_NAME: "val",
-    PLUGINS: ["./plugins/users", "./plugins/mongo-brain", "./plugins/admin"],
-    BASE_URL: "http://localhost:8080",
-    DEV: "false",
-    MONGODB_URL: "mongodb://localhost/",
-    MONGODB_DATABASE: "hubot-brain",
-    FIREBASE_PROJECT_ID: "",
-    CRON_TIMEZONE: "America/Chicago",
-    ADAPTERS: ["./adapters/slack", "./adapters/alexa", "./adapters/facebook"],
-  };
-
   // Loaded values from config file
   private loadedConfig = {};
 
@@ -22,9 +8,21 @@ export default class Config {
   private setConfig = {};
 
   constructor() {
+    let exampleConfig = this.loadFile("configuration.example.json");
+    let config = this.loadFile("configuration.json");
+    this.loadedConfig = Object.assign({}, exampleConfig, config);
+  }
+
+  // Load either in this directory or in the directory above. (TS compilation doesn't copy over
+  // JSON files).
+  private loadFile(filename: string) {
     try {
-      this.loadedConfig = require("./configuration.json");
-    } catch (e) {}
+      return require("./" + filename);
+    } catch (e) {
+      try {
+        return require("../" + filename);
+      } catch (e) {}
+    }
   }
 
   // TODO: persist/load from brain
@@ -40,8 +38,6 @@ export default class Config {
       return process.env[key];
     } else if (this.loadedConfig[key] !== undefined) {
       return this.loadedConfig[key];
-    } else if (this.defaultValues[key] !== undefined) {
-      return this.defaultValues[key];
     } else if (defaultValue !== undefined) {
       return defaultValue;
     } else {

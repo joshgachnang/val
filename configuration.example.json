@@ -1,13 +1,20 @@
 {
   "BOT_NAME": "val",
+  "BOT_PORT": 8080,
+  "BOT_ADDRESS": "0.0.0.0",
   "BASE_URL": "http://localhost:8080",
   "DEV": true,
-  "MONGODB_URL": "mongodb://localhost/hubot-brain",
   "SENTRY_URL": "",
+  "FIREBASE_PROJECT_ID": "val-testing",
+  "CRON_TIMEZONE": "America/Los_Angeles",
 
-  "CRON_TIMEZONE": "America/Chicago",
-
-  "ADAPTERS": ["./adapters/slack", "./adapters/twilio", "./adapters/alexa", "./adapters/twitter"],
+  "ADAPTERS": [
+    "./adapters/slack",
+    "./adapters/twilio",
+    "./adapters/alexa",
+    "./adapters/twitter",
+    "./adapters/facebook"
+  ],
 
   "SLACK_TOKEN": "",
 
@@ -16,26 +23,29 @@
   "TWITTER_ACCESS_TOKEN_KEY": "",
   "TWITTER_ACCESS_TOKEN_SECRET": "",
 
+  "FACEBOOK_MESSENGER_TOKEN": "",
+  "FACEBOOK_MESSENGER_VERIFY_TOKEN": "",
+
+  "ADMIN_USERNAMES": ["josh"],
+
   "PLUGINS": [
-    "./plugins/help",
     "./plugins/users",
-    "./plugins/mongo-brain",
+    "./plugins/migrate",
     "./plugins/admin",
     "./plugins/emotionChip",
-    "./plugins/briefing",
+    "./plugins/healthcheck",
 
+    "./plugins/briefing",
     "./plugins/forecastio",
     "./plugins/inspirationalQuote",
     "./plugins/cta",
     "./plugins/googleCalendar",
-    "./plugins/meditation",
-    "./plugins/alarm",
+    "./plugins/journal",
     "./plugins/cryptocurrency",
     "./plugins/productivityQuote",
-    "./plugins/events",
-    "./plugins/todo",
-    "./plugins/healthcheck",
     "./plugins/emoticons",
+    "./plugins/twitter",
+
     "hubot-shipit",
     "../node_modules/hubot-scripts/src/scripts/ackbar.coffee",
     "../node_modules/hubot-scripts/src/scripts/coin.coffee",
@@ -44,12 +54,13 @@
     "../node_modules/hubot-scripts/src/scripts/xkcd.coffee"
   ],
 
-  "ADMIN_USERNAMES": ["josh"],
   "LATITUDE": 41.0,
   "LONGITUDE": -87.0,
   "CTA_TRAIN_API_KEY": "",
   "CTA_TRAIN_MAP_ID": "41320",
+
   "DARKSKY_KEY": "",
+
   "GOOGLE_CALENDAR_CLIENT_SECRET": {
     "installed": {
       "client_id": "",
@@ -61,8 +72,9 @@
       "redirect_uris": ["urn:ietf:wg:oauth:2.0:oob", "http://localhost"]
     }
   },
-  "CALENDAR_NAMES": ["LBB", "Bills", "pcsforeducation@gmail.com", "josh.gachnang@triggrhealth.com"],
-  "MIRROR_QUOTES": [
+  "CALENDAR_NAMES": ["username@gmail.com"],
+
+  "INSPIRATIONAL_QUOTES": [
     "Look at that sexy dude!",
     "Woah, stylin' today",
     "Damn guuuurrrrl",
@@ -71,6 +83,7 @@
     "I'm jealous of that shirt",
     "Go kick some ass today!"
   ],
+
   "PRODUCTIVITY_QUOTES": [
     "'It's not knowing what to do, it's doing what you know.' -Tony Robbins",
     "'Focus on being productive instead of busy.' -Tim Ferriss",
@@ -174,6 +187,5 @@
     "'Multitasking is a lie' ― Gary Keller",
     "'Your time is limited, so don't waste it living someone else's life. Don't be trapped by dogma - which is living with the results of other people's thinking. Don't let the noise of other's opinions drown out your own inner voice. And most important, have the courage to follow your heart and intuition.' - Steve Jobs",
     "'Conquer yourself rather than the world.'"
-  ],
-  "GUIDED_MEDITATION_URL": ""
+  ]
 }
