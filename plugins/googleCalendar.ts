@@ -109,7 +109,6 @@ class GoogleCalendar {
    * @param {function} callback The callback to call with the authorized client.
    */
   async authorize(userId: string) {
-    console.log("USERID", userId);
     await this.setupCredentials();
     // Check if we have previously stored a token.
     let token = await this.robot.db.get(userId, AUTH_TOKEN_KEY);

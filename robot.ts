@@ -477,8 +477,8 @@ export default class Robot extends EventEmitter {
   }
 
   listen() {
-    let port = this.config.get("EXPRESS_BIND_PORT") || 8080;
-    let address = this.config.get("EXPRESS_BIND_ADDRESS") || "0.0.0.0";
+    let port = this.config.get("BOT_PORT") || 8080;
+    let address = this.config.get("BOT_ADDRESS") || "0.0.0.0";
     this.logger.debug("[Robot] All routes:");
     //    this.logger.debug(this.router.stack);
     this.router._router.stack.forEach((r) => {

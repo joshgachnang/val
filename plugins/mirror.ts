@@ -20,10 +20,6 @@ const defaultLayout = {
 };
 
 export default function(robot: Robot) {
-  async function hello() {
-    return "hello world!";
-  }
-
   robot.router.get("/mirror/layout", async (req, res) => {
     let mirrors = (await robot.db.get(null, MIRROR_KEY)) || {};
     let layoutName = req.query.layout;
@@ -50,7 +46,6 @@ export default function(robot: Robot) {
       return res.reply(`${name} is already added!`);
     }
     mirrors[name] = {
-      userId: res.userId,
       layout: defaultLayout,
       message: [],
     };
