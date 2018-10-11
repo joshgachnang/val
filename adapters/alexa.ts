@@ -70,7 +70,7 @@ export default class AlexaAdapter extends Adapter {
   run() {}
 
   createApp(name: string, intents: any, invocationName?: string, welcomeMessage?: string) {
-    console.log(`[alexa] creating Alexa app ${name}`);
+    this.robot.logger.info(`[alexa] creating Alexa app ${name}`);
 
     if (!welcomeMessage) {
       welcomeMessage = `hello, welcome to ${invocationName}`;

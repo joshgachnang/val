@@ -36,7 +36,6 @@ export default class Response {
   // e.g. if you had a listener on `my favorite movie is {movie:MULTIWORD}`, `slot('movie')` would
   // return the matching value from the user, e.g. 'Empire Strikes Back'.
   slot(name: string) {
-    console.log(this.match, this.match.notes);
     return this.match[name];
   }
 

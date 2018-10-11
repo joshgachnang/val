@@ -62,7 +62,6 @@ export default function(robot: Robot) {
     robot.logger.info(`Saving event: ${event}`, event);
     let events = await getEvents(userId);
     events.push(event);
-    console.log("saving events", events);
 
     saveEvents(events, userId);
     return event;
@@ -91,7 +90,6 @@ export default function(robot: Robot) {
 
   // TODO: introduce api keys
   robot.router.post("/events", async (req, res) => {
-    console.log("EVENT POST", req.query.userId, req.body);
     if (!req.query.userId) {
       return res.status(403).send();
     }
@@ -134,7 +132,6 @@ export default function(robot: Robot) {
     }
 
     eventData.description = text.trim();
-    console.log("EVENT DATA", eventData);
     await saveEvent(eventData, res.userId);
     res.reply("Ok! Saved that to your events.");
   });
