@@ -17,14 +17,13 @@ export default class TwitterAdapter extends Adapter {
       access_token_key: this.robot.config.get("TWITTER_ACCESS_TOKEN_KEY"),
       access_token_secret: this.robot.config.get("TWITTER_ACCESS_TOKEN_SECRET"),
     });
-    console.log("TWITTER", this.client);
   }
 
   // TODO: support DMs
   send(envelope: Envelope, strings: string | string[]) {}
 
   post(strings: string | string[], attachment?: string) {
-    this.robot.logger.info(`Posting to twitter: ${strings}`);
+    this.robot.logger.debug(`Posting to twitter: ${strings}`);
     return this.client.post("statuses/update", {status: strings});
   }
 }

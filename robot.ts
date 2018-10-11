@@ -104,7 +104,7 @@ export default class Robot extends EventEmitter {
     this.router = undefined;
     this.logger = new winston.Logger({
       transports: [
-        new winston.transports.Console({level: "debug"}),
+        new winston.transports.Console({level: "info"}),
         new winston.transports.File({filename: "bot.log", level: "debug"}),
       ],
     });
@@ -186,13 +186,13 @@ export default class Robot extends EventEmitter {
   }
 
   hear(regex: RegExp | string, options: any, callback: ResponseCallback) {
-    this.logger.info("[Robot] creating hear listener for regex", regex);
+    this.logger.debug("[Robot] creating hear listener for regex", regex);
     let listener = new TextListener(this, regex, options, callback);
     this.pluginListeners.push(listener);
   }
 
   respond(regex: RegExp | string, options: any, callback: ResponseCallback) {
-    this.logger.info("[Robot] creating respond listener for regex", regex);
+    this.logger.debug("[Robot] creating respond listener for regex", regex);
     let listener = new TextListener(this, this.respondPattern(regex), options, callback);
     this.pluginListeners.push(listener);
   }
@@ -351,7 +351,7 @@ export default class Robot extends EventEmitter {
 
   // TODO: add aliases like "hourly, minutely, daily"
   cron(name: string, schedule: string, callback: EmptyCallback) {
-    this.logger.info(`Adding cronjob ${name}, running at: ${schedule}`);
+    this.logger.debug(`Adding cronjob ${name}, running at: ${schedule}`);
     let job: any;
     try {
       job = new cron.CronJob({
@@ -374,7 +374,7 @@ export default class Robot extends EventEmitter {
   // name.)
   // The briefings are actually sent out in the briefing plugin.
   briefing(name: string, callback: BriefingCallback) {
-    this.logger.info(`Adding briefing ${name}`);
+    this.logger.debug(`Adding briefing ${name}`);
     this.briefings[name] = callback;
   }
 

@@ -104,7 +104,6 @@ export default function(robot: Robot) {
     let days = await getDailySummary(userId, rescuetimeKey);
     days = JSON.parse(days);
     for (let day of days) {
-      console.log("DATE", day.date, day.productivity_pulse);
       data[day.date] = day;
     }
     let today = moment().format("YYYY-MM-DD");
@@ -120,7 +119,6 @@ export default function(robot: Robot) {
     let configuredUsers = robot.brain.get(ENABLED_KEY) || {};
     for (let userId of Object.keys(configuredUsers)) {
       let key = configuredUsers[userId];
-      // console.log("SAVIG FOR", userId, key);
       await saveForUser(userId, key);
     }
   }
@@ -142,8 +140,6 @@ export default function(robot: Robot) {
         seconds += Number(scores[s]);
       }
     }
-    console.log(scores);
-    console.log("SCORE", "SECONDS", score, seconds);
     // Double seconds to account for skew of very (un)productive seconds
     return (score / (seconds * 2) * 100).toFixed(0);
   }

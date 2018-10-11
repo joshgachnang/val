@@ -28,7 +28,6 @@ class GoogleCalendar {
   robot: Robot;
 
   init(robot: Robot) {
-    console.log("INIT GOOGLE CALENDAR");
     this.robot = robot;
     // TODO: the api needs authentication..
     robot.router.get("/calendars", async (req, res) => {
@@ -40,7 +39,7 @@ class GoogleCalendar {
         let events = await this.listEvents();
         res.json({events});
       } catch (e) {
-        console.log(e);
+        this.robot.logger.warn("[googleCalendar] error authorizing:", e);
         res.status(400).send({error: e});
       }
     });

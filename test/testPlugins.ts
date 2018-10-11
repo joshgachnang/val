@@ -152,7 +152,6 @@ class RobotHelpSuite extends PluginTestSuite {
       setTimeout(() => {
         assert.equal(this.robot.adapters.fake.events.length, 2);
         let strings = this.robot.adapters.fake.events[1].data.strings;
-        console.log(strings[1]);
         // TODO: Not sure why strings[1] is an array..
         assert.equal(
           strings[1][0],
