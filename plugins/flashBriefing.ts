@@ -7,12 +7,13 @@ import * as moment from "moment-timezone";
 
 class FlashBriefing {
   init(robot: Robot) {
-    let googleCalendar = robot.plugins.googleCalendar;
-    let forecastIO = robot.plugins.forecastio;
-
     robot.router.get("/alexa/flashBreifing", async (req, res) => {
+      let googleCalendar = robot.plugins.googleCalendar;
+      let forecastIO = robot.plugins.forecastio;
+
       let agenda = await googleCalendar.getAgenda(res.locals.userId);
       let forecast = await forecastIO.getDayForecast();
+
       return res.json([
         {
           uid: `id1${moment()
