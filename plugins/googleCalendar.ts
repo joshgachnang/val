@@ -8,19 +8,16 @@
 // Author:
 //   pcsforeducation
 
-import * as fs from "fs";
 const google = require("googleapis");
 const googleAuth = require("google-auth-library");
 import * as moment from "moment-timezone";
 
-import AlexaAdapter from "../adapters/alexa";
 import Config from "../config";
 import Response from "../response";
 import Robot from "../robot";
 
 const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
 const AUTH_TOKEN_KEY = "googleAuthToken";
-const CALENDAR_KEY = "googleCalendar";
 const CLIENT_SECRET_KEY = "googleCalendarClientSecret";
 
 class GoogleCalendar {
@@ -60,7 +57,7 @@ class GoogleCalendar {
     robot.hear("authorize google calendar", {}, this.requestAuthorize);
 
     // TODO: add these as part of a conversation
-    robot.hear(/authkey\s+([A-Za-z0-9/_-]+)/i, {}, (response: Response) => {
+    robot.hear(/authkey\s+([A-Za-z0-9/_-]+)/i, {}, async (response: Response) => {
       this.saveCode(response.userId, response.match[1], () => {
         response.reply("authorized!");
       });
@@ -89,16 +86,16 @@ class GoogleCalendar {
     this.oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
   }
 
-  async requestAuthorize(response) {
+  requestAuthorize = async (response) => {
     await this.setupCredentials();
     if (!this.oauth2Client) {
       return response.reply("You need to set a google client secret key first.");
     }
-    // this.getNewToken(response);
+    this.getNewToken(response);
     setTimeout(() => {
       response.reply("Please type the 'authkey' then the provided auth key");
     }, 1000);
-  }
+  };
 
   /**
    * Create an OAuth2 client with the given credentials, and then execute the
@@ -107,7 +104,7 @@ class GoogleCalendar {
    * @param {Object} credentials The authorization client credentials.
    * @param {function} callback The callback to call with the authorized client.
    */
-  async authorize(userId: string) {
+  authorize = async (userId: string) => {
     await this.setupCredentials();
     // Check if we have previously stored a token.
     let token = await this.robot.db.get(userId, AUTH_TOKEN_KEY);
@@ -120,26 +117,19 @@ class GoogleCalendar {
       );
       throw new Error("No calendars authorized");
     }
-  }
+  };
 
-  /**
-   * Get and store new token after prompting for user authorization, and then
-   * execute the given callback with the authorized OAuth2 client.
-   *
-   * @param {google.auth.OAuth2} this.oauth2Client The OAuth2 client to get token for.
-   * @param {getEventsCallback} callback The callback to call with the authorized
-   *     client.
-   */
-  function(response: Response) {
+  getNewToken = (response: Response) => {
     let authUrl = this.oauth2Client.generateAuthUrl({
       access_type: "offline",
       scope: SCOPES,
     });
     response.reply(`Authorize this app by visiting this url: ${authUrl}`);
-  }
+  };
 
-  saveCode(userId: string, code: string, callback) {
-    this.oauth2Client.getToken(code, function(err, token) {
+  saveCode = async (userId: string, code: string, callback) => {
+    await this.setupCredentials();
+    this.oauth2Client.getToken(code, (err, token) => {
       if (err) {
         this.robot.logger.warn(
           `[googleCalendar] Error while trying to retrieve access token: ${err}`
@@ -150,26 +140,9 @@ class GoogleCalendar {
       this.storeToken(userId, token);
       callback(this.oauth2Client);
     });
-  }
+  };
 
-  // robot.router.get("/alexa/flashBreifing", async (req, res) => {
-  //   let agenda = await getAgenda(res.locals.userId);
-  //   return res.json([
-  //     {
-  //       uid: `id1${moment()
-  //         .utcOffset(0)
-  //         .startOf("hour")
-  //         .unix()}`,
-  //       updateDate: moment()
-  //         .utcOffset(0)
-  //         .format("YYYY-MM-DD[T]HH:00:00.[0Z]"),
-  //       titleText: "Val agenda",
-  //       mainText: agenda,
-  //     },
-  //   ]);
-  // });
-
-  async getAgenda(userId: string): Promise<string> {
+  getAgenda = async (userId: string): Promise<string> => {
     let today = moment();
     let events;
     try {
@@ -181,7 +154,6 @@ class GoogleCalendar {
     }
     let dayEvents = "";
     let timeEvents = "";
-    let res = "";
     events = events.sort((a, b) => {
       return new Date(a.start.dateTime).getTime() - new Date(b.start.dateTime).getTime();
     });
@@ -214,33 +186,28 @@ class GoogleCalendar {
     }
     if (dayEvents) {
       return `${leader} ${dayEvents}. ${timeEvents}`;
+    } else if (!dayEvents && !timeEvents) {
+      return "Your agenda is clear today!";
     } else {
       return `${leader} ${timeEvents}`;
     }
-  }
-
-  // Register an Alexa Intent
-  // if (robot.adapters.AlexaAdapter) {
-  // let alexaAdapter = robot.adapters.AlexaAdapter as AlexaAdapter;
-  // let utterances = ["What is on my agenda"];
-  // alexaAdapter.registerIntent("GetAgenda", utterances, (slots) => "What is on my agenda");
-  // }
+  };
 
   /**
    * Store token to disk be used in later program executions.
    *
    * @param {string} token The token to store to disk.
    */
-  async storeToken(userId: string, token: string) {
+  storeToken = async (userId: string, token: string) => {
     this.robot.db.set(userId, AUTH_TOKEN_KEY, token);
-  }
+  };
 
   /**
    * Lists the next 10 events on the user's primary calendar.
    *
    * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
    */
-  async listEvents() {
+  listEvents = async () => {
     let calendar = google.calendar("v3");
     let events = [];
     let config = new Config();
@@ -296,12 +263,12 @@ was ${calendarIds.length}. Not fetching.`);
       events = [].concat.apply([], events);
     }
     return events;
-  }
+  };
 
-  async listCalendars(): Promise<any> {
+  listCalendars = async (): Promise<any> => {
     return new Promise((resolve) => {
       let calendar = google.calendar("v3");
-      calendar.calendarList.list({auth: this.oauth2Client}, function(err, response) {
+      calendar.calendarList.list({auth: this.oauth2Client}, (err, response) => {
         if (err) {
           this.robot.logger.warn(
             `[googleCalendar] The list calendar API returned an error: ${err}`
@@ -315,17 +282,7 @@ was ${calendarIds.length}. Not fetching.`);
         }
       });
     });
-  }
-
-  // function cacheCalendars() {
-  //   // TODO move this to a scheduled background worker rather than startup
-  //   listCalendars((calendars) => {
-  //     if (calendars) {
-  //       // TODO could use calendars.etag to not fetch more often than necessary
-  //       robot.brain.set("calendarList", calendars.items);
-  //     }
-  //   });
-  // }
+  };
 }
 
 const calendar = new GoogleCalendar();
