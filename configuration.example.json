@@ -36,6 +36,7 @@
     "./plugins/healthcheck",
 
     "./plugins/briefing",
+    "./plugins/flashBriefing",
     "./plugins/forecastio",
     "./plugins/inspirationalQuote",
     "./plugins/cta",
