@@ -1,7 +1,5 @@
-bower_components/
-uploads/
-prodenvfile
 envfile
 bot.log
 node_modules/
 app/
+dist/

@@ -28,6 +28,7 @@ class GoogleCalendar {
     this.robot = robot;
     // TODO: the api needs authentication..
     robot.router.get("/calendars", async (req, res) => {
+      console.log("CALENDARS", res.locals);
       if (!res.locals.userId) {
         return res.status(401).send();
       }
