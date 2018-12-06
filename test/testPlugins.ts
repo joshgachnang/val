@@ -153,8 +153,9 @@ class RobotHelpSuite extends PluginTestSuite {
         assert.equal(this.robot.adapters.fake.events.length, 2);
         let strings = this.robot.adapters.fake.events[1].data.strings;
         // TODO: Not sure why strings[1] is an array..
+        console.log(strings);
         assert.equal(
-          strings[1][0],
+          strings[0][0],
           "Commands:\nasyncPlugin:\n-----------\n@k2so async - pretends to async some things " +
             "(not really)\nawait - waits on some stuff\n\nhelp:\n----\n@k2so help - displays " +
             "help for all commands\n"

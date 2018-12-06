@@ -41,16 +41,23 @@ class RobotTestSuite {
     return new TextMessage(this.getUser(), text, "#general", "id", this.robot.adapters.fake, {});
   }
 
-  hearRespondTest(respond: boolean, filter: any, text: string, callback: () => void) {
+  hearRespondTest(
+    respond: boolean,
+    filter: any,
+    text: string,
+    // First param always undefined so we can just pass `done`, second is the response if we need to
+    // test more with the response. A little gross.
+    callback: (nothing: any, response?: Response) => void
+  ) {
     if (respond) {
       this.robot.respond(filter, {}, (response: Response) => {
         assert.equal((response.message as TextMessage).text, text);
-        callback();
+        callback(undefined, response);
       });
     } else {
       this.robot.hear(filter, {}, (response: Response) => {
         assert.equal((response.message as TextMessage).text, text);
-        callback();
+        callback(undefined, response);
       });
     }
 
@@ -139,6 +146,33 @@ class RobotTestSuite {
   @test
   hearEmptyOptionEnd(done) {
     this.hearRespondTest(false, "{a|} pepsi", "hello, i want pepsi, please", done);
+  }
+
+  @test
+  hearWithTag(done) {
+    this.hearRespondTest(
+      false,
+      "want {number:NUMBER} {kind:WORD}",
+      "hello, i want 1 beer, please",
+      (nothing: any, response: Response) => {
+        assert.equal(response.slot("number"), "1");
+        assert.equal(response.slot("kind"), "beer");
+        done();
+      }
+    );
+  }
+
+  @test
+  hearWithTagOptions(done) {
+    this.hearRespondTest(
+      false,
+      "want {kind:beer|coffee}",
+      "hello, i want beer, please",
+      (nothing: any, response: Response) => {
+        assert.equal(response.slot("kind"), "beer");
+        done();
+      }
+    );
   }
 
   // TODO flakey

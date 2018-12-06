@@ -115,6 +115,9 @@ export default class SlackAdapter extends Adapter {
       this.robot.logger.error(`[slack] request error: ${e}`, e);
       throw e;
     }
+    if (!response) {
+      throw new Error("Could not connect to Slack API");
+    }
     if (response.ok === "false") {
       this.robot.logger.error(`[slack] request not ok: ${response.error}`);
       throw new Error(`Slack Request Error: ${response.error}`);

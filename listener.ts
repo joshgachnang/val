@@ -2,9 +2,10 @@
 
 import * as XRegExp from "xregexp";
 
-import {TextMessage} from "./message";
+import {Message, TextMessage} from "./message";
 import Response from "./response";
 import Robot from "./robot";
+import Adapter from "./adapter";
 
 export class Listener {
   robot: Robot;
@@ -38,7 +39,7 @@ export class Listener {
   }
 
   // Response middleware is called after a response is created but before the callback is called
-  call(message, adapter, responseMiddleware) {
+  call(message: Message, adapter: Adapter, responseMiddleware: (Response) => void) {
     let match = this.matcher(message);
     if (match) {
       this.robot.logger.debug("[listener] found match:", match);
@@ -58,6 +59,9 @@ export class Listener {
         this.robot.logger.warn("[listener] response is undefined, not calling callback");
         return false;
       }
+
+      this.robot.addToConversation(response);
+
       this.robot.logger.debug(`[listener] Executing listener callback for Message ${message}`);
       try {
         this.callback(response);
@@ -110,9 +114,30 @@ class SlotMatcher {
     return regex;
   }
 
+  // private captureGroups(text: string, slotName?: string): string {
+  //   let captureRegex = new XRegExp("{(\\w+)\\:(.+)}", "g");
+  //   let captureMatch = captureRegex.exec(text);
+  //   console.log("CAPTURE MATCH", captureMatch);
+  //   let matches = [];
+
+  //   while (captureMatch !== null) {
+  //     matches.push(captureMatch);
+  //     captureMatch = captureRegex.exec(text);
+  //   }
+
+  //   for (let match of matches) {
+  //     const groupName = match[1];
+  //     const rest = match[2];
+  //     console.log("PRE", groupName, rest, text);
+  //     text = text.replace(`{${groupName}:${rest}}`, `(?<${groupName}>:${rest})`);
+  //     console.log("POST", text);
+  //   }
+  //   return text;
+  // }
+
   // Match strings of the type "{opt1|opt2|opt3...}" and replace the slot with each option
   private orMatches(text: string, slotName?: string): string {
-    let orRegex = new XRegExp(`{(['\\w\\d\\s\\|]+)}`, "g");
+    let orRegex = new XRegExp(`{(?<group>\\w+\\:)?(?<rest>['\\w\\d\\s\\|]+)}`, "g");
 
     let matches = [];
     let orMatch = orRegex.exec(text);
@@ -122,12 +147,12 @@ class SlotMatcher {
     }
 
     for (let match of matches) {
-      let split = match[1].split("|");
+      let split = match.split.split("|");
       // Check for empty matches
       if (split[split.length - 1] === "") {
         // Match empty string, and filter out the excess spaces around the slot
-        let restOfMatch = match[1].slice(0, -1);
-        let sub = `{${match[1]}}`;
+        let restOfMatch = match.split.slice(0, -1);
+        let sub = `{${match.split}}`;
         if (match.index > 0) {
           sub = " " + sub;
         }
@@ -172,9 +197,34 @@ class SlotMatcher {
 
   private buildRegexes(text: string) {
     let regexString = "";
+
+    let fullRegex = new XRegExp("{(?<name>\\w+)?(?<firstcolon>\\:)?(?<args>.+)}", "g");
+    let fullMatch = fullRegex.exec(text);
+    // console.log("CAPTURE MATCH", fullMatch);
+    let matches = [];
+
+    while (fullMatch !== null) {
+      matches.push(fullMatch);
+      fullMatch = fullRegex.exec(text);
+    }
+
+    console.log("NEW MATCHES", matches);
+
+    // for (let match of matches) {
+    //   const groupName = match[1];
+    //   const rest = match[2];
+    //   console.log("PRE", groupName, rest, text);
+    //   text = text.replace(`{${groupName}:${rest}}`, `{(?<${groupName}>:${rest})}`);
+    //   console.log("POST", text);
+    // }
+
     regexString = this.orMatches(text);
     regexString = this.typeMatches(regexString);
-    // this.regexString = regexString;
+    regexString = this.captureGroups(text);
+
+    this.regexString = regexString;
+
+    console.log("REGEX STRING", regexString);
     this.regex = new XRegExp(regexString, "gi");
   }
 

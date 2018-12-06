@@ -59,6 +59,7 @@ export default function(robot: Robot) {
     let user = await robot.db.getUser(res.userId);
     user.authToken = generateAuthToken();
     await robot.db.updateUser(user);
+    await robot.db.initUserTokenMap();
     res.reply(`Alright, done! Your token is: ${user.authToken}`);
   });
 

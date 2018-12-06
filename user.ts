@@ -89,6 +89,9 @@ export default class User {
     if (data.facebook) {
       this.updateFacebookUser(data.facebook);
     }
+    if (data.authToken) {
+      this.authToken = data.authToken;
+    }
   }
 
   public updateSlackUser(slackUserObj: any) {

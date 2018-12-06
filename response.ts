@@ -16,9 +16,13 @@ export default class Response {
   constructor(bot: Robot, message: Message, match: any, adapter: any) {
     this.bot = bot;
     this.message = message;
+    console.log("MATCH", match);
+    if (match) {
+      console.log("GROUPS", match.name);
+    }
     this.match = match;
     this.envelope = new Envelope(
-      (message as TextMessage).room, // might be undefined for non text messages, and that's ok.
+      message.room, // might be undefined for non text messages, and that's ok.
       message.user,
       message,
       adapter.adapterName

@@ -18,10 +18,12 @@ import * as winston from "winston";
 import Adapter from "./adapter";
 import Brain from "./brain";
 import Config from "./config";
+import {ConversationBrain} from "./conversation";
 import DB from "./db";
 import Envelope from "./envelope";
 import {Listener, TextListener} from "./listener";
 import {Message, TextMessage} from "./message";
+import OAuth, {OAuthHandler} from "./oauth";
 import "./polyfill";
 import Response from "./response";
 import User from "./user";
@@ -69,6 +71,8 @@ export default class Robot extends EventEmitter {
   server: any;
   cronjobs: any[] = [];
   briefings: any = {}; // name: fn
+  oauth: OAuthHandler;
+  conversationBrain: ConversationBrain;
   private expressServer: any;
 
   constructor(config: Config) {
@@ -109,6 +113,7 @@ export default class Robot extends EventEmitter {
       ],
     });
     this.brain = new Brain(this);
+    this.conversationBrain = new ConversationBrain(this);
     this.setupExpress();
 
     this.adapters = {};
@@ -120,6 +125,7 @@ export default class Robot extends EventEmitter {
 
     this.logger.info("[Robot] Initializing Firebase DB");
     this.db = new DB(this);
+    this.oauth = OAuth;
 
     for (let adapter of this.config.get("ADAPTERS")) {
       this.logger.info("[Robot] loading adapter:", adapter);
@@ -129,6 +135,8 @@ export default class Robot extends EventEmitter {
       this.adapters[adapterClass.adapterName] = adapterClass;
     }
     this.emit("adapterInitialized");
+
+    await this.oauth.init(this);
 
     for (let plugin of this.config.get("PLUGINS")) {
       this.logger.info("[Robot] loading plugin:", plugin);
@@ -185,19 +193,25 @@ export default class Robot extends EventEmitter {
     this.emit("running");
   }
 
-  hear(regex: RegExp | string, options: any, callback: ResponseCallback) {
+  public hear(regex: RegExp | string, options: any, callback: ResponseCallback) {
     this.logger.debug("[Robot] creating hear listener for regex", regex);
     let listener = new TextListener(this, regex, options, callback);
     this.pluginListeners.push(listener);
   }
 
-  respond(regex: RegExp | string, options: any, callback: ResponseCallback) {
+  public respond(regex: RegExp | string, options: any, callback: ResponseCallback) {
     this.logger.debug("[Robot] creating respond listener for regex", regex);
     let listener = new TextListener(this, this.respondPattern(regex), options, callback);
     this.pluginListeners.push(listener);
   }
 
-  respondPattern(regex: RegExp | string) {
+  public conversationRespond(respondString: string, callback: ResponseCallback) {
+    this.logger.debug("[Robot] creating conversation respond listener for string", respondString);
+
+    // Lookback for last message and last message in the same channel
+  }
+
+  private respondPattern(regex: RegExp | string) {
     let name = this.name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 
     if (typeof regex === "string") {
@@ -223,7 +237,8 @@ export default class Robot extends EventEmitter {
     return new RegExp("^\\s*[@]*" + name.toLowerCase() + "[:,]?\\s*(?:" + pattern + ")", modifiers);
   }
 
-  parseHelp(path: string) {
+  // TODO: only public for testing..
+  public parseHelp(path: string) {
     let scriptDocumentation = {};
     let body = readFileSync(path, "utf-8");
     let currentSection = null;
@@ -263,7 +278,7 @@ export default class Robot extends EventEmitter {
     return scriptDocumentation;
   }
 
-  reply(envelope: Envelope, user: User, messages: string[] | string) {
+  public reply(envelope: Envelope, user: User, messages: string[] | string) {
     this.logger.debug(
       `[Robot] Attempting to reply to ${user} in #${envelope.room.name}, message: ${messages}`
     );
@@ -272,10 +287,10 @@ export default class Robot extends EventEmitter {
       messages = [messages];
     }
 
-    this.adapters[envelope.adapterName].reply(envelope, user, messages);
+    this.adapters[envelope.adapterName].reply(envelope, messages);
   }
 
-  send(envelope: Envelope, messages: string[] | string) {
+  public send(envelope: Envelope, messages: string[] | string) {
     this.logger.debug(
       `[Robot] Sending in ${envelope.room} via ${envelope.adapterName}: ${messages}`
     );
@@ -290,24 +305,32 @@ export default class Robot extends EventEmitter {
     adapter.send(envelope, messages);
   }
 
-  emote(envelope: Envelope, emotes) {
+  public emote(envelope: Envelope, emotes) {
     this.logger.warn("Unsupported action: emote", envelope.room, emotes);
   }
 
-  enter(options, callback) {
+  public enter(options, callback) {
     this.logger.warn("Unsupported action: enter", options);
   }
 
-  leave(options, callback) {
+  public leave(options, callback) {
     this.logger.warn("Unsupported action: leave", options);
   }
 
-  topic(options, callback) {
+  public topic(options, callback) {
     this.logger.warn("Unsupported action: topic", options);
   }
 
-  error(callback) {
+  public error(callback) {
     this.errorHandlers.push(callback);
+  }
+
+  public addToConversation(response: Response) {
+    this.conversationBrain.addToConversation(response);
+  }
+
+  public getConversationForUser(userId: string): Promise<Response[]> {
+    return this.conversationBrain.getConversationForUser(userId);
   }
 
   // Deprecated, for loading hubot plugins. Use normal requires() and import for new plugins
@@ -338,7 +361,7 @@ export default class Robot extends EventEmitter {
   }
 
   // Deprecated, for loading hubot plugins. Use normal requires() and import for new plugins
-  load(path) {
+  public load(path) {
     this.logger.debug(`Loading scripts from ${path}`);
 
     if (fs.existsSync(path)) {
@@ -350,7 +373,7 @@ export default class Robot extends EventEmitter {
   }
 
   // TODO: add aliases like "hourly, minutely, daily"
-  cron(name: string, schedule: string, callback: EmptyCallback) {
+  public cron(name: string, schedule: string, callback: EmptyCallback) {
     this.logger.debug(`Adding cronjob ${name}, running at: ${schedule}`);
     let job: any;
     try {
@@ -373,13 +396,13 @@ export default class Robot extends EventEmitter {
   // you can use this to ensure your briefing is near the top (for example, by prepending 0 to your
   // name.)
   // The briefings are actually sent out in the briefing plugin.
-  briefing(name: string, callback: BriefingCallback) {
+  public briefing(name: string, callback: BriefingCallback) {
     this.logger.debug(`Adding briefing ${name}`);
     this.briefings[name] = callback;
   }
 
   // Get a key from the environment, or throw an error if it's not defined
-  envKey(key) {
+  public envKey(key) {
     let value = process.env[key];
     if (!value) {
       throw new Error(`${key} environment variable not defined`);
@@ -387,22 +410,17 @@ export default class Robot extends EventEmitter {
     return value;
   }
 
-  catchAll(options, callback) {
-    if (!callback) {
-      callback = options;
-      options = {};
-    }
-
-    this.logger.warn("Unsupported action: catchAll", options);
+  public catchAll(options, callback) {
+    this.logger.warn("Unsupported action: catchAll");
   }
 
   // Deprecated: use request()
-  http(url: string, options: any = {}) {
+  public http(url: string, options: any = {}) {
     return httpClient.create(url, options).header("User-Agent", `${this.name}/1.0`);
   }
 
   // Await wrapper around request. The preferred way to make HTTP requests from a plugin
-  request(body: any): any {
+  public request(body: any, headers?: any): any {
     return new Promise((resolve, reject) => {
       request(body, (error, response, body) => {
         if (error) reject(error);
@@ -413,19 +431,20 @@ export default class Robot extends EventEmitter {
     });
   }
 
-  receive(message: Message, adapter: Adapter, callback: (res: Response) => any) {
+  public receive(message: Message, adapter: Adapter, callback: (res: Response) => any) {
     let msg = message as TextMessage;
     if (!msg) {
       this.logger.info("[Robot] blank message error");
       return;
     }
     for (let listener of this.pluginListeners) {
+      // console.log("call", listener);
       listener.call(msg, adapter, callback);
     }
   }
 
   /* Wrap an express .get/.post/etc call so async/await works. See setupExpress for usage. */
-  expressWrap(fn) {
+  public expressWrap(fn) {
     return function(req, res, next) {
       // Make sure to `.catch()` any errors and pass them along to the `next()`
       // middleware in the chain, in this case the error handler.
@@ -441,7 +460,7 @@ export default class Robot extends EventEmitter {
     };
   }
 
-  setupExpress() {
+  private setupExpress() {
     let app = express();
 
     if (this.raven) {
@@ -476,7 +495,7 @@ export default class Robot extends EventEmitter {
     this.router = app;
   }
 
-  listen() {
+  private listen() {
     let port = this.config.get("BOT_PORT") || 8080;
     let address = this.config.get("BOT_ADDRESS") || "0.0.0.0";
     this.logger.debug("[Robot] All routes:");
@@ -502,7 +521,8 @@ export default class Robot extends EventEmitter {
     }
   }
 
-  shutdown() {
+  // Only public for testing..
+  public shutdown() {
     this.emit("shutdown");
     if (this.expressServer) {
       this.expressServer.close();
@@ -511,7 +531,7 @@ export default class Robot extends EventEmitter {
 
   // filesystemPath: Relative path to the file
   // url: the URL to expose the file at. Will be served as `/static/${url}`
-  addStaticFile(filesystemPath, url) {
+  public addStaticFile(filesystemPath, url) {
     this.logger.debug(`[Robot] Adding static file: static/${url}:${filesystemPath}`);
     if (!existsSync(filesystemPath)) {
       throw new Error(`[Robot] Script does not exist: ${filesystemPath}`);
@@ -522,7 +542,7 @@ export default class Robot extends EventEmitter {
     });
   }
 
-  pluginRunnerWrapper(func, name) {
+  private pluginRunnerWrapper(func, name) {
     try {
       return func(this);
     } catch (e) {

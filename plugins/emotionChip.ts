@@ -12,9 +12,12 @@ function hello(robot: Robot) {
   const HELLO_CATEGORY = "emotionChipHello";
   robot.db.registerDefaultsForCateogry(HELLO_CATEGORY, ["hello!", "hi :)", "how's it going?"]);
 
-  robot.respond(/hello/i, {}, async (res: Response) => {
-    let item = await robot.db.getRandomItemFromCategory(HELLO_CATEGORY);
-    res.reply(item);
+  robot.respond("{hello|hi}", {}, async (res: Response) => {
+    console.log("HELLO");
+    return res.reply("Hi!");
+    // let item = await robot.db.getRandomItemFromCategory(HELLO_CATEGORY);
+    // console.log("ITEM", item);
+    // res.send(item);
   });
 }
 

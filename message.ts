@@ -11,9 +11,10 @@ export class Message {
   user: User;
   done: any;
   rawData: any;
+  room: Room;
   msgType = "message";
 
-  constructor(user, adapter, done) {
+  constructor(user, adapter, done, room?: Room) {
     this.robot = adapter.robot;
     this.adapter = adapter;
     this.user = user;
@@ -21,6 +22,9 @@ export class Message {
       this.done = false;
     } else {
       this.done = done;
+    }
+    if (this.room) {
+      this.room = room;
     }
   }
   finish() {

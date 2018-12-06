@@ -42,7 +42,7 @@ export default class DB {
     this.initUserTokenMap();
   }
 
-  async initUserTokenMap(users?: any): Promise<void> {
+  initUserTokenMap = async (users?: any): Promise<void> => {
     if (!users) {
       users = await this.getUsers();
     }
@@ -51,7 +51,8 @@ export default class DB {
         this.userTokenMap[user.authToken] = user.id;
       }
     }
-  }
+    console.log("REGENERATED MAP", this.userTokenMap);
+  };
 
   // By default, everything is stored per user.
   private getKey(userId, key): string {
@@ -87,9 +88,8 @@ export default class DB {
     if (!users) {
       users = {};
     }
-    // Should merge the user here rather than just setting it. This just clobbers them.
-    // Handle both user objects and Users.
-    users[user.id] = user.serialize ? user.serialize() : user;
+    const updatedUser = user.serialize ? user.serialize() : user;
+    users[user.id] = Object.assign({}, user, updatedUser);
     await this.set(GLOBAL_KEY, "users", users);
     await this.initUserTokenMap(users);
   }
@@ -135,6 +135,7 @@ export default class DB {
   // Keeps a cached mapping of user token to user id so we can easily check if a token belongs
   // or not
   public getUserFromAuthToken(token: string): string {
+    console.log("USER FRM TOKEN", this.userTokenMap, token, this.userTokenMap[token]);
     return this.userTokenMap[token];
   }
 
