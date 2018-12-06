@@ -60,15 +60,14 @@ export default function(robot: Robot) {
   robot.router.post(
     "/homesafe/contact",
     robot.expressWrap(async (req, res) => {
-      console.log("HOMESAFE REQUEST", req.body);
       let decodedToken = await admin.auth().verifyIdToken(req.body.token);
       let uid = decodedToken.uid;
       if (!uid) {
-        console.warn(`[homesafe] could not find matching user.`, decodedToken);
+        robot.logger.warn(`[homesafe] could not find matching user.`, decodedToken);
         res.status(400).send();
       }
       for (let contact of req.body.contacts) {
-        console.log("BODY", {
+        robot.logger.log("[homesafe] sending Twilio request", {
           body: req.body.message,
           to: contact.phoneNumbers[0].number,
           from: `+${twilioFrom}`,
@@ -81,9 +80,9 @@ export default function(robot: Robot) {
             from: convertNumber(twilioFrom),
           });
         } catch (e) {
-          console.warn(`[homesafe] error sending text: ${e}`);
+          robot.logger.warn(`[homesafe] error sending text: ${e}`);
         }
-        console.log(
+        robot.logger.log(
           `[homesafe] sent message from ${twilioFrom} to ${contact.phoneNumber}: ` +
             `${req.body.message}`,
           msg

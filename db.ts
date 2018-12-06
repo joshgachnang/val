@@ -87,9 +87,8 @@ export default class DB {
     if (!users) {
       users = {};
     }
-    // Should merge the user here rather than just setting it. This just clobbers them.
-    // Handle both user objects and Users.
-    users[user.id] = user.serialize ? user.serialize() : user;
+    const updatedUser = user.serialize ? user.serialize() : user;
+    users[user.id] = Object.assign({}, user, updatedUser);
     await this.set(GLOBAL_KEY, "users", users);
     await this.initUserTokenMap(users);
   }

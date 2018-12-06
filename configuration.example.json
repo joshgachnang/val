@@ -41,6 +41,7 @@
     "./plugins/inspirationalQuote",
     "./plugins/cta",
     "./plugins/googleCalendar",
+    "./plugins/googlePhotos",
     "./plugins/journal",
     "./plugins/cryptocurrency",
     "./plugins/productivityQuote",

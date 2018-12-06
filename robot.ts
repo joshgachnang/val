@@ -22,6 +22,7 @@ import DB from "./db";
 import Envelope from "./envelope";
 import {Listener, TextListener} from "./listener";
 import {Message, TextMessage} from "./message";
+import OAuth, {OAuthHandler} from "./oauth";
 import "./polyfill";
 import Response from "./response";
 import User from "./user";
@@ -69,6 +70,7 @@ export default class Robot extends EventEmitter {
   server: any;
   cronjobs: any[] = [];
   briefings: any = {}; // name: fn
+  oauth: OAuthHandler;
   private expressServer: any;
 
   constructor(config: Config) {
@@ -120,6 +122,7 @@ export default class Robot extends EventEmitter {
 
     this.logger.info("[Robot] Initializing Firebase DB");
     this.db = new DB(this);
+    this.oauth = OAuth;
 
     for (let adapter of this.config.get("ADAPTERS")) {
       this.logger.info("[Robot] loading adapter:", adapter);
@@ -129,6 +132,8 @@ export default class Robot extends EventEmitter {
       this.adapters[adapterClass.adapterName] = adapterClass;
     }
     this.emit("adapterInitialized");
+
+    await this.oauth.init(this);
 
     for (let plugin of this.config.get("PLUGINS")) {
       this.logger.info("[Robot] loading plugin:", plugin);
@@ -402,7 +407,7 @@ export default class Robot extends EventEmitter {
   }
 
   // Await wrapper around request. The preferred way to make HTTP requests from a plugin
-  request(body: any): any {
+  request(body: any, headers?: any): any {
     return new Promise((resolve, reject) => {
       request(body, (error, response, body) => {
         if (error) reject(error);
