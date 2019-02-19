@@ -28,6 +28,9 @@ const PROFILES_COLLECTION = "profiles";
 
 let firestoreDB;
 
+// Try to prevent double sends.
+let idCache = {};
+
 function convertNumber(number: string) {
   number = number
     .replace("(", "")
@@ -57,6 +60,12 @@ export default function(robot: Robot) {
     keyFilename: "./homesafe-firebase.json",
   });
 
+  // Reset the trigger ID cache every 10 minutes. This isn't ideal,
+  // but it works well enough in practice.
+  setInterval(() => {
+    idCache = {};
+  }, 10 * 60 * 1000);
+
   robot.router.post(
     "/homesafe/contact",
     robot.expressWrap(async (req, res) => {
@@ -67,12 +76,18 @@ export default function(robot: Robot) {
         console.warn(`[homesafe] could not find matching user.`, decodedToken);
         res.status(400).send();
       }
-      for (let contact of req.body.contacts) {
-        console.log("BODY", {
-          body: req.body.message,
-          to: contact.phoneNumbers[0].number,
-          from: `+${twilioFrom}`,
-        });
+      if (req.body.id && idCache[req.body.id]) {
+        robot.logger.warn(`[homesafe] ignoring duplicate request for trigger ${req.body.id}`);
+        return;
+      }
+
+      if (req.body.id) {
+        idCache[req.body.id] = true;
+      }
+
+      const contacts = Array.isArray(req.body.contacts) ? req.body.contacts : [req.body.contacts];
+
+      for (let contact of contacts) {
         let msg;
         try {
           msg = await client.messages.create({
@@ -82,6 +97,7 @@ export default function(robot: Robot) {
           });
         } catch (e) {
           console.warn(`[homesafe] error sending text: ${e}`);
+          delete idCache[req.body.id]
         }
         console.log(
           `[homesafe] sent message from ${twilioFrom} to ${contact.phoneNumber}: ` +
