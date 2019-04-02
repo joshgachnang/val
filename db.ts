@@ -24,7 +24,7 @@ const GLOBAL_KEY = "GLOBAL";
 export default class DB {
   robot: Robot;
   db: any;
-  userTokenMap: {[token: string]: string} = {};
+  userTokenMap: { [token: string]: string } = {};
 
   constructor(robot: Robot) {
     this.robot = robot;
@@ -33,9 +33,19 @@ export default class DB {
 
     robot.logger.debug(`[db] connecting to firestore project: ${projectId}`);
 
+    if (!process.env.VAL_FIRESTORE_CLIENT_EMAIL || process.env.VAL_FIRESTORE_CLIENT_EMAIL.trim() === "") {
+      throw new Error("You must set the VAL_FIRESTORE_CLIENT_EMAIL environment variable");
+    }
+    if (!process.env.VAL_FIRESTORE_PRIVATE_KEY || process.env.VAL_FIRESTORE_PRIVATE_KEY.trim() === "") {
+      throw new Error("You must set the VAL_FIRESTORE_PRIVATE_KEY environment variable")
+    }
+
     this.db = new Firestore({
       projectId: projectId,
-      keyFilename: "firebase.json",
+      credentials: {
+        client_email: process.env.VAL_FIRESTORE_CLIENT_EMAIL,
+        private_key: process.env.VAL_FIRESTORE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      }
     });
     this.initUserTokenMap();
   }
@@ -96,7 +106,7 @@ export default class DB {
     return new User(users[userId]);
   }
 
-  public async getUsers(teamId?: string): Promise<{[id: string]: User}> {
+  public async getUsers(teamId?: string): Promise<{ [id: string]: User }> {
     let rawUsers = (await this.get(GLOBAL_KEY, "users")) || {};
     let users = {};
     for (let id of Object.keys(rawUsers)) {
