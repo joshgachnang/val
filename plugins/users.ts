@@ -2,6 +2,7 @@ import Envelope from "../envelope";
 import Response from "../response";
 import Robot from "../robot";
 import * as crypto from "crypto";
+import Twilio from "../adapters/twilio";
 
 // Description:
 //   Manage your user account
@@ -41,14 +42,14 @@ export default function(robot: Robot) {
       return;
     }
 
-    let twilioAdapter = robot.adapters["TwilioAdapter"];
+    let twilioAdapter = robot.adapters["TwilioAdapter"] as Twilio;
     if (!twilioAdapter) {
       robot.logger.debug("Twilio Adapter not configured, not adding phone number to user");
       return;
     }
 
     let randomCode = getRandomCode();
-    twilioAdapter.sendMessage(`Please enter this code: ${randomCode}`, phoneNumber, undefined);
+    twilioAdapter.sendMessage(`Please enter this code: ${randomCode}`, phoneNumber);
   });
 
   robot.respond("{what's|what is|whats} my user id", {}, (res: Response) => {

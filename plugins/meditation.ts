@@ -23,7 +23,6 @@ export default function(robot: Robot) {
     if (!response) return;
     if (response.message.msgType === "alexa") {
       let msg = response.message as AlexaMessage;
-      robot.logger.debug(msg);
       let stream = {
         url: robot.config.get("GUIDED_MEDITATION_URL"),
         token: "sometoken",

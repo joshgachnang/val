@@ -9,13 +9,14 @@
     "build:clean": "rm -rf dist/*",
     "build:compile": "tsc",
     "build:copy": "cp -a thirdParty dist/ && cp *.json dist/",
+    "dev": "concurrently --kill-others 'npm run watch:typescript' 'npm run watch:node'",
     "docker": "npm run build && docker build -t servercobra/val . && docker push servercobra/val",
+    "install:service": "cp val.service /lib/systemd/system/val.service && systemctl daemon-reload && systemctl start val",
     "precommit": "prettier --print-width 100 --trailing-comma 'all'  --write '**/*.ts'",
     "start": "node dist/server.js",
     "test": "npm run test:lint && npm run build && npm run test:mocha",
     "test:lint": "node node_modules/prettier/bin/prettier.js --list-different \"**/*.ts\"",
     "test:mocha": "mocha --timeout 200 --exit dist/test/*.js",
-    "watch": "concurrently --kill-others 'npm run watch:typescript' 'npm run watch:node'",
     "watch:files": "cpx '*.json' dist --watch",
     "watch:node": "nodemon dist/server.js",
     "watch:typescript": "tsc -w"
@@ -71,7 +72,7 @@
   },
   "devDependencies": {
     "@types/body-parser": "1.16.8",
-    "@types/express": "4.11.0",
+    "@types/express": "^4.16.1",
     "@types/lodash": "ts2.0",
     "@types/moment": "2.13.0",
     "@types/moment-timezone": "0.5.2",
@@ -103,9 +104,7 @@
     "watchify": "3.9.0"
   },
   "babel": {
-    "presets": [
-      "es2016"
-    ]
+    "presets": ["es2016"]
   },
   "prettier": {
     "arrowParens": "always",

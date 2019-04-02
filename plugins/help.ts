@@ -5,7 +5,6 @@
 
 import Response from "../response";
 import Robot from "../robot";
-import {plugin} from "mongoose";
 
 export default function(robot: Robot) {
   function helpMessage(res: Response) {

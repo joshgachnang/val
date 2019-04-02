@@ -30,7 +30,6 @@
 
   "PLUGINS": [
     "./plugins/users",
-    "./plugins/migrate",
     "./plugins/admin",
     "./plugins/emotionChip",
     "./plugins/healthcheck",

@@ -11,6 +11,7 @@ const Firestore = require("@google-cloud/firestore");
 
 import Response from "../response";
 import Robot from "../robot";
+import AlexaAdapter from "../adapters/alexa";
 
 const SUBSTITUTES_COLLECTION = "substitutes";
 
@@ -81,7 +82,7 @@ export default function(robot: Robot) {
   async function createAlexaApp() {
     let allSubstitutes = await getSubstitutes();
 
-    robot.adapters["AlexaAdapter"].createApp(
+    (robot.adapters["AlexaAdapter"] as AlexaAdapter).createApp(
       "avotoast",
       [
         {

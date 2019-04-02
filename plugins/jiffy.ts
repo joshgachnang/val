@@ -1,5 +1,5 @@
-import Response from "../response";
 import Robot from "../robot";
+import SlackAdapter from "../adapters/slack";
 
 const BRAIN_KEY = "JIFFY";
 
@@ -85,11 +85,12 @@ export default function(robot: Robot) {
     return reply(randomFrom(winners), true);
   }
 
-  robot.adapters["Slack"].addSlashCommand("jiffy", (body: any, reply: any) => {
+  const slack = robot.adapters["Slack"] as SlackAdapter;
+  slack.addSlashCommand("jiffy", (body: any, reply: any) => {
     return search(body.text, reply);
   });
 
-  robot.adapters["Slack"].addSlashCommand("jiffyadd", (body: any, reply: any) => {
+  slack.addSlashCommand("jiffyadd", (body: any, reply: any) => {
     return add(body.text, reply);
   });
 }

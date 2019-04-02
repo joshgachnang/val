@@ -12,10 +12,11 @@
 // See: https://github.com/Microsoft/TypeScript/issues/3283
 import Response from "../response";
 import Robot from "../robot";
+import TwitterAdapter from "../adapters/twitter";
 
 export default function(robot: Robot) {
   robot.respond("twitter post {:MULTIANY}", {}, async (res: Response) => {
-    await robot.adapters.Twitter.post(res.match[1]);
+    await (robot.adapters.Twitter as TwitterAdapter).post(res.match[1]);
     res.reply("Ok! Posted!");
   });
 }

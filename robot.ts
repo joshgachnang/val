@@ -1,6 +1,5 @@
 require("source-map-support").install();
 require("coffee-script/register");
-import * as extensions from "./extensions";
 
 import {EventEmitter} from "events";
 let httpClient = require("scoped-http-client");
@@ -26,7 +25,8 @@ import {Message, TextMessage} from "./message";
 import OAuth, {OAuthHandler} from "./oauth";
 import "./polyfill";
 import Response from "./response";
-import User from "./user";
+import AlexaAdapter from "./adapters/alexa";
+import {Server} from "http";
 
 let HUBOT_DOCUMENTATION_SECTIONS = [
   "description",
@@ -56,24 +56,21 @@ export interface BriefingCallback {
 export default class Robot extends EventEmitter {
   name: string;
   config: Config;
-  pluginListeners: Array<Listener> = [];
+  pluginListeners: Listener[] = [];
   db: DB;
-  help: any = {};
-  commands: any;
-  errorHandlers: any;
+  help: {[pluginName: string]: {[section: string]: string[]}} = {};
   TextMessage: TextMessage; // tslint:disable-line
-  router: any;
-  logger: any;
+  router: express.Application;
+  logger: winston.LoggerInstance;
   brain: Brain;
-  adapters: any;
-  plugins: any;
+  adapters: {[name: string]: Adapter};
+  plugins: {[name: string]: (robot: Robot) => void};
   raven: any;
-  server: any;
   cronjobs: any[] = [];
   briefings: any = {}; // name: fn
   oauth: OAuthHandler;
   conversationBrain: ConversationBrain;
-  private expressServer: any;
+  private expressServer: Server;
 
   constructor(config: Config) {
     super();
@@ -103,8 +100,6 @@ export default class Robot extends EventEmitter {
 
     // Default variables
     this.pluginListeners = [];
-    this.commands = [];
-    this.errorHandlers = [];
     this.router = undefined;
     this.logger = new winston.Logger({
       transports: [
@@ -168,6 +163,7 @@ export default class Robot extends EventEmitter {
           ret = pluginModule(this);
         }
       } catch (e) {
+        console.log(e);
         throw new Error(`Failed to initialize plugin ${plugin}: ${e}`);
       }
 
@@ -187,7 +183,7 @@ export default class Robot extends EventEmitter {
     // TODO: can't register for an on('pluginsInitialized'..) in adapters for some reason.
     if (this.adapters.AlexaAdapter) {
       this.logger.debug("initing alexa plugins");
-      this.adapters.AlexaAdapter.postPluginInit();
+      (this.adapters.AlexaAdapter as AlexaAdapter).postPluginInit();
     }
     this.listen();
     this.emit("running");
@@ -239,7 +235,7 @@ export default class Robot extends EventEmitter {
 
   // TODO: only public for testing..
   public parseHelp(path: string) {
-    let scriptDocumentation = {};
+    let scriptDocumentation: {[section: string]: string[]} = {};
     let body = readFileSync(path, "utf-8");
     let currentSection = null;
 
@@ -270,7 +266,6 @@ export default class Robot extends EventEmitter {
           // New version going forward
           cleanedLine = cleanedLine.replace("@bot", "@" + this.name);
           cleanedLine = cleanedLine.replace("bot", "@" + this.name);
-          this.commands.push(cleanedLine);
         }
         scriptDocumentation[currentSection].push(cleanedLine);
       }
@@ -278,9 +273,11 @@ export default class Robot extends EventEmitter {
     return scriptDocumentation;
   }
 
-  public reply(envelope: Envelope, user: User, messages: string[] | string) {
+  public reply(envelope: Envelope, messages: string[] | string) {
     this.logger.debug(
-      `[Robot] Attempting to reply to ${user} in #${envelope.room.name}, message: ${messages}`
+      `[Robot] Attempting to reply to ${envelope.user} in #${
+        envelope.room.name
+      }, message: ${messages}`
     );
 
     if (!Array.isArray(messages)) {
@@ -319,10 +316,6 @@ export default class Robot extends EventEmitter {
 
   public topic(options, callback) {
     this.logger.warn("Unsupported action: topic", options);
-  }
-
-  public error(callback) {
-    this.errorHandlers.push(callback);
   }
 
   public addToConversation(response: Response) {
@@ -452,7 +445,7 @@ export default class Robot extends EventEmitter {
         .then((returnVal) => res.json(returnVal))
         .catch((err) => {
           if (err.message && err.status) {
-            res.sendStatus(err.status).send({error: err.message});
+            res.status(err.status).send({error: err.message});
           } else {
             next(err);
           }
@@ -508,13 +501,7 @@ export default class Robot extends EventEmitter {
 
     try {
       this.expressServer = this.router.listen(port, address);
-      //      this.server = https.createServer({
-      //        key: fs.readFileSync('./certs/server/privkey.pem'),
-      //        cert: fs.readFileSync('./certs/server/fullchain.pem'),
-      //        rejectUnauthorized: false
-      //    }, this.router).listen(port, () => {
       this.logger.info(`[Robot] Listening at ${address}:${port}`);
-      //    });
     } catch (err) {
       this.logger.error(`[Robot] Error trying to start HTTP server: ${err}\n${err.stack}`);
       process.exit(1);

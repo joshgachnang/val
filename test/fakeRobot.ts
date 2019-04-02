@@ -20,7 +20,7 @@ export default class FakeRobot extends Robot {
 
   response(regex: RegExp, options, callback: ResponseCallback) {}
 
-  reply(envelope: Envelope, user: User, messages) {}
+  reply(envelope: Envelope, messages) {}
 
   send(envelope: Envelope, messages) {}
 

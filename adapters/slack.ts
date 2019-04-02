@@ -85,8 +85,15 @@ export default class SlackAdapter extends Adapter {
     if (body.subtype === "bot_message") {
       return undefined;
     }
-    this.logger.debug(`[slack] received message:`, body);
+    this.logger.debug(`[slack] received message: ${JSON.stringify(body)}`);
     let user = this.users[body.user];
+    if (!user) {
+      this.logger.warn(
+        `[slack] could not find user: ${body.user}. User list: ${Object.keys(this.users)}`
+      );
+      throw new Error("Could not find user");
+    }
+    console;
     let room = this.channels[body.channel];
     if (!room) {
       // Direct message
@@ -186,7 +193,7 @@ export default class SlackAdapter extends Adapter {
     this.sendMessageToChannel(channel, message, options);
   }
 
-  private async sendMessageToChannel(channel: string, message: string, options: any) {
+  async sendMessageToChannel(channel: string, message: string, options?: any) {
     let body = {
       channel: channel,
       text: message,
@@ -250,7 +257,10 @@ export default class SlackAdapter extends Adapter {
     }
   }
 
-  reply(envelope, user, strings) {
+  reply(envelope: Envelope, u: User | string[], s?: string[]) {
+    let user = s ? (u as User) : envelope.user;
+    let strings = s ? s : (u as string[]);
+    console.log("STRINGS", strings);
     for (let str of strings) {
       let text: string;
       if (envelope.room.isDirectMessage) {

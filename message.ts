@@ -40,8 +40,7 @@ export class TextMessage extends Message {
   constructor(user: User, text: string, room: any, id: string, adapter: Adapter, rawData: any) {
     if (!user || !text) {
       throw new Error(
-        `Cannot create text message without user or text. user:
-        ${user} text: ${text}`
+        `Cannot create text message without user or text. user: ${user} text: ${text}`
       );
     }
     super(user, adapter, false);

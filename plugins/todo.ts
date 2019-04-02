@@ -118,6 +118,6 @@ export default function(robot: Robot) {
       })
       .join("");
 
-    robot.reply(response.envelope, response.envelope.user, text);
+    robot.reply(response.envelope, text);
   });
 }

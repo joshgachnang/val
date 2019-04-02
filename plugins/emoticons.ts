@@ -11,21 +11,24 @@
 //   pcsforeducation
 
 import Robot from "../robot";
+import SlackAdapter from "../adapters/slack";
 
 export default function(robot: Robot) {
-  robot.adapters["Slack"].addSlashCommand("tableflip", (body: any, reply: any) => {
+  const slack = robot.adapters["Slack"] as SlackAdapter;
+
+  slack.addSlashCommand("tableflip", (body: any, reply: any) => {
     reply("(╯°□°）╯︵ ┻━┻)", true);
   });
 
-  robot.adapters["Slack"].addSlashCommand("flipharder", (body: any, reply: any) => {
+  slack.addSlashCommand("flipharder", (body: any, reply: any) => {
     reply("(ノಠ益ಠ)ノ彡┻━┻", true);
   });
 
-  robot.adapters["Slack"].addSlashCommand("respecttables", (body: any, reply: any) => {
+  slack.addSlashCommand("respecttables", (body: any, reply: any) => {
     reply("┬─┬ノ( º _ ºノ)", true);
   });
 
-  robot.adapters["Slack"].addSlashCommand("redditface", (body: any, reply: any) => {
+  slack.addSlashCommand("redditface", (body: any, reply: any) => {
     reply("ಠ_ಠ", true);
   });
 }

@@ -18,8 +18,6 @@ import * as _ from "lodash";
 
 import Robot from "./robot";
 import User from "./user";
-import {EventEmitter} from "events";
-import {raw} from "body-parser";
 
 const GLOBAL_KEY = "GLOBAL";
 
@@ -51,7 +49,6 @@ export default class DB {
         this.userTokenMap[user.authToken] = user.id;
       }
     }
-    console.log("REGENERATED MAP", this.userTokenMap);
   };
 
   // By default, everything is stored per user.
@@ -135,7 +132,6 @@ export default class DB {
   // Keeps a cached mapping of user token to user id so we can easily check if a token belongs
   // or not
   public getUserFromAuthToken(token: string): string {
-    console.log("USER FRM TOKEN", this.userTokenMap, token, this.userTokenMap[token]);
     return this.userTokenMap[token];
   }
 

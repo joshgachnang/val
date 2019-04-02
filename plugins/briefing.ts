@@ -5,6 +5,7 @@
 import Response from "../response";
 import Robot from "../robot";
 import User from "../user";
+import SlackAdapter from "../adapters/slack";
 
 const BRIEFING_KEY = "briefings";
 
@@ -37,7 +38,7 @@ export default function(robot: Robot) {
       );
       return;
     }
-    robot.adapters["Slack"].sendToName(
+    (robot.adapters["Slack"] as SlackAdapter).sendToName(
       user.slack.name,
       user.slack.teamId,
       `Good ${time}!\n\n${text}`

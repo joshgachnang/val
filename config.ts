@@ -11,6 +11,7 @@ export default class Config {
     let exampleConfig = this.loadFile("configuration.example.json");
     let config = this.loadFile("configuration.json");
     this.loadedConfig = Object.assign({}, exampleConfig, config);
+    // console.log("Loaded", config);
   }
 
   // Load either in this directory or in the directory above. (TS compilation doesn't copy over
@@ -19,9 +20,14 @@ export default class Config {
     try {
       return require("./" + filename);
     } catch (e) {
+      // console.warn(`Could not find ./${filename} in ${process.cwd()}`, e);
+      // console.warn(e);
       try {
         return require("../" + filename);
-      } catch (e) {}
+      } catch (e) {
+        // console.warn(`Could not find ../${filename} in ${process.cwd()}`, e);
+        // console.warn(e);
+      }
     }
   }
 

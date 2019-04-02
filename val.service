@@ -1,0 +1,13 @@
+[Unit]
+Description=Val
+
+[Service]
+Type=simple
+WorkingDirectory=/home/josh/val
+User=1000
+Environment="NODE_ENV=production"
+ExecStart=/usr/bin/nodejs dist/server.js
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

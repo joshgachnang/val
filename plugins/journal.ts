@@ -10,6 +10,7 @@
 import * as moment from "moment-timezone";
 import Response from "../response";
 import Robot from "../robot";
+import SlackAdapter from "../adapters/slack";
 
 const JOURNAL_KEY = "journal";
 
@@ -54,7 +55,7 @@ export default function(robot: Robot) {
     robot.logger.info(
       `[journal] sending journal notification to slack user: ${user.slack.name} (${user.slack.id})`
     );
-    robot.adapters["Slack"].sendToName(
+    (robot.adapters["Slack"] as SlackAdapter).sendToName(
       user.slack.name,
       user.slack.teamId,
       "Hello! Good morning! It is time to journal! You can make a journal entry by telling me " +

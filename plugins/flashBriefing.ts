@@ -11,8 +11,8 @@ class FlashBriefing {
       let googleCalendar = robot.plugins.googleCalendar;
       let forecastIO = robot.plugins.forecastio;
 
-      let agenda = await googleCalendar.getAgenda(res.locals.userId);
-      let forecast = await forecastIO.getDayForecast();
+      let agenda = await (googleCalendar as any).getAgenda(res.locals.userId);
+      let forecast = await (forecastIO as any).getDayForecast();
 
       return res.json([
         {

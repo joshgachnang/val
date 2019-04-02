@@ -16,6 +16,8 @@ import Response from "../response";
 import Robot from "../robot";
 import * as cheerio from "cheerio";
 import * as moment from "moment";
+import TwitterAdapter from "../adapters/twitter";
+import SlackAdapter from "../adapters/slack";
 
 const SCORES_KEY = "triviaStatsScores";
 
@@ -170,10 +172,13 @@ async function scrape(robot: Robot, year: number, hour: number) {
     message = matchingScores.join("\n");
   }
   // TODO: make a standard thing.
-  robot.adapters.Slack.sendMessageToChannel("triviastats", `<!channel> ${message}`);
+  (robot.adapters.Slack as SlackAdapter).sendMessageToChannel(
+    "triviastats",
+    `<!channel> ${message}`
+  );
 
   // Post to twitter that new scores are posted!
-  robot.adapters.Twitter.post(`Trivia scores for Hour ${hour} are posted!`);
+  (robot.adapters.Twitter as TwitterAdapter).post(`Trivia scores for Hour ${hour} are posted!`);
 }
 
 async function findTeamScore(robot: Robot, search: string): Promise<string[]> {

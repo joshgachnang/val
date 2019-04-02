@@ -28,7 +28,7 @@ export default class Twilio extends Adapter {
     this.robot.logger.debug("SMS USER", envelope.user);
     let message = strings.join("\n");
 
-    return this.send_sms(message, envelope.user, function(err, body) {
+    return this.sendMessage(message, envelope.user, function(err, body) {
       if (err || body === null) {
         this.robot.logger.debug(`Error sending reply SMS: ${err} ${body}`);
       } else {
@@ -52,7 +52,7 @@ export default class Twilio extends Adapter {
       let payload = request.body;
       if (payload.Body != null && payload.From != null) {
         this.robot.logger.debug(`Received SMS: ${payload.Body} from ${payload.From}`);
-        this.receive_sms(payload.Body, payload.From);
+        this.receiveMessage(payload.Body, payload.From);
       }
 
       response.writeHead(200, {"Content-Type": "text/plain"});
@@ -60,7 +60,7 @@ export default class Twilio extends Adapter {
     });
   }
 
-  private receive_sms(body, fromNumber) {
+  private receiveMessage(body, fromNumber) {
     this.robot.logger.debug(`Receive SMS ${body}, from: ${fromNumber}`);
     if (body.length === 0) {
       this.robot.logger.debug("SMS Body length is 0, returning");
@@ -79,7 +79,11 @@ export default class Twilio extends Adapter {
     return this.robot.receive(message, this, undefined);
   }
 
-  public send_sms(message, to, callback) {
+  public sendMessage(
+    message: string,
+    to: string,
+    callback?: (err: string | null, body?: any) => void
+  ) {
     this.robot.logger.debug("SENDING SMS", this.sid, this.token, this.fromNumber);
     let auth = new Buffer(this.sid + ":" + this.token).toString("base64");
     let data = QS.stringify({From: this.fromNumber, To: to, Body: message});

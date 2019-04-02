@@ -131,9 +131,14 @@ export class OAuthHandler {
   };
 
   refreshToken = async (userId: string) => {
-    let token = await this.oauth2Client.refreshAccessToken();
-    await this.storeToken(userId, token);
-    return token;
+    console.log("refreshing");
+    return new Promise((resolve) => {
+      this.oauth2Client.refreshAccessToken(async (err: string, token) => {
+        console.log("Refresh", err, token);
+        await this.storeToken(userId, token);
+        resolve(token);
+      });
+    });
   };
 
   /**
@@ -143,10 +148,31 @@ export class OAuthHandler {
    */
   getToken = async (userId: string) => {
     let token = await this.robot.db.get(userId, AUTH_TOKEN_KEY);
-    if (new Date(token.expiry) > new Date()) {
+    if (Number(token.expiry_date) < new Date().getTime()) {
       return this.refreshToken(userId);
     }
     return token;
+  };
+
+  oauthRequest = async (
+    userId: string,
+    url: string,
+    method: "GET" | "POST" = "GET",
+    body?: any
+  ) => {
+    let token = await this.getToken(userId);
+    if (!token) {
+      throw new Error(`[googlePhotos] no auth token set up`);
+    }
+    let res = await this.robot.request({
+      url,
+      method,
+      body,
+      headers: {
+        Authorization: `Bearer ${token.access_token}`,
+      },
+    });
+    return JSON.parse(res);
   };
 }
 

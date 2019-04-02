@@ -7,6 +7,7 @@ import FakeRobot from "./fakeRobot";
 import {TextMessage} from "../message"; // tslint:disable-line
 import Robot from "../robot";
 import User from "../user";
+import FakeAdapter from "./fakeAdapter";
 
 export class PluginTestSuite {
   robot: Robot;
@@ -39,7 +40,8 @@ export class PluginTestSuite {
   }
 
   getTextMessage(text: string): TextMessage {
-    return new TextMessage(this.getUser(), text, "#general", "id", this.robot.adapters.fake, {});
+    const fake = this.robot.adapters.fake as FakeAdapter;
+    return new TextMessage(this.getUser(), text, "#general", "id", fake, {});
   }
 }
 
@@ -51,22 +53,20 @@ class EchoTest extends PluginTestSuite {
 
   @test
   noEcho() {
-    assert.equal(this.robot.adapters.fake.events.length, 1);
-    this.robot.receive(this.getTextMessage("hello"), this.robot.adapters.fake, undefined);
-    assert.equal(this.robot.adapters.fake.events.length, 1);
+    const fake = this.robot.adapters.fake as FakeAdapter;
+    assert.equal(fake.events.length, 1);
+    this.robot.receive(this.getTextMessage("hello"), fake, undefined);
+    assert.equal(fake.events.length, 1);
   }
 
   @test
   echo(done) {
-    assert.equal(this.robot.adapters.fake.events.length, 1);
-    this.robot.receive(
-      this.getTextMessage(`@${this.robotName}: hello`),
-      this.robot.adapters.fake,
-      undefined
-    );
+    const fake = this.robot.adapters.fake as FakeAdapter;
+    assert.equal(fake.events.length, 1);
+    this.robot.receive(this.getTextMessage(`@${this.robotName}: hello`), fake, undefined);
     // TODO: gross.
     setTimeout(() => {
-      assert.equal(this.robot.adapters.fake.events.length, 2);
+      assert.equal(fake.events.length, 2);
       done();
     }, 10);
   }
@@ -142,16 +142,13 @@ class RobotHelpSuite extends PluginTestSuite {
         description: ["Find a list of commands"],
       },
     });
-    this.robot.receive(
-      this.getTextMessage(`@${this.robotName}: help`),
-      this.robot.adapters.fake,
-      undefined
-    );
+    const fake = this.robot.adapters.fake as FakeAdapter;
+    this.robot.receive(this.getTextMessage(`@${this.robotName}: help`), fake, undefined);
     // TODO: gross.
     await new Promise((resolve) =>
       setTimeout(() => {
-        assert.equal(this.robot.adapters.fake.events.length, 2);
-        let strings = this.robot.adapters.fake.events[1].data.strings;
+        assert.equal(fake.events.length, 2);
+        let strings = fake.events[1].data.strings;
         // TODO: Not sure why strings[1] is an array..
         console.log(strings);
         assert.equal(

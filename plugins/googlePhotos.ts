@@ -13,6 +13,9 @@ import Robot from "../robot";
 const ALBUM_NAME = "ChoeNang Family";
 
 function pickRandom(items) {
+  if (!items) {
+    return;
+  }
   return items[Math.floor(Math.random() * items.length)];
 }
 
@@ -53,20 +56,12 @@ class GooglePhotos {
     method: "GET" | "POST" = "GET",
     body?: any
   ) {
-    let token = await this.robot.oauth.getToken(userId);
-    if (!token) {
-      throw new Error(`[googlePhotos] no auth token set up`);
-    }
-    console.log("TOKEN", token);
-    let res = await this.robot.request({
-      url: `https://photoslibrary.googleapis.com/v1/${url}`,
-      method: method,
-      body: body,
-      headers: {
-        Authorization: `Bearer ${token.access_token}`,
-      },
-    });
-    return JSON.parse(res);
+    return this.robot.oauth.oauthRequest(
+      userId,
+      `https://photoslibrary.googleapis.com/v1/${url}`,
+      method,
+      body
+    );
   }
 
   getAlbumId = async (userId: string) => {
@@ -75,6 +70,7 @@ class GooglePhotos {
     }
     let res = await this.apiRequest(userId, "albums");
     if (!res.albums) {
+      console.log("res", res);
       this.robot.logger.warn(`[googlePhotos] albums was null, cannot get album id.`);
       return;
     }
@@ -101,7 +97,7 @@ class GooglePhotos {
 
     while (res.nextPageToken) {
       res = await this.getPhotosFromAlbum(userId, albumId, res.nextPageToken);
-      photos = photos.concat(res.mediaItems);
+      photos = photos.concat(res.mediaItems.filter((i: any) => i.mimeType !== "video/mp4"));
     }
     this.robot.logger.info(
       `[googlePhotos] cached ${photos ? photos.length : 0} photos for user id: ${userId}`
@@ -119,9 +115,13 @@ class GooglePhotos {
     if (!this.photoCache[userId]) {
       await this.cachePhotos(userId);
     }
+    await this.robot.oauth.authorize(userId);
     let photo = pickRandom(this.photoCache[userId]);
-    console.log("PHOTO", photo);
-    let item = await this.apiRequest(userId, `mediaItems/${photo.mediaItemId}`, "GET");
+    if (!photo) {
+      console.warn("[googlePhotos] Could not pick photo, none cached");
+      return;
+    }
+    let item = await this.apiRequest(userId, `mediaItems/${photo.id}`, "GET");
     return item.baseUrl;
   };
 }

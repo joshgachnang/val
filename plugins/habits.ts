@@ -20,6 +20,7 @@
 import * as moment from "moment-timezone";
 import Response from "../response";
 import Robot from "../robot";
+import SlackAdapter from "../adapters/slack";
 
 const HABIT_KEY = "habits";
 
@@ -72,7 +73,6 @@ export default function(robot: Robot) {
     };
     let existingConfigs = await robot.db.get(res.userId, HABIT_KEY, Object.assign(DEFAULT_DB));
     existingConfigs.config[config.name] = config;
-    console.log("SAVING HABITS", existingConfigs);
 
     await robot.db.set(res.userId, HABIT_KEY, existingConfigs);
     res.reply("Ok!");
@@ -118,7 +118,7 @@ export default function(robot: Robot) {
       );
       return;
     }
-    robot.adapters["Slack"].sendToName(
+    (robot.adapters["Slack"] as SlackAdapter).sendToName(
       user.slack.name,
       user.slack.teamId,
       `Hey! Did you complete your ${config.name} task yet?`

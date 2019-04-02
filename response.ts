@@ -16,11 +16,15 @@ export default class Response {
   constructor(bot: Robot, message: Message, match: any, adapter: any) {
     this.bot = bot;
     this.message = message;
-    console.log("MATCH", match);
+    // console.log("MATCH", match);
     if (match) {
-      console.log("GROUPS", match.name);
+      // console.log("GROUPS", match.name);
     }
     this.match = match;
+    if (!message.user) {
+      bot.logger.warn("no user on response message", message);
+    }
+
     this.envelope = new Envelope(
       message.room, // might be undefined for non text messages, and that's ok.
       message.user,
@@ -55,7 +59,7 @@ export default class Response {
 
   // Actually takes a list of 1 to n arguments
   reply(...strings) {
-    this.bot.reply(this.envelope, this.envelope.user, strings);
+    this.bot.reply(this.envelope, strings);
   }
 
   // Actually takes a list of 1 to n arguments
