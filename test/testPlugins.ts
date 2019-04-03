@@ -1,10 +1,10 @@
-import {assert} from "chai";
-import {only, skip, slow, suite, test, timeout} from "mocha-typescript";
+import { assert } from "chai";
+import { only, skip, slow, suite, test, timeout } from "mocha-typescript";
 import * as winston from "winston";
 
 import Config from "../config";
 import FakeRobot from "./fakeRobot";
-import {TextMessage} from "../message"; // tslint:disable-line
+import { TextMessage } from "../message"; // tslint:disable-line
 import Robot from "../robot";
 import User from "../user";
 import FakeAdapter from "./fakeAdapter";
@@ -14,12 +14,12 @@ export class PluginTestSuite {
   robotName = "k2so";
 
   static async getFakeRobot(plugins) {
-    let config = new Config();
-    config.set("EXPRESS_BIND_PORT", "8081");
-    config.set("BOT_NAME", "k2so");
-    config.set("PLUGINS", plugins);
-    config.set("ADAPTERS", ["./test/fakeAdapter"]);
-
+    let config = {
+      EXPRESS_BIND_PORT: "8081",
+      BOT_NAME: "k2so",
+      PLUGINS: plugins,
+      ADAPTERS: ["./test/fakeAdapter"]
+    }
     let robot = new Robot(config);
     await robot.init();
     winston.debug("[test] created fake robot");
@@ -33,10 +33,10 @@ export class PluginTestSuite {
     }
   }
 
-  before() {}
+  before() { }
 
   getUser(): User {
-    return new User({id: "id", slack: {id: "someId", name: "fakeUser"}});
+    return new User({ id: "id", slack: { id: "someId", name: "fakeUser" } });
   }
 
   getTextMessage(text: string): TextMessage {
@@ -76,11 +76,12 @@ class EchoTest extends PluginTestSuite {
 class AsyncPluginInitTest extends PluginTestSuite {
   @test
   async asyncPlugin() {
-    let config = new Config();
-    config.set("EXPRESS_BIND_PORT", "8081");
-    config.set("BOT_NAME", "k2so");
-    config.set("PLUGINS", ["./test/asyncPlugin"]);
-    config.set("ADAPTERS", ["./test/fakeAdapter"]);
+    let config = {
+      EXPRESS_BIND_PORT: "8081",
+      BOT_NAME: "k2so",
+      PLUGINS: ["./test/asyncPlugin"],
+      ADAPTERS: ["./test/fakeAdapter"]
+    }
     this.robot = new Robot(config);
     assert.equal(Object.keys(this.robot.plugins).length, 0);
     let promise = this.robot.init();
@@ -94,11 +95,12 @@ class AsyncPluginInitTest extends PluginTestSuite {
 class RobotHelpSuite extends PluginTestSuite {
   @test
   async parseHelp() {
-    let config = new Config();
-    config.set("EXPRESS_BIND_PORT", "8081");
-    config.set("BOT_NAME", "k2so");
-    config.set("PLUGINS", ["./test/asyncPlugin"]);
-    config.set("ADAPTERS", ["./test/fakeAdapter"]);
+    let config = {
+      EXPRESS_BIND_PORT: "8081",
+      BOT_NAME: "k2so",
+      PLUGINS: ["./test/asyncPlugin"],
+      ADAPTERS: ["./test/fakeAdapter"]
+    }
     this.robot = new Robot(config);
     await this.robot.init();
     let filename = require.resolve("./asyncPlugin");
@@ -118,11 +120,12 @@ class RobotHelpSuite extends PluginTestSuite {
 
   @test
   async helpCommand() {
-    let config = new Config();
-    config.set("EXPRESS_BIND_PORT", "8081");
-    config.set("BOT_NAME", "k2so");
-    config.set("PLUGINS", ["./test/asyncPlugin", "./plugins/help"]);
-    config.set("ADAPTERS", ["./test/fakeAdapter"]);
+    let config = {
+      EXPRESS_BIND_PORT: "8081",
+      BOT_NAME: "k2so",
+      PLUGINS: ["./test/asyncPlugin", "./plugins/help"],
+      ADAPTERS: ["./test/fakeAdapter"]
+    }
     this.robot = new Robot(config);
     await this.robot.init();
     assert.deepEqual(this.robot.help, {
@@ -154,8 +157,8 @@ class RobotHelpSuite extends PluginTestSuite {
         assert.equal(
           strings[0][0],
           "Commands:\nasyncPlugin:\n-----------\n@k2so async - pretends to async some things " +
-            "(not really)\nawait - waits on some stuff\n\nhelp:\n----\n@k2so help - displays " +
-            "help for all commands\n"
+          "(not really)\nawait - waits on some stuff\n\nhelp:\n----\n@k2so help - displays " +
+          "help for all commands\n"
         );
         resolve();
       }, 10)

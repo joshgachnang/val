@@ -16,8 +16,7 @@ import Config from "./config";
 import Robot from "./robot";
 
 // create a bot
-let config = new Config();
-let robot = new Robot(config);
+let robot = new Robot();
 robot.init();
 
 process.on("uncaughtException", (err) => {
