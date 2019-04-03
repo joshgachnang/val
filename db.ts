@@ -29,19 +29,20 @@ export default class DB {
   constructor(robot: Robot) {
     this.robot = robot;
 
-    let projectId = robot.config.get("FIREBASE_PROJECT_ID");
-
-    robot.logger.debug(`[db] connecting to firestore project: ${projectId}`);
-
     if (!process.env.VAL_FIRESTORE_CLIENT_EMAIL || process.env.VAL_FIRESTORE_CLIENT_EMAIL.trim() === "") {
       throw new Error("You must set the VAL_FIRESTORE_CLIENT_EMAIL environment variable");
     }
     if (!process.env.VAL_FIRESTORE_PRIVATE_KEY || process.env.VAL_FIRESTORE_PRIVATE_KEY.trim() === "") {
       throw new Error("You must set the VAL_FIRESTORE_PRIVATE_KEY environment variable")
     }
+    if (!process.env.VAL_FIRESTORE_PROJECT_ID || process.env.VAL_FIRESTORE_PROJECT_ID.trim() === "") {
+      throw new Error("You must set the VAL_FIRESTORE_PROJECT_ID environment variable")
+    }
+
+    robot.logger.debug(`[db] connecting to firestore project ${process.env.VAL_FIRESTORE_PROJECT_ID}`);
 
     this.db = new Firestore({
-      projectId: projectId,
+      projectId: process.env.VAL_FIRESTORE_PROJECT_ID,
       credentials: {
         client_email: process.env.VAL_FIRESTORE_CLIENT_EMAIL,
         private_key: process.env.VAL_FIRESTORE_PRIVATE_KEY.replace(/\\n/g, '\n'),
@@ -83,6 +84,14 @@ export default class DB {
       docs = all.data();
     }
     return docs !== undefined ? docs : defaultReturn;
+  }
+
+  public async getConfig(): Promise<{ [key: string]: any }> {
+    return this.get(GLOBAL_KEY, "config");
+  }
+
+  public async setConfig(config: any): Promise<void> {
+    return this.set(GLOBAL_KEY, 'config', config);
   }
 
   // Update or create new user

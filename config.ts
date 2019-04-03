@@ -1,49 +1,57 @@
 import * as process from "process";
+import DB from "./db";
+import Robot from "./robot";
+
+// const CONFIG_COLLECTION = "config"
 
 export default class Config {
-  // Loaded values from config file
-  private loadedConfig = {};
+  private db: DB;
+  private robot: Robot;
+  private loadedConfig: { [key: string]: any } = {};
+  private defaultConfig: { [key: string]: any } = {};
 
-  // Some plugins and adapters may need to
-  private setConfig = {};
-
-  constructor() {
-    let exampleConfig = this.loadFile("configuration.example.json");
-    let config = this.loadFile("configuration.json");
-    this.loadedConfig = Object.assign({}, exampleConfig, config);
-    // console.log("Loaded", config);
+  constructor(robot: Robot, db: DB, defaultConfig?: { [key: string]: any }) {
+    this.robot = robot;
+    this.db = db;
+    this.defaultConfig = defaultConfig;
   }
 
-  // Load either in this directory or in the directory above. (TS compilation doesn't copy over
-  // JSON files).
-  private loadFile(filename: string) {
-    try {
-      return require("./" + filename);
-    } catch (e) {
-      // console.warn(`Could not find ./${filename} in ${process.cwd()}`, e);
-      // console.warn(e);
-      try {
-        return require("../" + filename);
-      } catch (e) {
-        // console.warn(`Could not find ../${filename} in ${process.cwd()}`, e);
-        // console.warn(e);
-      }
+  public async init() {
+    await this.refreshConfig();
+    await this.setDefaultConfig();
+  }
+
+  public async refreshConfig() {
+    this.loadedConfig = await this.db.getConfig();
+    console.log("Loaded config", this.loadedConfig)
+  }
+
+  public async set(key: string, value: any) {
+    // await this.db.setConfig(key, value);
+    await this.refreshConfig();
+  }
+
+  public async setDefaultConfig() {
+    if (Object.keys(this.loadedConfig).length > 0) {
+      this.robot.logger.error("[config] Not setting default config. Clear all config data first.")
+      return;
     }
-  }
+    const exampleConfig = require("../configuration.example.json");
+    await this.db.setConfig(exampleConfig);
 
-  // TODO: persist/load from brain
-  public set(key: string, value: any) {
-    this.setConfig[key] = value;
+    for (let key of Object.keys(exampleConfig)) {
+      console.log("Loading default", key, exampleConfig[key])
+    }
   }
 
   // Fetch a config variable. Picks environment variables, then config file variables, then
   public get(key: string, defaultValue: any = undefined) {
-    if (this.setConfig[key] !== undefined) {
-      return this.setConfig[key];
-    } else if (process.env[key] !== undefined) {
+    if (process.env[key] !== undefined) {
       return process.env[key];
     } else if (this.loadedConfig[key] !== undefined) {
       return this.loadedConfig[key];
+    } else if (this.defaultConfig && this.defaultConfig[key] !== undefined) {
+      return this.defaultConfig[key]
     } else if (defaultValue !== undefined) {
       return defaultValue;
     } else {

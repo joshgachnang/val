@@ -1,13 +1,10 @@
 {
   "BOT_NAME": "val",
-  "BOT_PORT": 8080,
-  "BOT_ADDRESS": "0.0.0.0",
+  "VAL_PORT": 8080,
+  "VAL_ADDRESS": "0.0.0.0",
   "BASE_URL": "http://localhost:8080",
   "DEV": true,
-  "SENTRY_URL": "",
-  "FIREBASE_PROJECT_ID": "val-testing",
   "CRON_TIMEZONE": "America/Los_Angeles",
-
   "ADAPTERS": [
     "./adapters/slack",
     "./adapters/twilio",
@@ -15,25 +12,21 @@
     "./adapters/twitter",
     "./adapters/facebook"
   ],
-
   "SLACK_TOKEN": "",
-
   "TWITTER_CONSUMER_KEY": "",
   "TWITTER_CONSUMER_SECRET": "",
   "TWITTER_ACCESS_TOKEN_KEY": "",
   "TWITTER_ACCESS_TOKEN_SECRET": "",
-
   "FACEBOOK_MESSENGER_TOKEN": "",
   "FACEBOOK_MESSENGER_VERIFY_TOKEN": "",
-
-  "ADMIN_USERNAMES": ["josh"],
-
+  "ADMIN_USERNAMES": [
+    "josh"
+  ],
   "PLUGINS": [
     "./plugins/users",
     "./plugins/admin",
     "./plugins/emotionChip",
     "./plugins/healthcheck",
-
     "./plugins/briefing",
     "./plugins/flashBriefing",
     "./plugins/forecastio",
@@ -46,7 +39,6 @@
     "./plugins/productivityQuote",
     "./plugins/emoticons",
     "./plugins/twitter",
-
     "hubot-shipit",
     "../node_modules/hubot-scripts/src/scripts/ackbar.coffee",
     "../node_modules/hubot-scripts/src/scripts/coin.coffee",
@@ -54,14 +46,11 @@
     "../node_modules/hubot-scripts/src/scripts/go-for-it.coffee",
     "../node_modules/hubot-scripts/src/scripts/xkcd.coffee"
   ],
-
   "LATITUDE": 41.0,
   "LONGITUDE": -87.0,
   "CTA_TRAIN_API_KEY": "",
   "CTA_TRAIN_MAP_ID": "41320",
-
   "DARKSKY_KEY": "",
-
   "GOOGLE_CALENDAR_CLIENT_SECRET": {
     "installed": {
       "client_id": "",
@@ -70,11 +59,15 @@
       "token_uri": "https://accounts.google.com/o/oauth2/token",
       "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
       "client_secret": "",
-      "redirect_uris": ["urn:ietf:wg:oauth:2.0:oob", "http://localhost"]
+      "redirect_uris": [
+        "urn:ietf:wg:oauth:2.0:oob",
+        "http://localhost"
+      ]
     }
   },
-  "CALENDAR_NAMES": ["username@gmail.com"],
-
+  "CALENDAR_NAMES": [
+    "username@gmail.com"
+  ],
   "INSPIRATIONAL_QUOTES": [
     "Look at that sexy dude!",
     "Woah, stylin' today",
@@ -84,7 +77,6 @@
     "I'm jealous of that shirt",
     "Go kick some ass today!"
   ],
-
   "PRODUCTIVITY_QUOTES": [
     "'It's not knowing what to do, it's doing what you know.' -Tony Robbins",
     "'Focus on being productive instead of busy.' -Tim Ferriss",

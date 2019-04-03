@@ -1,13 +1,13 @@
 require("source-map-support").install();
 require("coffee-script/register");
 
-import {EventEmitter} from "events";
+import { EventEmitter } from "events";
 let httpClient = require("scoped-http-client");
 import * as bodyParser from "body-parser";
 import * as cors from "cors";
 import * as cron from "cron";
 import * as express from "express";
-import {existsSync, readFileSync} from "fs";
+import { existsSync, readFileSync } from "fs";
 import * as fs from "fs";
 import * as path from "path";
 import * as raven from "raven";
@@ -17,16 +17,16 @@ import * as winston from "winston";
 import Adapter from "./adapter";
 import Brain from "./brain";
 import Config from "./config";
-import {ConversationBrain} from "./conversation";
+import { ConversationBrain } from "./conversation";
 import DB from "./db";
 import Envelope from "./envelope";
-import {Listener, TextListener} from "./listener";
-import {Message, TextMessage} from "./message";
-import OAuth, {OAuthHandler} from "./oauth";
+import { Listener, TextListener } from "./listener";
+import { Message, TextMessage } from "./message";
+import OAuth, { OAuthHandler } from "./oauth";
 import "./polyfill";
 import Response from "./response";
 import AlexaAdapter from "./adapters/alexa";
-import {Server} from "http";
+import { Server } from "http";
 
 let HUBOT_DOCUMENTATION_SECTIONS = [
   "description",
@@ -58,26 +58,26 @@ export default class Robot extends EventEmitter {
   config: Config;
   pluginListeners: Listener[] = [];
   db: DB;
-  help: {[pluginName: string]: {[section: string]: string[]}} = {};
+  help: { [pluginName: string]: { [section: string]: string[] } } = {};
   TextMessage: TextMessage; // tslint:disable-line
   router: express.Application;
   logger: winston.LoggerInstance;
   brain: Brain;
-  adapters: {[name: string]: Adapter};
-  plugins: {[name: string]: (robot: Robot) => void};
+  adapters: { [name: string]: Adapter };
+  plugins: { [name: string]: (robot: Robot) => void };
   raven: any;
   cronjobs: any[] = [];
   briefings: any = {}; // name: fn
   oauth: OAuthHandler;
   conversationBrain: ConversationBrain;
   private expressServer: Server;
+  private defaultConfig: { [key: string]: any };
 
-  constructor(config: Config) {
+  constructor(defaultConfig?: { [key: string]: any }) {
     super();
-    this.config = config;
-
-    if (this.config.get("SENTRY_URL", false)) {
-      this.raven = raven.config(this.config.get("SENTRY_URL")).install();
+    this.defaultConfig = defaultConfig
+    if (process.env.VAL_SENTRY_URL, false) {
+      this.raven = raven.config(process.env.VAL_SENTRY_URL).install();
       process.on("uncaughtException", (err) => {
         this.raven.captureException(err);
       });
@@ -85,17 +85,8 @@ export default class Robot extends EventEmitter {
       process.on("unhandledRejection", (err) => {
         this.raven.captureException(err);
       });
-    }
-
-    if (!config.get("BOT_NAME")) {
-      winston.error("`name` is importd to start robot");
-      throw new Error("`name` is importd to start robot");
     } else {
-      this.name = config.get("BOT_NAME");
-    }
-
-    if (!config.get("ADAPTERS")) {
-      throw new Error("A list of `adapters` is required to start robot.");
+      console.warn('No Sentry URL configured. Set the VAL_SENTRY_URL environment variable to configure error reporting.')
     }
 
     // Default variables
@@ -103,8 +94,8 @@ export default class Robot extends EventEmitter {
     this.router = undefined;
     this.logger = new winston.Logger({
       transports: [
-        new winston.transports.Console({level: "info"}),
-        new winston.transports.File({filename: "bot.log", level: "debug"}),
+        new winston.transports.Console({ level: "info" }),
+        new winston.transports.File({ filename: "bot.log", level: "debug" }),
       ],
     });
     this.brain = new Brain(this);
@@ -121,6 +112,20 @@ export default class Robot extends EventEmitter {
     this.logger.info("[Robot] Initializing Firebase DB");
     this.db = new DB(this);
     this.oauth = OAuth;
+
+    this.config = new Config(this, this.db, this.defaultConfig);
+    await this.config.init();
+
+    if (!this.config.get("BOT_NAME")) {
+      winston.error("`name` is required to start robot");
+      throw new Error("`name` is required to start robot");
+    } else {
+      this.name = this.config.get("BOT_NAME");
+    }
+
+    if (!this.config.get("ADAPTERS")) {
+      throw new Error("A list of `adapters` is required to start robot.");
+    }
 
     for (let adapter of this.config.get("ADAPTERS")) {
       this.logger.info("[Robot] loading adapter:", adapter);
@@ -235,7 +240,7 @@ export default class Robot extends EventEmitter {
 
   // TODO: only public for testing..
   public parseHelp(path: string) {
-    let scriptDocumentation: {[section: string]: string[]} = {};
+    let scriptDocumentation: { [section: string]: string[] } = {};
     let body = readFileSync(path, "utf-8");
     let currentSection = null;
 
@@ -276,7 +281,7 @@ export default class Robot extends EventEmitter {
   public reply(envelope: Envelope, messages: string[] | string) {
     this.logger.debug(
       `[Robot] Attempting to reply to ${envelope.user} in #${
-        envelope.room.name
+      envelope.room.name
       }, message: ${messages}`
     );
 
@@ -438,14 +443,14 @@ export default class Robot extends EventEmitter {
 
   /* Wrap an express .get/.post/etc call so async/await works. See setupExpress for usage. */
   public expressWrap(fn) {
-    return function(req, res, next) {
+    return function (req, res, next) {
       // Make sure to `.catch()` any errors and pass them along to the `next()`
       // middleware in the chain, in this case the error handler.
       fn(req)
         .then((returnVal) => res.json(returnVal))
         .catch((err) => {
           if (err.message && err.status) {
-            res.status(err.status).send({error: err.message});
+            res.status(err.status).send({ error: err.message });
           } else {
             next(err);
           }
@@ -472,7 +477,7 @@ export default class Robot extends EventEmitter {
       next();
     });
 
-    app.use(bodyParser.urlencoded({extended: false}));
+    app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.json());
     app.use((req, res, next) => {
       if (req.query && req.query["token"]) {
@@ -489,8 +494,9 @@ export default class Robot extends EventEmitter {
   }
 
   private listen() {
-    let port = this.config.get("BOT_PORT") || 8080;
-    let address = this.config.get("BOT_ADDRESS") || "0.0.0.0";
+    // PORT is passed in by Heroku.
+    let port = process.env.PORT || this.config.get("VAL_PORT", 8080);
+    let address = this.config.get("VAL_ADDRESS", "0.0.0.0");
     this.logger.debug("[Robot] All routes:");
     //    this.logger.debug(this.router.stack);
     this.router._router.stack.forEach((r) => {

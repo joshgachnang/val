@@ -1,9 +1,9 @@
-import {assert} from "chai";
-import {only, skip, slow, suite, test, timeout} from "mocha-typescript";
+import { assert } from "chai";
+import { only, skip, slow, suite, test, timeout } from "mocha-typescript";
 
 import Adapter from "../adapter";
 import Config from "../config";
-import {TextMessage} from "../message"; // tslint:disable-line
+import { TextMessage } from "../message"; // tslint:disable-line
 import Response from "../response";
 import Robot from "../robot";
 import User from "../user";
@@ -22,11 +22,12 @@ class RobotTestSuite {
   }
 
   async getFakeRobot(plugins) {
-    let config = new Config();
-    config.set("EXPRESS_BIND_PORT", "8081");
-    config.set("BOT_NAME", "k2so");
-    config.set("PLUGINS", plugins);
-    config.set("ADAPTERS", ["./test/fakeAdapter"]);
+    let config = {
+      EXPRESS_BIND_PORT: "8081",
+      BOT_NAME: "k2so",
+      PLUGINS: plugins,
+      ADAPTERS: ["./test/fakeAdapter"]
+    }
 
     let robot = new Robot(config);
     await robot.init();
@@ -34,7 +35,7 @@ class RobotTestSuite {
   }
 
   getUser(): User {
-    return new User({id: "id", slack: {id: "someId", name: "fakeUser"}});
+    return new User({ id: "id", slack: { id: "someId", name: "fakeUser" } });
   }
 
   getTextMessage(text: string): TextMessage {
