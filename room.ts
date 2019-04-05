@@ -1,3 +1,11 @@
 export default class Room {
-  constructor(public name: string, public id?: string, public isDirectMessage: Boolean = false) {}
+  name: string;
+  id?: string;
+  isDirectMessage: boolean;
+
+  constructor(name: string, id?: string, isDirectMessage: boolean = false) {
+    this.name = name;
+    this.id = id;
+    this.isDirectMessage = isDirectMessage;
+  }
 }

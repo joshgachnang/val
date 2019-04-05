@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 // Description:
 //   <description of the scripts functionality>
 //
@@ -17,15 +18,11 @@
 // Author:
 //   <github username of the original script author>
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const Firestore = require("@google-cloud/firestore");
-const admin = require("firebase-admin");
-const Twilio = require("twilio");
-
+import * as admin from "firebase-admin";
+import * as Twilio from "twilio";
 import Robot from "../robot";
-
-const PROFILES_COLLECTION = "profiles";
-
-let firestoreDB;
 
 // Try to prevent double sends.
 let idCache = {};
@@ -40,7 +37,7 @@ function convertNumber(number: string) {
   return `+1${number}`;
 }
 
-export default function (robot: Robot) {
+export default function(robot: Robot) {
   let twilioFrom = robot.config.get("HOMESAFE_TWILIO_NUMBER");
   let client = new Twilio(
     robot.config.get("HOMESAFE_TWILIO_SID"),
@@ -51,18 +48,17 @@ export default function (robot: Robot) {
   admin.initializeApp({
     credential: admin.credential.cert({
       projectId: robot.config.get("HOMESAFE_FIRESTORE_PROJECT_ID"),
-
-      client_email: robot.config.get("HOMESAFE_FIRESTORE_CLIENT_EMAIL"),
-      private_key: robot.config.get("HOMESAFE_FIRESTORE_PRIVATE_KEY").replace(/\\n/g, '\n'),
+      clientEmail: robot.config.get("HOMESAFE_FIRESTORE_CLIENT_EMAIL"),
+      privateKey: robot.config.get("HOMESAFE_FIRESTORE_PRIVATE_KEY").replace(/\\n/g, "\n"),
     }),
     databaseURL: "https://nang-homesafe.firebaseio.com",
   });
-  firestoreDB = new Firestore({
+  new Firestore({
     projectId: robot.config.get("HOMESAFE_FIRESTORE_PROJECT_ID"),
     credentials: {
-      client_email: robot.config.get("HOMESAFE_FIRESTORE_CLIENT_EMAIL"),
-      private_key: robot.config.get("HOMESAFE_FIRESTORE_PRIVATE_KEY").replace(/\\n/g, '\n'),
-    }
+      clientEmail: robot.config.get("HOMESAFE_FIRESTORE_CLIENT_EMAIL"),
+      privateKey: robot.config.get("HOMESAFE_FIRESTORE_PRIVATE_KEY").replace(/\\n/g, "\n"),
+    },
   });
 
   // Reset the trigger ID cache every 10 minutes. This isn't ideal,
@@ -102,15 +98,15 @@ export default function (robot: Robot) {
           });
         } catch (e) {
           console.warn(`[homesafe] error sending text: ${e}`);
-          delete idCache[req.body.id]
+          delete idCache[req.body.id];
         }
         console.log(
           `[homesafe] sent message from ${twilioFrom} to ${contact.phoneNumber}: ` +
-          `${req.body.message}`,
+            `${req.body.message}`,
           msg
         );
       }
-      return { message: "Success!" };
+      return {message: "Success!"};
     })
   );
 }

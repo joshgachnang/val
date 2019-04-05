@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // Description:
 //   <description of the scripts functionality>
 //

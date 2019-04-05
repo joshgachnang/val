@@ -1,9 +1,8 @@
 "use strict";
 
 import Envelope from "./envelope";
-import {Message, TextMessage} from "./message";
+import {Message} from "./message";
 import Robot from "./robot";
-import User from "./user";
 
 export default class Response {
   bot: Robot;
@@ -63,19 +62,13 @@ export default class Response {
   }
 
   // Actually takes a list of 1 to n arguments
-  topic() {
-    let strings = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
-  }
+  topic() {}
 
   // Actually takes a list of 1 to n arguments
-  play() {
-    let strings = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
-  }
+  play() {}
 
   // Actually takes a list of 1 to n arguments
-  locked() {
-    let strings = 1 <= arguments.length ? [].slice.call(arguments, 0) : [];
-  }
+  locked() {}
 
   random(items) {
     return items[Math.floor(Math.random() * items.length)];

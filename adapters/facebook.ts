@@ -1,11 +1,11 @@
-const FBMessenger = require("fb-messenger");
-const request = require("request");
-
+/* eslint-disable @typescript-eslint/camelcase */
+import * as FBMessenger from "fb-messenger";
+import * as request from "request";
 import Adapter from "../adapter";
-import Robot from "../robot";
-import User from "../user";
 import Envelope from "../envelope";
 import {TextMessage} from "../message";
+import Robot from "../robot";
+import User from "../user";
 
 interface MessageData {
   sender: {id: string};
@@ -140,7 +140,7 @@ export default class FacebookMessenger extends Adapter {
         method: "POST",
         json: requestBody,
       },
-      (err, res, body) => {
+      (err) => {
         if (err) {
           this.robot.logger.warn(`[facebook] request error to endpoint "${url}"`, err, requestBody);
         }

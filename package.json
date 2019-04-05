@@ -1,6 +1,9 @@
 {
   "name": "valbot",
   "version": "0.1.0",
+  "engines": {
+    "node": "10.x"
+  },
   "description": "A chat bot supporting multiple interfaces, including Slack and Alexa",
   "main": "server.js",
   "scripts": {
@@ -48,8 +51,6 @@
     "js-combinatorics": "0.5.3",
     "lodash": "4.17.11",
     "moment-timezone": "0.5.14",
-    "mongodb": "3.0.0-rc0",
-    "mongoose": "4.13.7",
     "node-gyp": "3.6.2",
     "node-rescuetime": "0.1.1",
     "numbered": "1.1.0",
@@ -82,6 +83,8 @@
     "@types/request": "^2.47.0",
     "@types/supertest": "2.0.4",
     "@types/winston": "2.3.7",
+    "@typescript-eslint/eslint-plugin": "^1.6.0",
+    "@typescript-eslint/parser": "^1.6.0",
     "babel-cli": "6.26.0",
     "babel-polyfill": "6.26.0",
     "babel-preset-es2015": "6.24.1",
@@ -91,15 +94,18 @@
     "cpx": "^1.5.0",
     "csscomb": "4.2.0",
     "debowerify": "1.5.0",
-    "eslint": "4.13.1",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "eslint-plugin-react": "^7.12.4",
     "mocha": "4.0.1",
     "mocha-typescript": "1.1.12",
     "nodemon": "1.18.3",
-    "prettier": "1.9.2",
+    "prettier": "^1.9.2",
     "rimraf": "2.6.2",
     "supertest": "3.0.0",
     "ts-node": "4.0.2",
-    "typescript": "2.6.2",
+    "typescript": "^3.4.2",
     "typescript-eslint-parser": "11.0.0",
     "watchify": "3.9.0"
   },
@@ -107,6 +113,33 @@
     "presets": [
       "es2016"
     ]
+  },
+  "eslintConfig": {
+    "parser": "@typescript-eslint/parser",
+    "extends": [
+      "plugin:react/recommended",
+      "plugin:@typescript-eslint/recommended",
+      "prettier/@typescript-eslint",
+      "plugin:prettier/recommended"
+    ],
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 2018,
+      "sourceType": "module"
+    },
+    "settings": {
+      "react": {
+        "version": "16.6"
+      }
+    },
+    "rules": {
+      "@typescript-eslint/explicit-member-accessibility": "off",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/interface-name-prefix": "off"
+    }
   },
   "prettier": {
     "arrowParens": "always",

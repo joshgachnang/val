@@ -1,5 +1,3 @@
-import Robot from "../robot";
-
-export default function(robot: Robot) {
+export default function() {
   throw new Error("fail!");
 }

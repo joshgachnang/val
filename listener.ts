@@ -1,7 +1,6 @@
 "use strict";
 
 import * as XRegExp from "xregexp";
-
 import {TextMessage} from "./message";
 import Response from "./response";
 import Robot from "./robot";
@@ -84,7 +83,7 @@ class SlotMatcher {
     ANY: "s?($SLOTNAME.+)s?",
     MULTIANY: "($SLOTNAME.+)",
     NUMBER: "($SLOTNAME[\\d\\.\\,]+)",
-    BOT_NAME: (text: string) => `${this.robot.config.get("BOT_NAME")}:?`,
+    BOT_NAME: () => `${this.robot.config.get("BOT_NAME")}:?`,
     // URL: (text: string) => {return false;},
   };
 
@@ -111,7 +110,7 @@ class SlotMatcher {
   }
 
   // Match strings of the type "{opt1|opt2|opt3...}" and replace the slot with each option
-  private orMatches(text: string, slotName?: string): string {
+  private orMatches(text: string): string {
     let orRegex = new XRegExp(`{(['\\w\\d\\s\\|]+)}`, "g");
 
     let matches = [];
@@ -143,7 +142,7 @@ class SlotMatcher {
     return text;
   }
 
-  private typeMatches(text: string, slotName?: string): string {
+  private typeMatches(text: string): string {
     let orRegex = new XRegExp("{([\\w\\d\\s\\:]+)}", "g");
 
     let matches = [];

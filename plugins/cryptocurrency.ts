@@ -226,7 +226,7 @@ export default function(robot: Robot) {
     let total = 0;
     let output = "Current Portfolio:\n";
     let priceOutput = [];
-    let prices = await Promise.all(
+    await Promise.all(
       Object.keys(portfolio).map(async (key) => {
         let p = await fetchTicker(key);
         let pricePer = p.price;

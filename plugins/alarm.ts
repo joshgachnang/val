@@ -1,8 +1,6 @@
 import * as crypto from "crypto";
 import * as moment from "moment-timezone";
-
 import Response from "../response";
-import Robot from "../robot";
 
 type AlarmRepeat =
   | "never"
@@ -19,15 +17,17 @@ export class Alarm {
   public time: string;
   public created: Date;
   public id: string;
+  public repeats: AlarmRepeat;
 
   // acceptable inputs for time:
   // 11:11am
   // 15:00
-  constructor(time: string, public repeats: AlarmRepeat) {
+  constructor(time: string, repeats: AlarmRepeat) {
     let date = moment(time, ["h:ma", "H:m"]);
     this.time = date.format("H:m");
     this.created = new Date();
     this.id = crypto.randomBytes(16).toString("hex");
+    this.repeats = repeats;
   }
 
   /* represent the alarm in a way that can be stored in the brain */

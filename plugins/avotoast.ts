@@ -7,11 +7,12 @@
 // Author:
 //   pcsforeducation
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const Firestore = require("@google-cloud/firestore");
 
+import AlexaAdapter from "../adapters/alexa";
 import Response from "../response";
 import Robot from "../robot";
-import AlexaAdapter from "../adapters/alexa";
 
 const SUBSTITUTES_COLLECTION = "substitutes";
 
@@ -52,8 +53,8 @@ export default function(robot: Robot) {
   }
 
   function getSubstituteDescription(substitute: any) {
-    let fromUnit = substitute.fromUnit === "each" ? "" : substitute.fromUnit;
-    let toUnit = substitute.fromUnit === "each" ? "" : substitute.fromUnit;
+    // let fromUnit = substitute.fromUnit === "each" ? "" : substitute.fromUnit;
+    // let toUnit = substitute.fromUnit === "each" ? "" : substitute.fromUnit;
     let desc = `You can substitute ${printSubstitute(substitute, "from")} with ${printSubstitute(
       substitute,
       "to"

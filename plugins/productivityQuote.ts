@@ -1,5 +1,4 @@
 import * as moment from "moment-timezone";
-import Response from "../response";
 import Robot from "../robot";
 
 // Alexa flash briefing that delivers a productivity quote each morning
@@ -7,7 +6,7 @@ export default function(robot: Robot) {
   let quote = "";
 
   function getQuote() {
-    let dayOfYear = moment().format("DDD");
+    // let dayOfYear = moment().format("DDD");
     let quotes = robot.config.get("PRODUCTIVITY_QUOTES");
     // This ensures a stable selection all day.
     // Loop around if we get more than 365 quotes.

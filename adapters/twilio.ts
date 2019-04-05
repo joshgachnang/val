@@ -1,5 +1,4 @@
-const HTTP = require("http");
-const QS = require("querystring");
+import * as QS from "querystring";
 import Adapter from "../adapter";
 import {TextMessage} from "../message";
 import Robot from "../robot";
@@ -99,10 +98,10 @@ export default class Twilio extends Adapter {
         return callback(err);
       } else if (res.statusCode === 201) {
         this.robot.logger.debug("RESULT", body);
-        let json = JSON.parse(body);
+        // let json = JSON.parse(body);
         return callback(null, body);
       } else {
-        let json = JSON.parse(body);
+        // let json = JSON.parse(body);
         return callback(body.message);
       }
     });

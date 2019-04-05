@@ -1,32 +1,31 @@
 require("source-map-support").install();
 require("coffee-script/register");
 
-import { EventEmitter } from "events";
-let httpClient = require("scoped-http-client");
 import * as bodyParser from "body-parser";
 import * as cors from "cors";
 import * as cron from "cron";
+import {EventEmitter} from "events";
 import * as express from "express";
-import { existsSync, readFileSync } from "fs";
 import * as fs from "fs";
+import {existsSync, readFileSync} from "fs";
+import {Server} from "http";
 import * as path from "path";
 import * as raven from "raven";
 import * as request from "request";
+import httpClient from "scoped-http-client";
 import * as winston from "winston";
-
 import Adapter from "./adapter";
+import AlexaAdapter from "./adapters/alexa";
 import Brain from "./brain";
 import Config from "./config";
-import { ConversationBrain } from "./conversation";
+import {ConversationBrain} from "./conversation";
 import DB from "./db";
 import Envelope from "./envelope";
-import { Listener, TextListener } from "./listener";
-import { Message, TextMessage } from "./message";
-import OAuth, { OAuthHandler } from "./oauth";
+import {Listener, TextListener} from "./listener";
+import {Message, TextMessage} from "./message";
+import OAuth, {OAuthHandler} from "./oauth";
 import "./polyfill";
 import Response from "./response";
-import AlexaAdapter from "./adapters/alexa";
-import { Server } from "http";
 
 let HUBOT_DOCUMENTATION_SECTIONS = [
   "description",
@@ -58,25 +57,25 @@ export default class Robot extends EventEmitter {
   config: Config;
   pluginListeners: Listener[] = [];
   db: DB;
-  help: { [pluginName: string]: { [section: string]: string[] } } = {};
+  help: {[pluginName: string]: {[section: string]: string[]}} = {};
   TextMessage: TextMessage; // tslint:disable-line
   router: express.Application;
   logger: winston.LoggerInstance;
   brain: Brain;
-  adapters: { [name: string]: Adapter };
-  plugins: { [name: string]: (robot: Robot) => void };
+  adapters: {[name: string]: Adapter};
+  plugins: {[name: string]: (robot: Robot) => void};
   raven: any;
   cronjobs: any[] = [];
   briefings: any = {}; // name: fn
   oauth: OAuthHandler;
   conversationBrain: ConversationBrain;
   private expressServer: Server;
-  private defaultConfig: { [key: string]: any };
+  private defaultConfig: {[key: string]: any};
 
-  constructor(defaultConfig?: { [key: string]: any }) {
+  constructor(defaultConfig?: {[key: string]: any}) {
     super();
-    this.defaultConfig = defaultConfig
-    if (process.env.VAL_SENTRY_URL, false) {
+    this.defaultConfig = defaultConfig;
+    if ((process.env.VAL_SENTRY_URL, false)) {
       this.raven = raven.config(process.env.VAL_SENTRY_URL).install();
       process.on("uncaughtException", (err) => {
         this.raven.captureException(err);
@@ -86,7 +85,9 @@ export default class Robot extends EventEmitter {
         this.raven.captureException(err);
       });
     } else {
-      console.warn('No Sentry URL configured. Set the VAL_SENTRY_URL environment variable to configure error reporting.')
+      console.warn(
+        "No Sentry URL configured. Set the VAL_SENTRY_URL environment variable to configure error reporting."
+      );
     }
 
     // Default variables
@@ -94,8 +95,8 @@ export default class Robot extends EventEmitter {
     this.router = undefined;
     this.logger = new winston.Logger({
       transports: [
-        new winston.transports.Console({ level: "info" }),
-        new winston.transports.File({ filename: "bot.log", level: "debug" }),
+        new winston.transports.Console({level: "info"}),
+        new winston.transports.File({filename: "bot.log", level: "debug"}),
       ],
     });
     this.brain = new Brain(this);
@@ -129,6 +130,7 @@ export default class Robot extends EventEmitter {
 
     for (let adapter of this.config.get("ADAPTERS")) {
       this.logger.info("[Robot] loading adapter:", adapter);
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       let adapterModule = require(adapter);
       // Use default here to get the default exported class
       let adapterClass = new adapterModule.default(this);
@@ -153,11 +155,10 @@ export default class Robot extends EventEmitter {
       let parts = filename.split("/");
       let pluginName = parts[parts.length - 1].replace(".js", "").replace(".coffee", "");
 
-      let ret;
       try {
         // Use default here to get the default exported function
         if (pluginModule.default && pluginModule.default.init) {
-          ret = await pluginModule.default.init(this);
+          await pluginModule.default.init(this);
           // Save new style plugins to robot so they can be called from other plugins.
           this.plugins[pluginName] = pluginModule.default;
         } else if (pluginModule.default) {
@@ -165,7 +166,7 @@ export default class Robot extends EventEmitter {
           this.plugins[pluginName] = pluginModule;
         } else {
           // Backwards compatability with Hubot
-          ret = pluginModule(this);
+          pluginModule(this);
         }
       } catch (e) {
         console.log(e);
@@ -206,6 +207,7 @@ export default class Robot extends EventEmitter {
     this.pluginListeners.push(listener);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public conversationRespond(respondString: string, callback: ResponseCallback) {
     this.logger.debug("[Robot] creating conversation respond listener for string", respondString);
 
@@ -240,7 +242,7 @@ export default class Robot extends EventEmitter {
 
   // TODO: only public for testing..
   public parseHelp(path: string) {
-    let scriptDocumentation: { [section: string]: string[] } = {};
+    let scriptDocumentation: {[section: string]: string[]} = {};
     let body = readFileSync(path, "utf-8");
     let currentSection = null;
 
@@ -281,7 +283,7 @@ export default class Robot extends EventEmitter {
   public reply(envelope: Envelope, messages: string[] | string) {
     this.logger.debug(
       `[Robot] Attempting to reply to ${envelope.user} in #${
-      envelope.room.name
+        envelope.room.name
       }, message: ${messages}`
     );
 
@@ -311,15 +313,15 @@ export default class Robot extends EventEmitter {
     this.logger.warn("Unsupported action: emote", envelope.room, emotes);
   }
 
-  public enter(options, callback) {
+  public enter(options) {
     this.logger.warn("Unsupported action: enter", options);
   }
 
-  public leave(options, callback) {
+  public leave(options) {
     this.logger.warn("Unsupported action: leave", options);
   }
 
-  public topic(options, callback) {
+  public topic(options) {
     this.logger.warn("Unsupported action: topic", options);
   }
 
@@ -342,6 +344,7 @@ export default class Robot extends EventEmitter {
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const script = require(full);
 
       if (typeof script === "function") {
@@ -363,8 +366,7 @@ export default class Robot extends EventEmitter {
     this.logger.debug(`Loading scripts from ${path}`);
 
     if (fs.existsSync(path)) {
-      fs
-        .readdirSync(path)
+      fs.readdirSync(path)
         .sort()
         .map((file) => this.loadFile(path, file));
     }
@@ -408,19 +410,19 @@ export default class Robot extends EventEmitter {
     return value;
   }
 
-  public catchAll(options, callback) {
-    this.logger.warn("Unsupported action: catchAll");
-  }
-
   // Deprecated: use request()
   public http(url: string, options: any = {}) {
+    this.logger.warn(`[Robot] robot.http() is deprecated, please use robot.request().`);
     return httpClient.create(url, options).header("User-Agent", `${this.name}/1.0`);
   }
 
   // Await wrapper around request. The preferred way to make HTTP requests from a plugin
-  public request(body: any, headers?: any): any {
+  public request(body: string | {[key: string]: any}, headers: {[key: string]: string} = {}): any {
+    if (typeof body === "string") {
+      body = {uri: body};
+    }
     return new Promise((resolve, reject) => {
-      request(body, (error, response, body) => {
+      request(Object.assign({}, body, {headers}), (error, response, body) => {
         if (error) reject(error);
         else resolve(body);
       });
@@ -443,14 +445,14 @@ export default class Robot extends EventEmitter {
 
   /* Wrap an express .get/.post/etc call so async/await works. See setupExpress for usage. */
   public expressWrap(fn) {
-    return function (req, res, next) {
+    return function(req, res, next) {
       // Make sure to `.catch()` any errors and pass them along to the `next()`
       // middleware in the chain, in this case the error handler.
       fn(req)
         .then((returnVal) => res.json(returnVal))
         .catch((err) => {
           if (err.message && err.status) {
-            res.status(err.status).send({ error: err.message });
+            res.status(err.status).send({error: err.message});
           } else {
             next(err);
           }
@@ -477,7 +479,7 @@ export default class Robot extends EventEmitter {
       next();
     });
 
-    app.use(bodyParser.urlencoded({ extended: false }));
+    app.use(bodyParser.urlencoded({extended: false}));
     app.use(bodyParser.json());
     app.use((req, res, next) => {
       if (req.query && req.query["token"]) {

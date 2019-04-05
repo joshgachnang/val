@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import Robot from "./robot";
 
 if (fs.existsSync("./envfile")) {
   require("dotenv").config({path: "./envfile"});
@@ -11,9 +12,6 @@ try {
     hookRequire: true,
   });
 } catch (e) {}
-
-import Config from "./config";
-import Robot from "./robot";
 
 // create a bot
 let robot = new Robot();

@@ -1,9 +1,7 @@
-import { assert } from "chai";
-import { only, skip, slow, suite, test, timeout } from "mocha-typescript";
-
-import Adapter from "../adapter";
-import Config from "../config";
-import { TextMessage } from "../message"; // tslint:disable-line
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import {assert} from "chai";
+import {suite, test} from "mocha-typescript";
+import {TextMessage} from "../message"; // tslint:disable-line
 import Response from "../response";
 import Robot from "../robot";
 import User from "../user";
@@ -26,8 +24,8 @@ class RobotTestSuite {
       EXPRESS_BIND_PORT: "8081",
       BOT_NAME: "k2so",
       PLUGINS: plugins,
-      ADAPTERS: ["./test/fakeAdapter"]
-    }
+      ADAPTERS: ["./test/fakeAdapter"],
+    };
 
     let robot = new Robot(config);
     await robot.init();
@@ -35,7 +33,7 @@ class RobotTestSuite {
   }
 
   getUser(): User {
-    return new User({ id: "id", slack: { id: "someId", name: "fakeUser" } });
+    return new User({id: "id", slack: {id: "someId", name: "fakeUser"}});
   }
 
   getTextMessage(text: string): TextMessage {

@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use strict";
 
 import {EventEmitter} from "events";
-import Robot from "./robot";
 import Envelope from "./envelope";
 import {Message} from "./message";
+import Robot from "./robot";
 
 export default class Adapter extends EventEmitter {
   robot: Robot;

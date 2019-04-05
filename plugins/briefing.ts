@@ -2,10 +2,9 @@
 //   Sends out briefings at registered times.
 //
 
+import SlackAdapter from "../adapters/slack";
 import Response from "../response";
 import Robot from "../robot";
-import User from "../user";
-import SlackAdapter from "../adapters/slack";
 
 const BRIEFING_KEY = "briefings";
 

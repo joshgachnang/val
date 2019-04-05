@@ -21,24 +21,13 @@ import * as moment from "moment";
 import Response from "../response";
 import Robot from "../robot";
 
-// Plugins need to export a default function that takes a robot. This function will be called
-// when the plugin is first loaded by the Robot and should do any setup necessary, such as setting
-// up HTTP endpoints or listening for phrases.
-// If the plugin returns a promise, the Robot will wait for the promise to resolve before moving to
-// load the next plugin. You should only do this when absolutely necessary (see mongo-brain), as it
-// can massively increase startup time.
-
 const DAILY_SUMMARY_URL = "https://www.rescuetime.com/anapi/daily_summary_feed";
 const DATA_URL = "https://www.rescuetime.com/anapi/data";
 const ENABLED_KEY = "rescueTimeEnabled";
 const RESCUETIME_KEY = "rescueTime";
 
-"https://www.rescuetime.com/anapi/data?key=B63RNbUr_nGsHSGy5mwuaqB5HwEiUjTpz7NlFC4q&op=select&vn=0&pv=interval&rs=day&rk=productivity";
+// "https://www.rescuetime.com/anapi/data?key=B63RNbUr_nGsHSGy5mwuaqB5HwEiUjTpz7NlFC4q&op=select&vn=0&pv=interval&rs=day&rk=productivity";
 export default function(robot: Robot) {
-  function getAPIKey(userId) {
-    return "B63RNbUr_nGsHSGy5mwuaqB5HwEiUjTpz7NlFC4q";
-  }
-
   function getDailySummary(userId, rescuetimeKey) {
     return robot.request({url: DAILY_SUMMARY_URL, qs: {key: rescuetimeKey}});
   }
@@ -106,7 +95,7 @@ export default function(robot: Robot) {
     for (let day of days) {
       data[day.date] = day;
     }
-    let today = moment().format("YYYY-MM-DD");
+    // let today = moment().format("YYYY-MM-DD");
     robot.brain.setForUser(RESCUETIME_KEY, data, userId);
   }
 
@@ -123,11 +112,11 @@ export default function(robot: Robot) {
     }
   }
 
-  function getTodayStats(userId) {
-    let today = moment().format("YYYY-MM-DD");
-    let data = robot.brain.getForUser(RESCUETIME_KEY, userId) || {};
-    return data[today];
-  }
+  // function getTodayStats(userId) {
+  //   let today = moment().format("YYYY-MM-DD");
+  //   let data = robot.brain.getForUser(RESCUETIME_KEY, userId) || {};
+  //   return data[today];
+  // }
 
   function calculateProductivityScore(scores: any): string {
     let score = 0;
@@ -141,7 +130,7 @@ export default function(robot: Robot) {
       }
     }
     // Double seconds to account for skew of very (un)productive seconds
-    return (score / (seconds * 2) * 100).toFixed(0);
+    return ((score / (seconds * 2)) * 100).toFixed(0);
   }
 
   robot.cron("rescueTimeUpdate", "05 * * * *", saveForUsers);

@@ -1,4 +1,4 @@
-const alexa = require("alexa-app");
+import * as alexa from "alexa-app";
 import * as express from "express";
 const app = new alexa.app("val");
 
@@ -91,6 +91,7 @@ export default class AlexaAdapter extends Adapter {
     // Expose alexa-app
     let router = express.Router();
     app.express({
+      expressApp: router,
       router: router,
       endpoint: "/" + name,
       checkCert: true,
@@ -117,7 +118,6 @@ export default class AlexaAdapter extends Adapter {
       }
       app.intent(intent.intent, options, (req, res) => {
         this.robot.logger.debug("intent", req.data);
-        this.robot.logger.info("Alexa intent " + req.name);
         this.receivedIntent(req, res, intent);
         return false;
       });
@@ -128,7 +128,6 @@ export default class AlexaAdapter extends Adapter {
     // TODO: save this to the brain when we actually have login
     let user = new User({alexa: {id: "josh", name: "josh"}});
     this.robot.logger.debug("SLOTS", req.data.request.slots);
-    let text = intent.getText(req.slots);
     let message = new AlexaMessage(user, req, res, intent, this);
     this.receive(message);
   }

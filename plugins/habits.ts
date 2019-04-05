@@ -18,9 +18,9 @@
 //   <github username of the original script author>
 
 import * as moment from "moment-timezone";
+import SlackAdapter from "../adapters/slack";
 import Response from "../response";
 import Robot from "../robot";
-import SlackAdapter from "../adapters/slack";
 
 const HABIT_KEY = "habits";
 
@@ -78,7 +78,7 @@ export default function(robot: Robot) {
     res.reply("Ok!");
   });
 
-  robot.conversationRespond(ADD_HABIT, (res: Response) => {});
+  robot.conversationRespond(ADD_HABIT, () => {});
 
   // TODO: obviously add a lot more options here
   const DID_HABIT = "i {did|finished|completed} {name:MULTIWORD}{|:MULTIANY}";
@@ -106,7 +106,7 @@ export default function(robot: Robot) {
     res.reply("Awesome! Good work!");
   });
 
-  robot.conversationRespond(DID_HABIT, (res: Response) => {});
+  robot.conversationRespond(DID_HABIT, () => {});
 
   // TODO support more reminder spots
   async function sendReminder(userId: string, config: HabitConfig) {
@@ -140,13 +140,12 @@ export default function(robot: Robot) {
   async function reminder(time: HabitWhen) {
     let users = await robot.db.getUsers();
     for (let user of Object.values(users)) {
-      let habitsData =
-        (await robot.db.get(user.id, HABIT_KEY)) || ({config: {}, habits: []} as HabitDB);
+      let habitsData = (await robot.db.get(user.id, HABIT_KEY)) || {config: {}, habits: []};
       let nowHabits = Object.values(habitsData.config).filter((habit) => habit.when === time);
       // Find see if we have a habit since yesterday
       console.log("NOW HABITS", nowHabits, typeof nowHabits, habitsData);
       for (let nowHabit of nowHabits) {
-        if (nowHabit && !await completedHabit(nowHabits, habitsData.habits)) {
+        if (nowHabit && !(await completedHabit(nowHabits, habitsData.habits))) {
           sendReminder(user.id, nowHabit);
         }
       }
@@ -156,7 +155,7 @@ export default function(robot: Robot) {
   robot.cron("morning habits", "00 6 * * *", () => reminder("mornings"));
   robot.cron("afternoon habits", "30 12 * * *", () => reminder("afternoons"));
   robot.cron("evening habits", "0 18 * * *", () => reminder("evenings"));
-  robot.respond("execute habit", {}, (res: Response) => {
+  robot.respond("execute habit", {}, () => {
     reminder("mornings");
   });
 }

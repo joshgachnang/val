@@ -13,7 +13,6 @@
 //   pcsforeducation
 
 import * as moment from "moment-timezone";
-
 import Response from "../response";
 import Robot from "../robot";
 
@@ -141,7 +140,7 @@ export default function(robot: Robot) {
     saveEvent(eventData, userId);
   });
 
-  robot.briefing("events", async (userId: string) => {
+  robot.briefing("events", async () => {
     return "";
   });
 }

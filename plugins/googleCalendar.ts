@@ -8,10 +8,9 @@
 // Author:
 //   pcsforeducation
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const google = require("googleapis");
 import * as moment from "moment-timezone";
-
-import Config from "../config";
 import Response from "../response";
 import Robot from "../robot";
 
@@ -27,10 +26,10 @@ class GoogleCalendar {
       try {
         await this.robot.oauth.authorize(res.locals.userId);
         let events = await this.listEvents();
-        res.json({ events });
+        res.json({events});
       } catch (e) {
         this.robot.logger.warn("[googleCalendar] error authorizing:", e);
-        res.status(400).send({ error: e });
+        res.status(400).send({error: e});
       }
     });
 
@@ -160,7 +159,7 @@ class GoogleCalendar {
   listCalendars = async (): Promise<any> => {
     return new Promise((resolve) => {
       let calendar = google.calendar("v3");
-      calendar.calendarList.list({ auth: this.robot.oauth.oauth2Client }, (err, response) => {
+      calendar.calendarList.list({auth: this.robot.oauth.oauth2Client}, (err, response) => {
         if (err) {
           this.robot.logger.warn(
             `[googleCalendar] The list calendar API returned an error: ${err}`

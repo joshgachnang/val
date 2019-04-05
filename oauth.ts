@@ -8,6 +8,7 @@
 // Author:
 //   pcsforeducation
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const googleAuth = require("google-auth-library");
 
 import Response from "./response";
@@ -100,6 +101,7 @@ export class OAuthHandler {
 
   getNewToken = (response: Response) => {
     let authUrl = this.oauth2Client.generateAuthUrl({
+      // eslint-disable-next-line @typescript-eslint/camelcase
       access_type: "offline",
       scope: SCOPES,
     });

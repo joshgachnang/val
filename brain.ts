@@ -117,7 +117,7 @@ export default class Brain extends EventEmitter {
     return Object.values(users).map((u) => new User(u));
   }
 
-  public userForId(id, options = {}): User {
+  public userForId(id): User {
     if (!id) {
       this.robot.logger.warn("[brain] userForId cannot search for undefined id");
       return undefined;

@@ -12,14 +12,28 @@
 // Note that a blank line has to be put between the documentation above and the start of the code or
 // the help comments will be stripped from the output JS.
 // See: https://github.com/Microsoft/TypeScript/issues/3283
-import Response from "../response";
-import Robot from "../robot";
 import * as cheerio from "cheerio";
 import * as moment from "moment";
-import TwitterAdapter from "../adapters/twitter";
 import SlackAdapter from "../adapters/slack";
+import TwitterAdapter from "../adapters/twitter";
+import Response from "../response";
+import Robot from "../robot";
 
 const SCORES_KEY = "triviaStatsScores";
+
+async function findTeamScore(robot: Robot, search: string): Promise<string[]> {
+  let allScores = (await robot.db.get(null, SCORES_KEY)) || {};
+  let scores = Object.values(allScores["2017"]["54"]);
+  let matchingScores = [];
+  scores.map((score) => {
+    for (let name of score.teams) {
+      if (name.toLowerCase().indexOf(search.toLowerCase()) > -1) {
+        matchingScores.push(`In ${score.place} place with ${score.score} points: ${name}.`);
+      }
+    }
+  });
+  return matchingScores;
+}
 
 function getScoreURL(hour: number): string {
   if (hour === 54) {
@@ -67,14 +81,6 @@ function parseHour(text: string): number {
   return val;
 }
 
-function getYear() {
-  return 2017;
-}
-
-function getHour() {
-  return 54;
-}
-
 const START_TIMES = {
   "2018": "2018-04-12T23:00:00.000Z",
   "2019": "2019-04-12T23:00:00.000Z",
@@ -118,21 +124,6 @@ function parsedHtmlToScores(parsed) {
   return placeScores;
 }
 
-async function cronScrape(robot: Robot) {
-  // Scrape for 8 hours after the contest to get final scores
-  if (!duringTrivia(62)) {
-    return;
-  }
-  let year = moment().year();
-  let allScores = (await robot.db.get(null, SCORES_KEY)) || {};
-  let thisYearScores = allScores[year] || {};
-  let hours = Object.keys(thisYearScores).sort();
-  let firstHour = Number(hours ? hours[hours.length - 1] + 1 : 1);
-  for (let i = firstHour; i <= 54; i++) {
-    await scrape(robot, year, i);
-  }
-}
-
 async function scrape(robot: Robot, year: number, hour: number) {
   let response = await robot.request(getScoreURL(Number(hour)));
   let parsed = cheerio.load(response);
@@ -140,6 +131,7 @@ async function scrape(robot: Robot, year: number, hour: number) {
 
   // let year = getYear();
   textHour = parseHour(textHour);
+  robot.logger.info(`Searching through hour ${textHour}`);
 
   let allScores = (await robot.db.get(null, SCORES_KEY)) || {};
   if (!allScores[year]) {
@@ -181,18 +173,19 @@ async function scrape(robot: Robot, year: number, hour: number) {
   (robot.adapters.Twitter as TwitterAdapter).post(`Trivia scores for Hour ${hour} are posted!`);
 }
 
-async function findTeamScore(robot: Robot, search: string): Promise<string[]> {
+async function cronScrape(robot: Robot) {
+  // Scrape for 8 hours after the contest to get final scores
+  if (!duringTrivia(62)) {
+    return;
+  }
+  let year = moment().year();
   let allScores = (await robot.db.get(null, SCORES_KEY)) || {};
-  let scores = Object.values(allScores["2017"]["54"]);
-  let matchingScores = [];
-  scores.map((score) => {
-    for (let name of score.teams) {
-      if (name.toLowerCase().indexOf(search.toLowerCase()) > -1) {
-        matchingScores.push(`In ${score.place} place with ${score.score} points: ${name}.`);
-      }
-    }
-  });
-  return matchingScores;
+  let thisYearScores = allScores[year] || {};
+  let hours = Object.keys(thisYearScores).sort();
+  let firstHour = Number(hours ? hours[hours.length - 1] + 1 : 1);
+  for (let i = firstHour; i <= 54; i++) {
+    await scrape(robot, year, i);
+  }
 }
 
 export default function(robot: Robot) {

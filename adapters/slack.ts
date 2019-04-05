@@ -1,11 +1,8 @@
+/* eslint-disable @typescript-eslint/camelcase */
 // Forked from Slackbots to throw out vow, use TS
-import {EventEmitter} from "events";
-
 import * as _ from "lodash";
-
 import Adapter from "../adapter";
 import Envelope from "../envelope";
-import {APIError} from "../errors";
 import {TextMessage} from "../message";
 import Robot from "../robot";
 import Room from "../room";
@@ -47,7 +44,7 @@ export default class SlackAdapter extends Adapter {
       this.robot.expressWrap(async (req) => {
         if (!req.body.type) {
           this.logger.debug(`[slack] No type present in slack request: `, req.body);
-          throw new APIError("No type present in slack request", 400);
+          throw new Error(`400: No type present in slack request`);
         }
 
         if (req.body.type === "url_verification") {
@@ -57,7 +54,7 @@ export default class SlackAdapter extends Adapter {
           let fn = this.eventFunctionMap[req.body.event.type];
           if (!fn) {
             this.logger.debug(`[slack] Unknown event type: ${req.body.type}`);
-            throw new APIError("Unknown event type", 404);
+            throw new Error("404: Unknown event type");
           }
           try {
             return await fn.bind(this)(req.body.event);
@@ -65,11 +62,11 @@ export default class SlackAdapter extends Adapter {
             this.logger.debug(
               `[slack] error handling event type ${req.body.type}: ${e.message} ${e.stack}`
             );
-            throw new APIError(`Error handling event type: ${e.message}`, 500);
+            throw new Error(`500: Error handling event type: ${e.message}`);
           }
         } else {
           this.logger.debug(`[slack] unknown message type: ${req.body.type}`);
-          throw new APIError(`Unknown message type`, 400);
+          throw new Error(`400: Unknown message type`);
         }
       })
     );
@@ -275,7 +272,6 @@ export default class SlackAdapter extends Adapter {
   run() {
     this.logger.info("[slack] Running Slack adapter");
 
-    let config = this.robot.config;
     this.updateUsers();
     this.updateChannels();
   }

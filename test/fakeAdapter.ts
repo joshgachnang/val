@@ -1,5 +1,4 @@
 import Adapter from "../adapter";
-import Config from "../config";
 import Robot from "../robot";
 
 export default class FakeAdapter extends Adapter {

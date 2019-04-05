@@ -1,15 +1,7 @@
-import Robot from "../robot";
 import SlackAdapter from "../adapters/slack";
+import Robot from "../robot";
 
 const BRAIN_KEY = "JIFFY";
-
-function intersect(a, b) {
-  let t;
-  if (b.length > a.length) (t = b), (b = a), (a = t); // indexOf to loop over shorter
-  return a.filter(function(e) {
-    return b.indexOf(e) > -1;
-  });
-}
 
 function randomFrom(array) {
   return array[Math.floor(Math.random() * array.length)];

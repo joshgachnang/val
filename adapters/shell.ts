@@ -1,17 +1,43 @@
-import Robot from "../robot";
-import Envelope from "../envelope";
+import chalk from "chalk";
+import cline from "cline";
 import * as crypto from "crypto";
+import * as fs from "fs";
+import * as readline from "readline";
+import * as Stream from "stream";
 import Adapter from "../adapter";
-import {TextMessage, Message} from "../message";
+import Envelope from "../envelope";
+import {TextMessage} from "../message";
+import Robot from "../robot";
 import User from "../user";
 
-const fs = require("fs");
-const readline = require("readline");
-const Stream = require("stream");
-const cline = require("cline");
-const chalk = require("chalk");
-
 const historyPath = ".hubot_history";
+
+// load history from .hubot_history.
+//
+// callback - A Function that is called with the loaded history items (or an empty array if there is no history)
+function loadHistory(callback) {
+  if (!fs.existsSync(historyPath)) {
+    return callback(new Error("No history available"));
+  }
+
+  const instream = fs.createReadStream(historyPath);
+  const outstream = new Stream() as any;
+  outstream.readable = true;
+  outstream.writable = true;
+
+  const items = [];
+
+  readline
+    .createInterface({input: instream, output: outstream, terminal: false})
+    .on("line", function(line) {
+      line = line.trim();
+      if (line.length > 0) {
+        items.push(line);
+      }
+    })
+    .on("close", () => callback(null, items))
+    .on("error", callback);
+}
 
 export default class Shell extends Adapter {
   cli: any;
@@ -61,12 +87,13 @@ export default class Shell extends Adapter {
     this.cli = cline();
 
     this.cli.command("*", (input) => {
-      let userId = process.env.HUBOT_SHELL_USER_ID || "1";
+      const userId = this.robot.config.get("HUBOT_SHELL_USER_ID", "1");
       // if (userId.match(/A\d+z/)) {
       //   userId = parseInt(userId);
       // }
 
-      const userName = process.env.HUBOT_SHELL_USER_NAME || "Shell";
+      const userName = this.robot.config.get("HUBOT_SHELL_USER_NAME", "Shell");
+      console.log("Username/id", userId, userName);
       // TODO:
       const user = new User({id: "shell"});
       // const user = this.robot.brain.userForId(userId, {name: userName, room: "Shell"});
@@ -119,30 +146,3 @@ export default class Shell extends Adapter {
 }
 
 // exports.use = (robot) => new Shell(robot);
-
-// load history from .hubot_history.
-//
-// callback - A Function that is called with the loaded history items (or an empty array if there is no history)
-function loadHistory(callback) {
-  if (!fs.existsSync(historyPath)) {
-    return callback(new Error("No history available"));
-  }
-
-  const instream = fs.createReadStream(historyPath);
-  const outstream = new Stream();
-  outstream.readable = true;
-  outstream.writable = true;
-
-  const items = [];
-
-  readline
-    .createInterface({input: instream, output: outstream, terminal: false})
-    .on("line", function(line) {
-      line = line.trim();
-      if (line.length > 0) {
-        items.push(line);
-      }
-    })
-    .on("close", () => callback(null, items))
-    .on("error", callback);
-}
