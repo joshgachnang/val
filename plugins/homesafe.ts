@@ -21,7 +21,6 @@ const Firestore = require("@google-cloud/firestore");
 const admin = require("firebase-admin");
 const Twilio = require("twilio");
 
-import Response from "../response";
 import Robot from "../robot";
 
 const PROFILES_COLLECTION = "profiles";
@@ -41,7 +40,7 @@ function convertNumber(number: string) {
   return `+1${number}`;
 }
 
-export default function(robot: Robot) {
+export default function (robot: Robot) {
   let twilioFrom = robot.config.get("HOMESAFE_TWILIO_NUMBER");
   let client = new Twilio(
     robot.config.get("HOMESAFE_TWILIO_SID"),
@@ -49,15 +48,21 @@ export default function(robot: Robot) {
   );
 
   // Why these paths are different, I will never know..
-  var serviceAccount = require("../homesafe-firebase.json");
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert({
+      projectId: robot.config.get("HOMESAFE_FIRESTORE_PROJECT_ID"),
+
+      client_email: robot.config.get("HOMESAFE_FIRESTORE_CLIENT_EMAIL"),
+      private_key: robot.config.get("HOMESAFE_FIRESTORE_PRIVATE_KEY").replace(/\\n/g, '\n'),
+    }),
     databaseURL: "https://nang-homesafe.firebaseio.com",
   });
-  let projectId = robot.config.get("HOMESAFE_PROJECT_ID");
   firestoreDB = new Firestore({
-    projectId: projectId,
-    keyFilename: "./homesafe-firebase.json",
+    projectId: robot.config.get("HOMESAFE_FIRESTORE_PROJECT_ID"),
+    credentials: {
+      client_email: robot.config.get("HOMESAFE_FIRESTORE_CLIENT_EMAIL"),
+      private_key: robot.config.get("HOMESAFE_FIRESTORE_PRIVATE_KEY").replace(/\\n/g, '\n'),
+    }
   });
 
   // Reset the trigger ID cache every 10 minutes. This isn't ideal,
@@ -101,11 +106,11 @@ export default function(robot: Robot) {
         }
         console.log(
           `[homesafe] sent message from ${twilioFrom} to ${contact.phoneNumber}: ` +
-            `${req.body.message}`,
+          `${req.body.message}`,
           msg
         );
       }
-      return {message: "Success!"};
+      return { message: "Success!" };
     })
   );
 }

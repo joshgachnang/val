@@ -32,8 +32,8 @@ export default class Config {
   }
 
   public async setDefaultConfig() {
-    if (Object.keys(this.loadedConfig).length > 0) {
-      this.robot.logger.error("[config] Not setting default config. Clear all config data first.")
+    if (this.loadedConfig && Object.keys(this.loadedConfig).length > 0) {
+      this.robot.logger.error("[config] Not setting default config since there is config data already there")
       return;
     }
     const exampleConfig = require("../configuration.example.json");
