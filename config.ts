@@ -23,7 +23,6 @@ export default class Config {
 
   public async refreshConfig() {
     this.loadedConfig = await this.db.getConfig();
-    console.log("Loaded config", this.loadedConfig);
   }
 
   public requireKeys(...keys) {

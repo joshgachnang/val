@@ -2,7 +2,7 @@
   "name": "valbot",
   "version": "0.1.0",
   "engines": {
-    "node": "10.x"
+    "node": "8.x"
   },
   "description": "A chat bot supporting multiple interfaces, including Slack and Alexa",
   "main": "server.js",

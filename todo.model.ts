@@ -8,6 +8,7 @@ export default class Todo {
   reminder: Date;
   completed: boolean = false;
   removed: boolean = false;
+  todoId: string;
 
   constructor(data) {
     if (!data.id) {

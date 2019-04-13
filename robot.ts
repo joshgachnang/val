@@ -95,7 +95,7 @@ export default class Robot extends EventEmitter {
     this.router = undefined;
     this.logger = new winston.Logger({
       transports: [
-        new winston.transports.Console({level: "info"}),
+        new winston.transports.Console({level: "debug"}),
         new winston.transports.File({filename: "bot.log", level: "debug"}),
       ],
     });

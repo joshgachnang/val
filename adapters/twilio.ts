@@ -27,7 +27,7 @@ export default class Twilio extends Adapter {
     this.robot.logger.debug("SMS USER", envelope.user);
     let message = strings.join("\n");
 
-    return this.sendMessage(message, envelope.user, function(err, body) {
+    return this.sendMessage(message, envelope.user, (err, body) => {
       if (err || body === null) {
         this.robot.logger.debug(`Error sending reply SMS: ${err} ${body}`);
       } else {
@@ -92,7 +92,7 @@ export default class Twilio extends Adapter {
       .path(`/2010-04-01/Accounts/${this.sid}/Messages.json`)
       .header("Authorization", `Basic ${auth}`)
       .header("Content-Type", "application/x-www-form-urlencoded")
-      .post(data)(function(err, res, body) {
+      .post(data)((err, res, body) => {
       if (err) {
         this.robot.logger.debug("Twilio HTTP Error: ", err);
         return callback(err);

@@ -36,10 +36,6 @@ async function findTeamScore(robot: Robot, search: string): Promise<string[]> {
 }
 
 function getScoreURL(hour: number): string {
-  if (hour === 54) {
-    // Hack for scraping last year.
-    return "http://www.90fmtrivia.org/TriviaScores2017/scorePages/TSK_results.html";
-  }
   return `http://90fmtrivia.org/TriviaScores${hour}/scorePages/results.html`;
 }
 
