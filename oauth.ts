@@ -58,7 +58,7 @@ export class OAuthHandler {
       credentials = await this.robot.db.get("GLOBAL", CLIENT_SECRET_KEY);
     }
     if (!credentials) {
-      throw new Error("No credentials set, try telling me 'authorize google'.");
+      throw new Error("No credentials set, try telling me 'add google client secret $secret'.");
     }
     let clientSecret = credentials.installed.client_secret;
     let clientId = credentials.installed.client_id;
@@ -112,9 +112,7 @@ export class OAuthHandler {
     await this.setupCredentials();
     this.oauth2Client.getToken(code, (err, token) => {
       if (err) {
-        this.robot.logger.warn(
-          `[googleCalendar] Error while trying to retrieve access token: ${err}`
-        );
+        this.robot.logger.warn(`[oauth] Error while trying to retrieve access token: ${err}`);
         return;
       }
       this.oauth2Client.credentials = token;
@@ -133,10 +131,8 @@ export class OAuthHandler {
   };
 
   refreshToken = async (userId: string) => {
-    console.log("refreshing");
     return new Promise((resolve) => {
       this.oauth2Client.refreshAccessToken(async (err: string, token) => {
-        console.log("Refresh", err, token);
         await this.storeToken(userId, token);
         resolve(token);
       });
@@ -164,16 +160,18 @@ export class OAuthHandler {
   ) => {
     let token = await this.getToken(userId);
     if (!token) {
-      throw new Error(`[googlePhotos] no auth token set up`);
+      throw new Error(`[oauth] no auth token set up`);
     }
-    let res = await this.robot.request({
-      url,
-      method,
-      body,
-      headers: {
-        Authorization: `Bearer ${token.access_token}`,
+    let res = await this.robot.request(
+      {
+        url,
+        method,
+        body,
       },
-    });
+      {
+        Authorization: `Bearer ${token.access_token}`,
+      }
+    );
     return JSON.parse(res);
   };
 }
