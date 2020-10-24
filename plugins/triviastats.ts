@@ -35,7 +35,7 @@ async function findTeamScore(robot: Robot, scores: any, search: string): Promise
 }
 
 function getScoreURL(hour: number): string {
-  return `http://www.90fmtrivia.org/TriviaScores2019/Score%20Pages/results.html`;
+  return `http://90fmtrivia.org/Trivia%20Experiment%20Scores!_files/results.html`;
 }
 
 function parseHour(text: string): number {
@@ -79,7 +79,8 @@ function parseHour(text: string): number {
 const START_TIMES = {
   "2018": "2018-04-12T23:00:00.000Z",
   "2019": "2019-04-12T23:00:00.000Z",
-  "2020": "2020-04-17T23:00:00.000Z",
+  // "2020": "2020-04-17T23:00:00.000Z",
+  "2020": "2020-10-23T23:00:00.000Z",
   "2021": "2021-04-16T23:00:00.000Z",
 };
 
@@ -181,7 +182,7 @@ async function scrape(robot: Robot, year: number, hour: number) {
 
   // Post to twitter that new scores are posted!
   (robot.adapters.Twitter as TwitterAdapter).post(
-    `Trivia scores for Hour ${textHour} are posted! http://www.90fmtrivia.org/TriviaScores2019/Scores.html`
+    `Trivia scores for Hour ${textHour} are posted! http://90fmtrivia.org/Trivia%20Experiment%20Scores!.html`
   );
 }
 
@@ -191,6 +192,7 @@ async function cronScrape(robot: Robot) {
   if (!duringTrivia(78)) {
     return;
   }
+
   let year = moment().year();
   robot.logger.info(`[triviastats] Scraping year: ${year}`);
 

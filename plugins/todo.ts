@@ -78,7 +78,11 @@ export default function(robot: Robot) {
     robot.logger.debug("get todos", req.query, req.params);
     let todos = loadTodos();
     if (req.query.completed) {
-      todos = filterTodos(Object.values(todos), "completed", JSON.parse(req.query.completed));
+      todos = filterTodos(
+        Object.values(todos),
+        "completed",
+        JSON.parse(req.query.completed as string)
+      );
     } else {
       todos = Object.values(todos);
     }

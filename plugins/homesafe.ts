@@ -39,7 +39,7 @@ function convertNumber(number: string) {
 
 export default function(robot: Robot) {
   let twilioFrom = robot.config.get("HOMESAFE_TWILIO_NUMBER");
-  let client = new Twilio(
+  let client = new (Twilio as any)(
     robot.config.get("HOMESAFE_TWILIO_SID"),
     robot.config.get("HOMESAFE_TWILIO_TOKEN")
   );

@@ -482,8 +482,8 @@ export default class Robot extends EventEmitter {
     app.use(bodyParser.urlencoded({extended: false}));
     app.use(bodyParser.json());
     app.use((req, res, next) => {
-      if (req.query && req.query["token"]) {
-        let userId = this.db.getUserFromAuthToken(req.query["token"]);
+      if (req.query && req.query.token) {
+        let userId = this.db.getUserFromAuthToken(req.query.token as string);
         if (!userId) {
           return res.status(401).send();
         } else {

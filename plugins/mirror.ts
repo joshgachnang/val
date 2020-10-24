@@ -22,7 +22,7 @@ const defaultLayout = {
 export default function(robot: Robot) {
   robot.router.get("/mirror/layout", async (req, res) => {
     let mirrors = (await robot.db.get(null, MIRROR_KEY)) || {};
-    let layoutName = req.query.layout;
+    let layoutName = req.query.layout as string;
 
     if (mirrors[layoutName]) {
       return res.json(mirrors[layoutName]);

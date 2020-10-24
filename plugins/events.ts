@@ -92,7 +92,7 @@ export default function(robot: Robot) {
     if (!req.query.userId) {
       return res.status(403).send();
     }
-    let e = await saveEvent(req.body, req.query.userId);
+    let e = await saveEvent(req.body, req.query.userId as string);
     return res.status(201).json(e);
   });
 
@@ -100,7 +100,7 @@ export default function(robot: Robot) {
     if (!req.query.userId) {
       return res.status(403).send();
     }
-    return res.json({events: await getEvents(req.query.userId)});
+    return res.json({events: await getEvents(req.query.userId as string)});
   });
 
   // TODO: these should go in their own plugins
