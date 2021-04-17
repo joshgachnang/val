@@ -35,7 +35,7 @@ async function findTeamScore(robot: Robot, scores: any, search: string): Promise
 }
 
 function getScoreURL(hour: number): string {
-  return `http://90fmtrivia.org/Trivia%20Experiment%20Scores!_files/results.html`;
+  return `http://www.90fmtrivia.org/TriviaScores2021/Trivia%2051%20Scores!_files/results.html`;
 }
 
 function parseHour(text: string): number {
@@ -137,6 +137,7 @@ async function scrape(robot: Robot, year: number, hour: number) {
   let response = await robot.request(getScoreURL(Number(hour)));
   let parsed = cheerio.load(response);
   let textHour = parsed("h1").text();
+  console.log("TEXT HOUR", textHour);
 
   // let year = getYear();
   textHour = parseHour(textHour);
