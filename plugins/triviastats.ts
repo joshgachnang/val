@@ -183,7 +183,7 @@ async function scrape(robot: Robot, year: number, hour: number) {
 
   // Post to twitter that new scores are posted!
   (robot.adapters.Twitter as TwitterAdapter).post(
-    `Trivia scores for Hour ${textHour} are posted! http://90fmtrivia.org/Trivia%20Experiment%20Scores!.html`
+    `Trivia scores for Hour ${textHour} are posted! http://www.90fmtrivia.org/TriviaScores2021/Trivia%2051%20Scores!.html`
   );
 }
 
