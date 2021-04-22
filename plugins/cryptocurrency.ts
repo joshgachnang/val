@@ -113,10 +113,10 @@ export default function(robot: Robot) {
       let text = getMainText();
       return res.json({
         uid: `id1${moment()
-          .utcOffset(0)
+          .utc()
           .startOf("hour")
           .unix()}`,
-        updateDate: updateTime.utcOffset(0).format("YYYY-MM-DD[T]HH:00:00.[0Z]"),
+        updateDate: updateTime.utcOffset(0).format("YYYY-MM-DD[T]HH:00:00.[00Z]"),
         titleText: text,
         mainText: text,
       });
@@ -142,7 +142,7 @@ export default function(robot: Robot) {
   }
 
   makeFlashBriefing("DOGE", "dogecoin", (result: string, price: number) => {
-    return `The current dogecoin price is $${price * 10000} per ten thousand. Wow. Much price.`;
+    return `The current dogecoin price is $${price}. Wow. Much price.`;
   });
   makeFlashBriefing("BTC", "bitcoin", (result: string, price: number) => {
     if (price > 9000) {
