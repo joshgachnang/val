@@ -35,7 +35,7 @@ async function findTeamScore(robot: Robot, scores: any, search: string): Promise
 }
 
 function getScoreURL(hour: number): string {
-  return `http://www.90fmtrivia.org/TriviaScores2021/Trivia%2051%20Scores!_files/results.html`;
+  return `http://www.90fmtrivia.org/TriviaScores2022/Trivia%2052%20Scores!_files/results.html`;
 }
 
 function parseHour(text: string): number {
@@ -82,6 +82,8 @@ const START_TIMES = {
   // "2020": "2020-04-17T23:00:00.000Z",
   "2020": "2020-10-23T23:00:00.000Z",
   "2021": "2021-04-16T23:00:00.000Z",
+  "2022": "2022-04-08T23:00:00.000Z",
+  "2023": "2022-04-08T14:00:00.000Z",
 };
 
 // Let you specify a longer duration for scraping.
@@ -183,7 +185,7 @@ async function scrape(robot: Robot, year: number, hour: number) {
 
   // Post to twitter that new scores are posted!
   (robot.adapters.Twitter as TwitterAdapter).post(
-    `Trivia scores for Hour ${textHour} are posted! http://www.90fmtrivia.org/TriviaScores2021/Trivia%2051%20Scores!.html`
+    `Trivia scores for Hour ${textHour} are posted! http://www.90fmtrivia.org/TriviaScores2022/Trivia%2052%20Scores!.html`
   );
 }
 
