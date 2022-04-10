@@ -7,7 +7,7 @@
 //      matching scores.
 //
 // Author:
-//   pcsforeducation
+//   joshgachnang
 
 // Note that a blank line has to be put between the documentation above and the start of the code or
 // the help comments will be stripped from the output JS.
@@ -19,7 +19,7 @@ import TwitterAdapter from "../adapters/twitter";
 import Response from "../response";
 import Robot from "../robot";
 
-const SCORES_KEY = "triviaStats";
+const SCORES_KEY = "triviaStats2";
 
 async function findTeamScore(robot: Robot, scores: any, search: string): Promise<string[]> {
   const matchingScores = [];
